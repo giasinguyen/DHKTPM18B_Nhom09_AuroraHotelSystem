@@ -9,7 +9,7 @@
 
 - **Nguyễn Trần Gia Sĩ**  
 - **Nguyễn Văn Minh**  
-- **Nguyễn Trung Nguyên**  
+- **Nguyễn Trung Nguyên 🗿**  
 - **Nguyễn Duy Khải**
 
 ---
