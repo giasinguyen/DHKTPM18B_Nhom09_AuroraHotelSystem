@@ -1,24 +1,25 @@
-package com.aurora.backend.dto.response;
+package com.aurora.backend.dto.request;
 
-import com.aurora.backend.entity.Role;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Set;
 
-@Getter
-@Setter
-@Builder
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String id;
+public class UserCreationRequest {
+    @Size(min = 4, message = "USERNAME_INVALID")
     String username;
+
+    @Size(min = 6, message = "INVALID_PASSWORD")
     String password;
+
     String firstName;
     String lastName;
     LocalDate dob;
-    Set<Role> roles;
 }
