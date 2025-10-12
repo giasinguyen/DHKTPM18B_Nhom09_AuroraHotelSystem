@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { setLanguage } from "@/features/slices/languageSlice";
+import { setLanguage } from "@/features/slices/language/languageSlice";
 import {
   Sheet,
   SheetContent,
@@ -34,7 +34,7 @@ const LanguageOption = ({ value }: { value: string }) => {
   );
 };
 
-export default function Header() {
+export default function ClientHeader() {
   const location = useLocation();
   const { t } = useTranslation("header");
   const dispatch = useAppDispatch();
@@ -92,7 +92,7 @@ export default function Header() {
             <div className="w-28 h-28 flex items-center justify-center">
               <img
                 src="src/assets/images/commons/aurora-logo.png"
-                alt="Annata Beach Hotel"
+                alt="Aurora Hotel"
                 className="h-full w-auto object-contain"
               />
             </div>
@@ -264,7 +264,7 @@ export default function Header() {
               <div className="w-28 h-28 flex items-center justify-center">
                 <img
                   src="src/assets/images/commons/aurora-logo.png"
-                  alt="Annata Beach Hotel"
+                  alt="Aurora Hotel"
                   className="h-full w-auto object-contain"
                 />
               </div>

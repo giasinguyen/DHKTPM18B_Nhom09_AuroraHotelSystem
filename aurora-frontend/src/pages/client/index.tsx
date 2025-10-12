@@ -1,15 +1,15 @@
 import { Outlet } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import ClientHeader from './components/ClientHeader';
+import ClientFooter from './components/ClientFooter';
 
 export default function RootPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <ClientHeader />
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer />
+      <ClientFooter />
     </div>
   );
 }
