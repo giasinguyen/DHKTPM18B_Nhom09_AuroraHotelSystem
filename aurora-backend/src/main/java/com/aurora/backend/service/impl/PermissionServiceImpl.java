@@ -30,10 +30,10 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public PermissionResponse createPermission(PermissionCreationRequest request) {
-        log.info("Creating permission: {}", request.getCode());
+        log.info("Creating permission: {}", request.getName());
         
-        // Check if permission code already exists
-        if (permissionRepository.existsByCode(request.getCode())) {
+        // Check if permission name already exists
+        if (permissionRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.PERMISSION_EXISTED);
         }
         
@@ -93,10 +93,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PermissionResponse> searchPermissions(String code, String description, Pageable pageable) {
-        log.debug("Searching permissions with filters - Code: {}, Description: {}", code, description);
+    public Page<PermissionResponse> searchPermissions(String name, String description, Pageable pageable) {
+        log.debug("Searching permissions with filters - Name: {}, Description: {}", name, description);
         
-        Page<Permission> permissions = permissionRepository.findByFilters(code, description, pageable);
+        Page<Permission> permissions = permissionRepository.findByFilters(name, description, pageable);
         return permissions.map(permissionMapper::toPermissionResponse);
     }
 }

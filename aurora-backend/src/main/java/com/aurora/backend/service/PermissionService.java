@@ -12,5 +12,5 @@ public interface PermissionService {
     void deletePermission(String id);
     PermissionResponse getPermissionById(String id);
     Page<PermissionResponse> getAllPermissions(Pageable pageable);
-    Page<PermissionResponse> searchPermissions(String code, String description, Pageable pageable);
+    Page<PermissionResponse> searchPermissions(String name, String description, Pageable pageable);
 }

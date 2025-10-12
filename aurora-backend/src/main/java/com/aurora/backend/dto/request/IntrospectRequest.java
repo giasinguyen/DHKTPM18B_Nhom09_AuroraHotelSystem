@@ -9,9 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PermissionCreationRequest {
-    @NotBlank(message = "PERMISSION_NAME_REQUIRED")
-    String name;
-    
-    String description;
+public class IntrospectRequest {
+    @NotBlank(message = "TOKEN_REQUIRED")
+    String token;
 }

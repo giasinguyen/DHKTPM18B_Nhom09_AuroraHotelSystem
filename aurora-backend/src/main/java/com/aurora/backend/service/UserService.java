@@ -1,15 +1,19 @@
 package com.aurora.backend.service;
 
 
+import java.util.HashSet;
 import java.util.List;
 
 import com.aurora.backend.dto.request.UserCreationRequest;
+import com.aurora.backend.dto.request.UserRegistrationRequest;
 import com.aurora.backend.dto.request.UserUpdateRequest;
 import com.aurora.backend.dto.response.UserResponse;
+import com.aurora.backend.entity.Role;
 import com.aurora.backend.entity.User;
 import com.aurora.backend.enums.ErrorCode;
 import com.aurora.backend.exception.AppException;
 import com.aurora.backend.mapper.UserMapper;
+import com.aurora.backend.repository.RoleRepository;
 import com.aurora.backend.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +31,46 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+
+    public UserResponse registerUser(UserRegistrationRequest request) {
+        log.info("Registering new user with username: {}", request.getUsername());
+        
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .dob(request.getDob())
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .address(request.getAddress())
+                .build();
+
+        Role userRole = roleRepository.findByName("USER")
+                .orElseGet(() -> {
+                    log.warn("USER role not found, creating default USER role");
+                    Role newRole = Role.builder()
+                            .name("USER")
+                            .description("Default user role")
+                            .build();
+                    return roleRepository.save(newRole);
+                });
+
+        user.setRoles(new HashSet<>());
+        user.getRoles().add(userRole);
+
+        User savedUser = userRepository.save(user);
+        log.info("User registered successfully with ID: {}", savedUser.getId());
+        
+        return userMapper.toUserResponse(savedUser);
+    }
 
     public UserResponse createUser(UserCreationRequest request) {
         log.info("Creating user with username: {}", request.getUsername());

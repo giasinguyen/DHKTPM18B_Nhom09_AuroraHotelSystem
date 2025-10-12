@@ -83,15 +83,15 @@ public class PermissionController {
 
     @GetMapping("/search")
     public ApiResponse<Page<PermissionResponse>> searchPermissions(
-            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "code") String sortBy,
+            @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<PermissionResponse> response = permissionService.searchPermissions(code, description, pageable);
+        Page<PermissionResponse> response = permissionService.searchPermissions(name, description, pageable);
         return ApiResponse.<Page<PermissionResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Permissions search completed successfully")

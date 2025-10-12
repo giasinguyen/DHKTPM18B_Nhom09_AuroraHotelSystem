@@ -27,3 +27,9 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+
+# JWT Configuration
+jwt:
+  signerKey: ${JWT_SIGNER_KEY}
+  valid-duration: ${JWT_VALID_DURATION:3600}
+  refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}

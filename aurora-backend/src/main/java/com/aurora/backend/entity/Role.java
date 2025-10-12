@@ -27,4 +27,9 @@ public class Role {
     )
     @ToString.Exclude
     Set<Permission> permissions;
+
+    public Role orElseGet(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseGet'");
+    }
 }

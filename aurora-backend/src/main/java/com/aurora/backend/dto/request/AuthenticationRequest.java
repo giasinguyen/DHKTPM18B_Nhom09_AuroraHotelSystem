@@ -1,6 +1,5 @@
 package com.aurora.backend.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,9 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PermissionCreationRequest {
-    @NotBlank(message = "PERMISSION_NAME_REQUIRED")
-    String name;
-    
-    String description;
+public class AuthenticationRequest {
+    String username;
+    String password;
 }

@@ -29,8 +29,12 @@ public class User {
     String firstName;
     String lastName;
     LocalDate dob;
+    
+    String phone;
+    String email;
+    String address;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

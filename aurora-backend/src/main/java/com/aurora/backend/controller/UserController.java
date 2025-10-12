@@ -4,6 +4,7 @@ package com.aurora.backend.controller;
 import java.util.List;
 
 import com.aurora.backend.dto.request.UserCreationRequest;
+import com.aurora.backend.dto.request.UserRegistrationRequest;
 import com.aurora.backend.dto.request.UserUpdateRequest;
 import com.aurora.backend.dto.response.ApiResponse;
 import com.aurora.backend.dto.response.UserResponse;
@@ -24,11 +25,21 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<UserResponse> registerUser(@RequestBody @Valid UserRegistrationRequest request) {
+        log.info("User registration request for username: {}", request.getUsername());
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.registerUser(request))
+                .message("User registered successfully")
+                .build();
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

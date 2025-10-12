@@ -10,14 +10,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, String> {
-    boolean existsByCode(String code);
-    Page<Permission> findByCodeContainingIgnoreCase(String code, Pageable pageable);
+    boolean existsByName(String name);
+    Page<Permission> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Permission> findByDescriptionContainingIgnoreCase(String description, Pageable pageable);
     
     @Query("SELECT p FROM Permission p WHERE " +
-           "(:code IS NULL OR :code = '' OR LOWER(p.code) LIKE LOWER(CONCAT('%', :code, '%'))) AND " +
+           "(:name IS NULL OR :name = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
            "(:description IS NULL OR :description = '' OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%')))")
-    Page<Permission> findByFilters(@Param("code") String code,
+    Page<Permission> findByFilters(@Param("name") String name,
                                   @Param("description") String description,
                                   Pageable pageable);
 }

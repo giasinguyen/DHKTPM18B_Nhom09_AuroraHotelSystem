@@ -15,7 +15,7 @@ public class Permission {
     String id;
 
     @Column(nullable = false, unique = true)
-    String code;          // ví dụ: USER_READ, BOOKING_CREATE
+    String name;          // ví dụ: USER_READ, USER_UPDATE, BOOKING_CREATE
     String description;
 
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.LAZY)
