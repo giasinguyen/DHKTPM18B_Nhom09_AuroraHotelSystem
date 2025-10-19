@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { setLanguage } from "@/features/slices/language/languageSlice";
+
 import {
   Sheet,
   SheetContent,
@@ -91,7 +92,7 @@ export default function ClientHeader() {
           <Link to="/" className="hidden lg:flex items-center space-x-3">
             <div className="w-28 h-28 flex items-center justify-center">
               <img
-                src="src/assets/images/commons/aurora-logo.png"
+                src="/src/assets/images/commons/aurora-logo.png"
                 alt="Aurora Hotel"
                 className="h-full w-auto object-contain"
               />
@@ -263,7 +264,7 @@ export default function ClientHeader() {
             >
               <div className="w-28 h-28 flex items-center justify-center">
                 <img
-                  src="src/assets/images/commons/aurora-logo.png"
+                  src="/src/assets/images/commons/aurora-logo.png"
                   alt="Aurora Hotel"
                   className="h-full w-auto object-contain"
                 />
