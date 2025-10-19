@@ -33,6 +33,11 @@ import ResetPasswordPage from "@/pages/client/guest/auth/ResetPassword";
 import CustomerProfilePage from "@/pages/client/customer/account/Profile";
 import ProfileUpsertPage from "@/pages/client/customer/account/ProfileUpsert";
 
+// Customer booking
+import CreateBookingPage  from "@/pages/client/customer/booking/CreateBooking";
+import ConfirmBookingPage  from "@/pages/client/customer/booking/ConfirmBooking";
+
+
 // Customer bookings
 import CustomerBookingListPage from "@/pages/client/customer/bookings/BookingList";
 import CustomerBookingDetailPage from "@/pages/client/customer/bookings/BookingDetail";
@@ -142,6 +147,8 @@ const router = createBrowserRouter([
       { path: "customer/profile", element: <CustomerProfilePage /> },
       { path: "customer/profile/upsert", element: <ProfileUpsertPage /> },
       { path: "customer/booking", element: <CustomerBookingListPage /> },
+      { path: "customer/booking/CreateBooking", element: <CreateBookingPage /> },
+      { path: "customer/booking/ConfirmBooking", element: <ConfirmBookingPage /> },
       { path: "customer/booking/:id", element: <CustomerBookingDetailPage /> },
       { path: "customer/favorites", element: <FavoriteListPage /> },
       {
