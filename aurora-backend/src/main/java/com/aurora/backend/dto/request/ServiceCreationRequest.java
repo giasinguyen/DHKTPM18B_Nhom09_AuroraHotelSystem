@@ -12,8 +12,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ServiceCreationRequest {
-    @NotBlank(message = "HOTEL_ID_REQUIRED")
-    String hotelId;
+    @NotBlank(message = "BRANCH_ID_REQUIRED")
+    String branchId;
     
     @NotBlank(message = "SERVICE_NAME_REQUIRED")
     String name;

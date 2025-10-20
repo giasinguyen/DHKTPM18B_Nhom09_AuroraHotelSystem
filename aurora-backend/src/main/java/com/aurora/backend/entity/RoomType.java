@@ -19,8 +19,8 @@ public class RoomType {
     String id;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    @JoinColumn(name = "branch_id", nullable = false)
+    Branch branch; // Changed from Hotel to Branch
 
     @Column(nullable = false)
     String name;   // Deluxe, Suite...

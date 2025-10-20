@@ -4,11 +4,11 @@
 -- =====================================================
 
 -- Xóa dữ liệu cũ (nếu có) - Đúng thứ tự foreign keys
-DELETE FROM user_roles;           -- Xóa TẤT CẢ user-role mappings
-DELETE FROM role_permissions;     -- Xóa role-permission mappings
-DELETE FROM users WHERE username IN ('admin', 'manager', 'staff', 'customer');  -- Xóa sample users
-DELETE FROM roles;                -- Xóa roles
-DELETE FROM permissions;          -- Cuối cùng xóa permissions
+-- DELETE FROM user_roles;           -- Xóa TẤT CẢ user-role mappings
+-- DELETE FROM role_permissions;     -- Xóa role-permission mappings
+-- DELETE FROM users WHERE username IN ('admin', 'manager', 'staff', 'customer');  -- Xóa sample users
+-- DELETE FROM roles;                -- Xóa roles
+-- DELETE FROM permissions;          -- Cuối cùng xóa permissions
 
 -- =====================================================
 -- BƯỚC 1: TẠO CÁC PERMISSIONS
@@ -16,7 +16,7 @@ DELETE FROM permissions;          -- Cuối cùng xóa permissions
 
 -- Guest Permissions (Xem thông tin công khai)
 INSERT INTO permissions (id, name, description) VALUES 
-(gen_random_uuid(), 'HOTEL_VIEW', 'Xem thông tin khách sạn'),
+(gen_random_uuid(), 'BRANCH_VIEW', 'Xem thông tin chi nhánh'),
 (gen_random_uuid(), 'ROOM_VIEW', 'Xem thông tin phòng và giá'),
 (gen_random_uuid(), 'ROOM_SEARCH', 'Tìm kiếm phòng trống'),
 (gen_random_uuid(), 'PROMOTION_VIEW', 'Xem khuyến mãi'),
@@ -57,7 +57,8 @@ INSERT INTO permissions (id, name, description) VALUES
 (gen_random_uuid(), 'PROMOTION_CREATE', 'Tạo khuyến mãi'),
 (gen_random_uuid(), 'PROMOTION_UPDATE', 'Cập nhật khuyến mãi'),
 (gen_random_uuid(), 'PROMOTION_DELETE', 'Xóa khuyến mãi'),
-(gen_random_uuid(), 'HOTEL_UPDATE', 'Cập nhật thông tin khách sạn'),
+(gen_random_uuid(), 'BRANCH_VIEW', 'Xem thông tin chi nhánh'),
+(gen_random_uuid(), 'BRANCH_VIEW_STATS', 'Xem thống kê chi nhánh'),
 (gen_random_uuid(), 'REPORT_VIEW', 'Xem báo cáo thống kê'),
 (gen_random_uuid(), 'REPORT_EXPORT', 'Xuất báo cáo'),
 (gen_random_uuid(), 'STAFF_VIEW', 'Xem danh sách nhân viên');
@@ -76,8 +77,11 @@ INSERT INTO permissions (id, name, description) VALUES
 (gen_random_uuid(), 'SYSTEM_CONFIG', 'Cấu hình hệ thống'),
 (gen_random_uuid(), 'BACKUP_MANAGE', 'Quản lý sao lưu'),
 (gen_random_uuid(), 'LOG_VIEW', 'Xem log hệ thống'),
-(gen_random_uuid(), 'HOTEL_CREATE', 'Tạo khách sạn mới'),
-(gen_random_uuid(), 'HOTEL_DELETE', 'Xóa khách sạn');
+(gen_random_uuid(), 'BRANCH_CREATE', 'Tạo chi nhánh mới'),
+(gen_random_uuid(), 'BRANCH_UPDATE', 'Cập nhật chi nhánh'),
+(gen_random_uuid(), 'BRANCH_DELETE', 'Xóa chi nhánh'),
+(gen_random_uuid(), 'BRANCH_ASSIGN_MANAGER', 'Gán quản lý cho chi nhánh'),
+(gen_random_uuid(), 'BRANCH_REMOVE_MANAGER', 'Gỡ quản lý khỏi chi nhánh');
 
 -- =====================================================
 -- BƯỚC 2: TẠO CÁC ROLES
@@ -100,7 +104,7 @@ SELECT r.id, p.id
 FROM roles r, permissions p
 WHERE r.name = 'GUEST'
 AND p.name IN (
-    'HOTEL_VIEW',
+    'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
     'PROMOTION_VIEW',
@@ -114,7 +118,7 @@ FROM roles r, permissions p
 WHERE r.name = 'CUSTOMER'
 AND p.name IN (
     -- Guest permissions
-    'HOTEL_VIEW',
+    'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
     'PROMOTION_VIEW',
@@ -138,7 +142,7 @@ FROM roles r, permissions p
 WHERE r.name = 'STAFF'
 AND p.name IN (
     -- Guest + Customer permissions
-    'HOTEL_VIEW',
+    'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
     'PROMOTION_VIEW',
@@ -160,14 +164,14 @@ AND p.name IN (
     'SERVICE_MANAGE'
 );
 
--- MANAGER Role: Kế thừa STAFF + Quản lý khách sạn và báo cáo
+-- MANAGER Role: Kế thừa STAFF + Quản lý chi nhánh và báo cáo
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r, permissions p
 WHERE r.name = 'MANAGER'
 AND p.name IN (
     -- Guest + Customer + Staff permissions
-    'HOTEL_VIEW',
+    'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
     'PROMOTION_VIEW',
@@ -195,7 +199,7 @@ AND p.name IN (
     'PROMOTION_CREATE',
     'PROMOTION_UPDATE',
     'PROMOTION_DELETE',
-    'HOTEL_UPDATE',
+    'BRANCH_VIEW_STATS',
     'REPORT_VIEW',
     'REPORT_EXPORT',
     'STAFF_VIEW'

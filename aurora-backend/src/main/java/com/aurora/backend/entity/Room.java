@@ -11,15 +11,15 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"hotel_id", "roomNumber"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"branch_id", "roomNumber"}))
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    @JoinColumn(name = "branch_id", nullable = false)
+    Branch branch; // Changed from Hotel to Branch
 
     @ManyToOne
     @JoinColumn(name = "room_type_id")

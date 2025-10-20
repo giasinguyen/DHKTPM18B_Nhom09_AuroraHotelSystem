@@ -34,6 +34,11 @@ public class User {
     String email;
     String address;
 
+    // Branch assignment (for staff and manager)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_branch_id")
+    Branch assignedBranch; // Chi nhánh mà user này được phân công (nếu là staff/manager)
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

@@ -15,7 +15,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(indexes = {
-        @Index(columnList = "hotel_id"),
+        @Index(columnList = "branch_id"),
         @Index(columnList = "customer_id"),
         @Index(columnList = "checkin,checkout")
 })
@@ -28,8 +28,8 @@ public class Booking {
     String bookingCode;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    @JoinColumn(name = "branch_id")
+    Branch branch;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")

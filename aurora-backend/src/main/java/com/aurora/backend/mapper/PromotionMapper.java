@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
 public interface PromotionMapper {
     
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "hotel", ignore = true)
+    @Mapping(target = "branch", ignore = true)
     @Mapping(source = "startDate", target = "startAt")
     @Mapping(source = "endDate", target = "endAt")
     @Mapping(source = "discount", target = "percentOff")
@@ -27,7 +27,7 @@ public interface PromotionMapper {
     
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "code", ignore = true)
-    @Mapping(target = "hotel", ignore = true)
+    @Mapping(target = "branch", ignore = true)
     @Mapping(source = "startDate", target = "startAt")
     @Mapping(source = "endDate", target = "endAt")
     @Mapping(source = "discount", target = "percentOff")

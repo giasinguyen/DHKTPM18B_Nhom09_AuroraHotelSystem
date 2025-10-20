@@ -19,8 +19,8 @@ public class Promotion {
     String id;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_id")
-    Hotel hotel;
+    @JoinColumn(name = "branch_id")
+    Branch branch;
 
     @Column(nullable = false, unique = true)
     String code; // EARLY10...

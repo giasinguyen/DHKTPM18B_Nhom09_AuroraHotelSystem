@@ -127,6 +127,18 @@ public enum ErrorCode {
     QUANTITY_POSITIVE(2304, "Quantity must be positive", HttpStatus.BAD_REQUEST),
     BOOKING_NOT_FOUND(2305, "Booking not found", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(2306, "User not found", HttpStatus.NOT_FOUND),
+    
+    // Branch errors (replacing Hotel errors)
+    BRANCH_NOT_EXISTED(2400, "Branch not found", HttpStatus.NOT_FOUND),
+    BRANCH_CODE_EXISTED(2401, "Branch code already exists", HttpStatus.BAD_REQUEST),
+    BRANCH_NAME_REQUIRED(2402, "Branch name is required", HttpStatus.BAD_REQUEST),
+    BRANCH_CODE_REQUIRED(2403, "Branch code is required", HttpStatus.BAD_REQUEST),
+    BRANCH_ADDRESS_REQUIRED(2404, "Branch address is required", HttpStatus.BAD_REQUEST),
+    BRANCH_HAS_ROOMS(2405, "Cannot delete branch with existing rooms", HttpStatus.BAD_REQUEST),
+    USER_NOT_MANAGER(2406, "User does not have MANAGER role", HttpStatus.BAD_REQUEST),
+    BRANCH_CITY_REQUIRED(2407, "City is required", HttpStatus.BAD_REQUEST),
+    BRANCH_DISTRICT_REQUIRED(2408, "District is required", HttpStatus.BAD_REQUEST),
+    BRANCH_WARD_REQUIRED(2409, "Ward is required", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

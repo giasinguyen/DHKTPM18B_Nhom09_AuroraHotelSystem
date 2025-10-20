@@ -1,0 +1,1651 @@
+{
+	"info": {
+		"_postman_id": "aurora-hotel-complete-apis",
+		"name": "Aurora Hotel Management - Complete APIs",
+		"description": "Complete API Collection for Aurora Hotel Management System\n\n**Test Flow:**\n1. Authentication - Login to get access token (POST /auth/token)\n2. Branch Management - Create/manage branches\n3. Room Type & Room Management\n4. Amenity & Facility Management\n5. Booking & Payment\n6. User & Role Management\n\n**Default Credentials:**\n- Admin: admin / password123\n- Manager: manager / password123\n- Staff: staff / password123\n- Customer: customer / password123\n\n**Important Endpoints:**\n- Login: POST /auth/token\n- Introspect: POST /auth/introspect\n- Logout: POST /auth/logout\n- Refresh: POST /auth/refresh",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "branchId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "roomTypeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "roomId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "amenityId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "facilityId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "serviceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "roleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "promotionId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01. Authentication",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    pm.collectionVariables.set('refreshToken', jsonData.result.refreshToken || '');",
+									"    console.log('✅ Admin logged in successfully');",
+									"    console.log('Access Token:', jsonData.result.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "token"]
+						},
+						"description": "Login with admin credentials. Token will be auto-saved."
+					}
+				},
+				{
+					"name": "Login as Manager",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    console.log('✅ Manager logged in successfully');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"manager\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "token"]
+						}
+					}
+				},
+				{
+					"name": "Login as Staff",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    console.log('✅ Staff logged in successfully');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"staff\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "token"]
+						}
+					}
+				},
+				{
+					"name": "Login as Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    console.log('✅ Customer logged in successfully');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"customer\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "token"]
+						}
+					}
+				},
+				{
+					"name": "Introspect Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{accessToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/introspect",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "introspect"]
+						},
+						"description": "Check if token is valid"
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    console.log('✅ Token refreshed');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
+						},
+						"description": "Refresh access token using refresh token"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{accessToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Logout current session"
+					}
+				}
+			],
+			"description": "Authentication endpoints for login, logout, and token management"
+		},
+		{
+			"name": "02. Branch Management",
+			"item": [
+				{
+					"name": "Create Branch - Hanoi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('branchId', jsonData.result.id);",
+									"    console.log('✅ Branch created:', jsonData.result.code);",
+									"    console.log('Branch ID saved:', jsonData.result.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"AUR-HN\",\n  \"name\": \"Aurora Hotel Hanoi Central\",\n  \"address\": \"123 Trang Tien Street\",\n  \"ward\": \"Trang Tien Ward\",\n  \"district\": \"Hoan Kiem District\",\n  \"city\": \"Hanoi\",\n  \"phone\": \"+84243822228\",\n  \"email\": \"hanoi@aurora.com\",\n  \"status\": \"ACTIVE\",\n  \"checkInTime\": \"14:00:00\",\n  \"checkOutTime\": \"12:00:00\",\n  \"operatingHours\": \"24/7\",\n  \"description\": \"Premium 5-star hotel in the heart of Hanoi Old Quarter with stunning lake views\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/branches",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches"]
+						},
+						"description": "Create Hanoi branch (Admin only)"
+					}
+				},
+				{
+					"name": "Create Branch - Ho Chi Minh",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"AUR-SG\",\n  \"name\": \"Aurora Hotel Saigon\",\n  \"address\": \"456 Nguyen Hue Boulevard\",\n  \"ward\": \"Ben Nghe Ward\",\n  \"district\": \"District 1\",\n  \"city\": \"Ho Chi Minh City\",\n  \"phone\": \"+84283822228\",\n  \"email\": \"saigon@aurora.com\",\n  \"status\": \"ACTIVE\",\n  \"checkInTime\": \"14:00:00\",\n  \"checkOutTime\": \"12:00:00\",\n  \"operatingHours\": \"24/7\",\n  \"description\": \"Luxury hotel in downtown Saigon with modern amenities\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/branches",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches"]
+						}
+					}
+				},
+				{
+					"name": "Get All Branches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						},
+						"description": "Get all branches with pagination (Manager+)"
+					}
+				},
+				{
+					"name": "Get Branch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Branch by Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/code/AUR-HN01",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "code", "AUR-HN01"]
+						}
+					}
+				},
+				{
+					"name": "Update Branch",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Aurora Hotel Hanoi Central - Updated\",\n  \"description\": \"Premium 5-star hotel with world-class facilities and service\",\n  \"phone\": \"+84243822229\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}"]
+						}
+					}
+				},
+				{
+					"name": "Search Branches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/search?keyword=Aurora&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "search"],
+							"query": [
+								{"key": "keyword", "value": "Aurora"},
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Branches by City",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/city/Hanoi?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "city", "Hanoi"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Branches by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/status/ACTIVE?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "status", "ACTIVE"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Branch Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}/statistics",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}", "statistics"]
+						}
+					}
+				},
+				{
+					"name": "Assign Manager to Branch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}/manager/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}", "manager", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "Remove Manager from Branch",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}/manager",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}", "manager"]
+						}
+					}
+				},
+				{
+					"name": "Delete Branch",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/branches/{{branchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["branches", "{{branchId}}"]
+						},
+						"description": "Delete branch (only if no rooms/facilities)"
+					}
+				}
+			],
+			"description": "Complete Branch Management APIs"
+		},
+		{
+			"name": "03. Amenity Management",
+			"item": [
+				{
+					"name": "Create Amenity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('amenityId', jsonData.result.id);",
+									"    console.log('✅ Amenity created:', jsonData.result.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Free WiFi\",\n  \"type\": \"TECHNOLOGY\",\n  \"description\": \"High-speed wireless internet access\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/amenities",
+							"host": ["{{baseUrl}}"],
+							"path": ["amenities"]
+						}
+					}
+				},
+				{
+					"name": "Get All Amenities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/amenities?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["amenities"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Amenity by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/amenities/{{amenityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["amenities", "{{amenityId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Amenity",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Ultra-fast 5G WiFi access\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/amenities/{{amenityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["amenities", "{{amenityId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Amenity",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/amenities/{{amenityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["amenities", "{{amenityId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Room Type Management",
+			"item": [
+				{
+					"name": "Create Room Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('roomTypeId', jsonData.result.id);",
+									"    console.log('✅ Room Type created:', jsonData.result.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"name\": \"Deluxe King Room\",\n  \"code\": \"DLX-K\",\n  \"capacityAdults\": 2,\n  \"capacityChildren\": 1,\n  \"sizeM2\": 35.0,\n  \"refundable\": true,\n  \"amenityIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/room-types",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types"]
+						}
+					}
+				},
+				{
+					"name": "Get All Room Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/room-types?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Room Type by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/room-types/{{roomTypeId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types", "{{roomTypeId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Room Types by Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/room-types/branch/{{branchId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types", "branch", "{{branchId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Room Type",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pricePerNight\": 175.00,\n  \"description\": \"Luxurious room with panoramic city view\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/room-types/{{roomTypeId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types", "{{roomTypeId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Room Type",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/room-types/{{roomTypeId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["room-types", "{{roomTypeId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "05. Room Management",
+			"item": [
+				{
+					"name": "Create Room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('roomId', jsonData.result.id);",
+									"    console.log('✅ Room created:', jsonData.result.roomNumber);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"roomNumber\": \"101\",\n  \"floor\": 1,\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"status\": \"AVAILABLE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rooms",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms"]
+						}
+					}
+				},
+				{
+					"name": "Get All Rooms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Room by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/{{roomId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "{{roomId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Rooms by Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/branch/{{branchId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "branch", "{{branchId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Rooms by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/status/AVAILABLE?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "status", "AVAILABLE"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Available Rooms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/search?branchId={{branchId}}&status=AVAILABLE&checkInDate=2025-11-01&checkOutDate=2025-11-05",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "search"],
+							"query": [
+								{"key": "branchId", "value": "{{branchId}}"},
+								{"key": "status", "value": "AVAILABLE"},
+								{"key": "checkInDate", "value": "2025-11-01"},
+								{"key": "checkOutDate", "value": "2025-11-05"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Room",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"MAINTENANCE\",\n  \"description\": \"Room under renovation\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rooms/{{roomId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "{{roomId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Room",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/{{roomId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["rooms", "{{roomId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "06. Facility Management",
+			"item": [
+				{
+					"name": "Create Facility",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('facilityId', jsonData.result.id);",
+									"    console.log('✅ Facility created:', jsonData.result.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"name\": \"Swimming Pool\",\n  \"openingHours\": \"06:00 - 22:00\",\n  \"policies\": \"No food or drinks allowed. Shower before entering.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/facilities",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities"]
+						}
+					}
+				},
+				{
+					"name": "Get All Facilities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/facilities?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Facility by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/facilities/{{facilityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities", "{{facilityId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Facilities by Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/facilities/branch/{{branchId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities", "branch", "{{branchId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Facility",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"operatingHours\": \"05:00 - 23:00\",\n  \"description\": \"Heated Olympic-size pool with jacuzzi\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/facilities/{{facilityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities", "{{facilityId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Facility",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/facilities/{{facilityId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["facilities", "{{facilityId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "07. Service Management",
+			"item": [
+				{
+					"name": "Create Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('serviceId', jsonData.result.id);",
+									"    console.log('✅ Service created:', jsonData.result.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"name\": \"Airport Shuttle\",\n  \"type\": \"TRANSPORTATION\",\n  \"description\": \"Complimentary airport pickup and drop-off\",\n  \"basePrice\": 25.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services",
+							"host": ["{{baseUrl}}"],
+							"path": ["services"]
+						}
+					}
+				},
+				{
+					"name": "Get All Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["services"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Service by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/{{serviceId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["services", "{{serviceId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Services by Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/branch/{{branchId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["services", "branch", "{{branchId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Services by Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/type/TRANSPORTATION?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["services", "type", "TRANSPORTATION"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Service",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 30.00,\n  \"description\": \"Premium airport shuttle service with luxury vehicle\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/services/{{serviceId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["services", "{{serviceId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Service",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/services/{{serviceId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["services", "{{serviceId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "08. Promotion Management",
+			"item": [
+				{
+					"name": "Create Promotion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('promotionId', jsonData.result.id);",
+									"    console.log('✅ Promotion created:', jsonData.result.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"SUMMER2025\",\n  \"name\": \"Summer Special Discount\",\n  \"description\": \"Get 20% off on all bookings this summer\",\n  \"discount\": 20.0,\n  \"startDate\": \"2025-06-01\",\n  \"endDate\": \"2025-08-31\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/promotions",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions"]
+						}
+					}
+				},
+				{
+					"name": "Get All Promotions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/promotions?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Active Promotions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/promotions/active?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions", "active"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Promotion by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/promotions/{{promotionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions", "{{promotionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Promotion",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"discountValue\": 25,\n  \"description\": \"Extended summer special - 25% off!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/promotions/{{promotionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions", "{{promotionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Promotion",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/promotions/{{promotionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["promotions", "{{promotionId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "09. Booking Management",
+			"item": [
+				{
+					"name": "Create Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('bookingId', jsonData.result.id);",
+									"    console.log('✅ Booking created:', jsonData.result.bookingCode);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookingCode\": \"BK2025110001\",\n  \"branchId\": \"{{branchId}}\",\n  \"customerId\": \"{{userId}}\",\n  \"checkin\": \"2025-11-01\",\n  \"checkout\": \"2025-11-05\",\n  \"totalPrice\": 700.00,\n  \"status\": \"PENDING\",\n  \"paymentStatus\": \"UNPAID\",\n  \"specialRequest\": \"Late check-in requested\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bookings",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings"]
+						}
+					}
+				},
+				{
+					"name": "Get All Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Booking by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "{{bookingId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Bookings by Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/branch/{{branchId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "branch", "{{branchId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Bookings by Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/customer/{{userId}}?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "customer", "{{userId}}"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/search?branchId={{branchId}}&status=PENDING&page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "search"],
+							"query": [
+								{"key": "branchId", "value": "{{branchId}}"},
+								{"key": "status", "value": "PENDING"},
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Booking",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CONFIRMED\",\n  \"notes\": \"Booking confirmed with late check-in\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bookings/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "{{bookingId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Booking",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["bookings", "{{bookingId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. User Management",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('userId', jsonData.result.id);",
+									"    console.log('✅ User created:', jsonData.result.username);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"firstName\": \"New\",\n  \"lastName\": \"User\",\n  \"dob\": \"1995-05-15\",\n  \"phone\": \"+84901234567\",\n  \"email\": \"newuser@aurora.com\",\n  \"address\": \"Hanoi, Vietnam\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=0&size=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Updated\",\n  \"phone\": \"+84909999999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Role & Permission Management",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/roles",
+							"host": ["{{baseUrl}}"],
+							"path": ["roles"]
+						}
+					}
+				},
+				{
+					"name": "Get All Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["permissions"]
+						}
+					}
+				},
+				{
+					"name": "Create Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('roleId', jsonData.result.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"SUPERVISOR\",\n  \"description\": \"Branch supervisor with limited admin rights\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/roles",
+							"host": ["{{baseUrl}}"],
+							"path": ["roles"]
+						}
+					}
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Branch supervisor with extended permissions\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/roles/{{roleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["roles", "{{roleId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/roles/{{roleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["roles", "{{roleId}}"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

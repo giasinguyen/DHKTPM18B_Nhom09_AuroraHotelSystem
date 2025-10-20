@@ -4,12 +4,12 @@ import com.aurora.backend.dto.request.FacilityCreationRequest;
 import com.aurora.backend.dto.request.FacilityUpdateRequest;
 import com.aurora.backend.dto.response.FacilityResponse;
 import com.aurora.backend.entity.Facility;
-import com.aurora.backend.entity.Hotel;
+import com.aurora.backend.entity.Branch;
 import com.aurora.backend.enums.ErrorCode;
 import com.aurora.backend.exception.AppException;
 import com.aurora.backend.mapper.FacilityMapper;
 import com.aurora.backend.repository.FacilityRepository;
-import com.aurora.backend.repository.HotelRepository;
+import com.aurora.backend.repository.BranchRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,23 +26,23 @@ import java.util.List;
 @Slf4j
 public class FacilityService {
     FacilityRepository facilityRepository;
-    HotelRepository hotelRepository;
+    BranchRepository branchRepository;
     FacilityMapper facilityMapper;
 
     public FacilityResponse createFacility(FacilityCreationRequest request) {
-        log.info("Creating facility with name: {} for hotel: {}", request.getName(), request.getHotelId());
+        log.info("Creating facility with name: {} for branch: {}", request.getName(), request.getBranchId());
         
         // Check if hotel exists
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new AppException(ErrorCode.HOTEL_NOT_EXISTED));
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_EXISTED));
         
         // Check if facility already exists in this hotel
-        if (facilityRepository.existsByHotelIdAndName(request.getHotelId(), request.getName())) {
+        if (facilityRepository.existsByBranchIdAndName(request.getBranchId(), request.getName())) {
             throw new AppException(ErrorCode.FACILITY_EXISTED);
         }
 
         Facility facility = facilityMapper.toFacility(request);
-        facility.setHotel(hotel);
+        facility.setBranch(branch);
         
         Facility savedFacility = facilityRepository.save(facility);
         log.info("Facility created successfully with ID: {}", savedFacility.getId());
@@ -71,28 +71,28 @@ public class FacilityService {
         return facilityMapper.toFacilityResponse(facility);
     }
 
-    public List<FacilityResponse> getFacilitiesByHotel(String hotelId) {
-        log.info("Fetching facilities by hotel ID: {}", hotelId);
+    public List<FacilityResponse> getFacilitiesByBranch(String hotelId) {
+        log.info("Fetching facilities by branch ID: {}", hotelId);
         
         // Check if hotel exists
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new AppException(ErrorCode.HOTEL_NOT_EXISTED);
+        if (!branchRepository.existsById(hotelId)) {
+            throw new AppException(ErrorCode.BRANCH_NOT_EXISTED);
         }
         
-        return facilityRepository.findByHotelId(hotelId).stream()
+        return facilityRepository.findByBranchId(hotelId).stream()
                 .map(facilityMapper::toFacilityResponse)
                 .toList();
     }
 
-    public Page<FacilityResponse> getFacilitiesByHotelWithPagination(String hotelId, Pageable pageable) {
-        log.info("Fetching facilities by hotel ID: {} with pagination", hotelId);
+    public Page<FacilityResponse> getFacilitiesByBranchWithPagination(String hotelId, Pageable pageable) {
+        log.info("Fetching facilities by branch ID: {} with pagination", hotelId);
         
         // Check if hotel exists
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new AppException(ErrorCode.HOTEL_NOT_EXISTED);
+        if (!branchRepository.existsById(hotelId)) {
+            throw new AppException(ErrorCode.BRANCH_NOT_EXISTED);
         }
         
-        return facilityRepository.findByHotelId(hotelId, pageable)
+        return facilityRepository.findByBranchId(hotelId, pageable)
                 .map(facilityMapper::toFacilityResponse);
     }
 
@@ -104,7 +104,7 @@ public class FacilityService {
 
         // Check if name already exists for another facility in the same hotel
         if (request.getName() != null && !request.getName().equals(facility.getName()) 
-                && facilityRepository.existsByHotelIdAndName(facility.getHotel().getId(), request.getName())) {
+                && facilityRepository.existsByBranchIdAndName(facility.getBranch().getId(), request.getName())) {
             throw new AppException(ErrorCode.FACILITY_EXISTED);
         }
 

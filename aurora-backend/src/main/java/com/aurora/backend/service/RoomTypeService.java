@@ -4,13 +4,13 @@ import com.aurora.backend.dto.request.RoomTypeCreationRequest;
 import com.aurora.backend.dto.request.RoomTypeUpdateRequest;
 import com.aurora.backend.dto.response.RoomTypeResponse;
 import com.aurora.backend.entity.Amenity;
-import com.aurora.backend.entity.Hotel;
+import com.aurora.backend.entity.Branch;
 import com.aurora.backend.entity.RoomType;
 import com.aurora.backend.enums.ErrorCode;
 import com.aurora.backend.exception.AppException;
 import com.aurora.backend.mapper.RoomTypeMapper;
 import com.aurora.backend.repository.AmenityRepository;
-import com.aurora.backend.repository.HotelRepository;
+import com.aurora.backend.repository.BranchRepository;
 import com.aurora.backend.repository.RoomTypeRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,29 +30,29 @@ import java.util.Set;
 @Slf4j
 public class RoomTypeService {
     RoomTypeRepository roomTypeRepository;
-    HotelRepository hotelRepository;
+    BranchRepository branchRepository;
     AmenityRepository amenityRepository;
     RoomTypeMapper roomTypeMapper;
 
     public RoomTypeResponse createRoomType(RoomTypeCreationRequest request) {
-        log.info("Creating room type with name: {} for hotel: {}", request.getName(), request.getHotelId());
+        log.info("Creating room type with name: {} for branch: {}", request.getName(), request.getBranchId());
         
         // Check if hotel exists
-        Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new AppException(ErrorCode.HOTEL_NOT_EXISTED));
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_EXISTED));
         
         // Check if room type already exists in this hotel
-        if (roomTypeRepository.existsByHotelIdAndName(request.getHotelId(), request.getName())) {
+        if (roomTypeRepository.existsByBranchIdAndName(request.getBranchId(), request.getName())) {
             throw new AppException(ErrorCode.ROOM_TYPE_EXISTED);
         }
         
         // Check if code already exists in this hotel
-        if (request.getCode() != null && roomTypeRepository.existsByHotelIdAndCode(request.getHotelId(), request.getCode())) {
+        if (request.getCode() != null && roomTypeRepository.existsByBranchIdAndCode(request.getBranchId(), request.getCode())) {
             throw new AppException(ErrorCode.ROOM_TYPE_EXISTED);
         }
 
         RoomType roomType = roomTypeMapper.toRoomType(request);
-        roomType.setHotel(hotel);
+        roomType.setBranch(branch);
         
         // Set amenities if provided
         if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
@@ -88,27 +88,27 @@ public class RoomTypeService {
     }
 
     public List<RoomTypeResponse> getRoomTypesByHotel(String hotelId) {
-        log.info("Fetching room types by hotel ID: {}", hotelId);
+        log.info("Fetching room types by branch ID: {}", hotelId);
         
         // Check if hotel exists
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new AppException(ErrorCode.HOTEL_NOT_EXISTED);
+        if (!branchRepository.existsById(hotelId)) {
+            throw new AppException(ErrorCode.BRANCH_NOT_EXISTED);
         }
         
-        return roomTypeRepository.findByHotelId(hotelId).stream()
+        return roomTypeRepository.findByBranchId(hotelId).stream()
                 .map(roomTypeMapper::toRoomTypeResponse)
                 .toList();
     }
 
     public Page<RoomTypeResponse> getRoomTypesByHotelWithPagination(String hotelId, Pageable pageable) {
-        log.info("Fetching room types by hotel ID: {} with pagination", hotelId);
+        log.info("Fetching room types by branch ID: {} with pagination", hotelId);
         
         // Check if hotel exists
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new AppException(ErrorCode.HOTEL_NOT_EXISTED);
+        if (!branchRepository.existsById(hotelId)) {
+            throw new AppException(ErrorCode.BRANCH_NOT_EXISTED);
         }
         
-        return roomTypeRepository.findByHotelId(hotelId, pageable)
+        return roomTypeRepository.findByBranchId(hotelId, pageable)
                 .map(roomTypeMapper::toRoomTypeResponse);
     }
 
@@ -120,13 +120,13 @@ public class RoomTypeService {
 
         // Check if name already exists for another room type in the same hotel
         if (request.getName() != null && !request.getName().equals(roomType.getName()) 
-                && roomTypeRepository.existsByHotelIdAndName(roomType.getHotel().getId(), request.getName())) {
+                && roomTypeRepository.existsByBranchIdAndName(roomType.getBranch().getId(), request.getName())) {
             throw new AppException(ErrorCode.ROOM_TYPE_EXISTED);
         }
         
         // Check if code already exists for another room type in the same hotel
         if (request.getCode() != null && !request.getCode().equals(roomType.getCode()) 
-                && roomTypeRepository.existsByHotelIdAndCode(roomType.getHotel().getId(), request.getCode())) {
+                && roomTypeRepository.existsByBranchIdAndCode(roomType.getBranch().getId(), request.getCode())) {
             throw new AppException(ErrorCode.ROOM_TYPE_EXISTED);
         }
 
