@@ -18,7 +18,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080/api/v1",
+			"value": "http://localhost:8080",
 			"type": "string"
 		},
 		{
@@ -121,9 +121,9 @@
 							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/token",
+							"raw": "{{baseUrl}}api/v1/auth/token",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "token"]
+							"path": ["api", "v1", "auth", "token"]
 						},
 						"description": "Login with admin credentials. Token will be auto-saved."
 					}
@@ -161,9 +161,9 @@
 							"raw": "{\n  \"username\": \"manager\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/token",
+							"raw": "{{baseUrl}}api/v1/auth/token",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "token"]
+							"path": ["api", "v1", "auth", "token"]
 						}
 					}
 				},
@@ -200,9 +200,9 @@
 							"raw": "{\n  \"username\": \"staff\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/token",
+							"raw": "{{baseUrl}}api/v1/auth/token",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "token"]
+							"path": ["api", "v1", "auth", "token"]
 						}
 					}
 				},
@@ -239,9 +239,9 @@
 							"raw": "{\n  \"username\": \"customer\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/token",
+							"raw": "{{baseUrl}}api/v1/auth/token",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "token"]
+							"path": ["api", "v1", "auth", "token"]
 						}
 					}
 				},
@@ -260,9 +260,9 @@
 							"raw": "{\n  \"token\": \"{{accessToken}}\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/introspect",
+							"raw": "{{baseUrl}}/api/v1/auth/introspect",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "introspect"]
+							"path": ["api", "v1", "auth", "introspect"]
 						},
 						"description": "Check if token is valid"
 					}
@@ -297,9 +297,9 @@
 							"raw": "{\n  \"token\": \"{{refreshToken}}\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/refresh",
+							"raw": "{{baseUrl}}/api/v1/auth/refresh",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "refresh"]
+							"path": ["api", "v1", "auth", "refresh"]
 						},
 						"description": "Refresh access token using refresh token"
 					}
@@ -319,9 +319,9 @@
 							"raw": "{\n  \"token\": \"{{accessToken}}\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/auth/logout",
+							"raw": "{{baseUrl}}/api/v1/auth/logout",
 							"host": ["{{baseUrl}}"],
-							"path": ["auth", "logout"]
+							"path": ["api", "v1", "auth", "logout"]
 						},
 						"description": "Logout current session"
 					}
