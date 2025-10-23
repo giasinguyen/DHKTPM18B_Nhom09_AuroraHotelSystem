@@ -28,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     
     BookingRepository bookingRepository;

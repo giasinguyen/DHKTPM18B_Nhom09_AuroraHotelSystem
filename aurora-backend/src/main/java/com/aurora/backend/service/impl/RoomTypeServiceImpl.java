@@ -30,6 +30,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@Transactional(readOnly = true)
 public class RoomTypeServiceImpl implements RoomTypeService {
 
     RoomTypeRepository roomTypeRepository;

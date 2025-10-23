@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@Transactional(readOnly = true)
 public class FacilityServiceImpl implements FacilityService {
     
     FacilityRepository facilityRepository;
@@ -32,6 +34,7 @@ public class FacilityServiceImpl implements FacilityService {
     FacilityMapper facilityMapper;
 
     @Override
+    @Transactional
     public FacilityResponse createFacility(FacilityCreationRequest request) {
         log.info("Creating facility with name: {} for branch: {}", request.getName(), request.getBranchId());
         
@@ -101,6 +104,7 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
+    @Transactional
     public FacilityResponse updateFacility(String id, FacilityUpdateRequest request) {
         log.info("Updating facility with ID: {}", id);
         
@@ -120,6 +124,7 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
+    @Transactional
     public void deleteFacility(String id) {
         log.info("Deleting facility with ID: {}", id);
         

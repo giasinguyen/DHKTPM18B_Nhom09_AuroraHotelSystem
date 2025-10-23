@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@Transactional(readOnly = true)
 public class PaymentServiceImpl implements PaymentService {
     
     PaymentRepository paymentRepository;
