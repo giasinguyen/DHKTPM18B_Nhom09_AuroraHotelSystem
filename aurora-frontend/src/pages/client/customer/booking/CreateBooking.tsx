@@ -15,6 +15,7 @@ export default function CreateBooking() {
     specialRequests: "",
     paymentMethod: "credit-card"
   });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   const formRef = useRef(null);
   const formInView = useInView(formRef, { once: true, margin: "-100px" });
@@ -39,12 +40,52 @@ export default function CreateBooking() {
     }
   };
 
- const handleSubmit = (e?: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
+    
+    // Validate current step
+    const newErrors: {[key: string]: string} = {};
+    
+    if (step === 1) {
+      if (!formData.checkIn) newErrors.checkIn = "Vui lòng chọn ngày nhận phòng";
+      if (!formData.checkOut) newErrors.checkOut = "Vui lòng chọn ngày trả phòng";
+      if (!formData.roomType) newErrors.roomType = "Vui lòng chọn loại phòng";
+      
+      // Validate check-out after check-in
+      if (formData.checkIn && formData.checkOut) {
+        const checkInDate = new Date(formData.checkIn);
+        const checkOutDate = new Date(formData.checkOut);
+        if (checkOutDate <= checkInDate) {
+          newErrors.checkOut = "Ngày trả phòng phải sau ngày nhận phòng";
+        }
+      }
+    }
+    
+    if (step === 2) {
+      if (!formData.fullName.trim()) newErrors.fullName = "Vui lòng nhập họ tên";
+      if (!formData.email.trim()) {
+        newErrors.email = "Vui lòng nhập email";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Email không hợp lệ";
+      }
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Vui lòng nhập số điện thoại";
+      } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
+        newErrors.phone = "Số điện thoại phải có 10-11 chữ số";
+      }
+    }
+    
+    setErrors(newErrors);
+    
+    // If there are errors, don't proceed
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+    
     if (step < 3) {
       setStep((s) => s + 1);
     } else {
-      // Save booking data ...
+      // Save booking data
       const bookingData = {
         ...formData,
         roomName: roomTypes.find(r => r.id === formData.roomType)?.name,
@@ -52,8 +93,14 @@ export default function CreateBooking() {
         confirmationCode: "ABH" + Math.random().toString(36).substr(2, 9).toUpperCase(),
         bookingDate: new Date().toLocaleDateString('vi-VN')
       };
-     sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-      window.location.href = '/customer/booking/ConfirmBooking';
+      sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+      
+      // Route based on payment method
+      if (formData.paymentMethod === 'credit-card' || formData.paymentMethod === 'bank-transfer') {
+        window.location.href = '/customer/booking/PaymentPage';
+      } else {
+        window.location.href = '/customer/booking/ConfirmBooking';
+      }
     }
   };
 
@@ -140,25 +187,41 @@ export default function CreateBooking() {
               <motion.div variants={fadeInUp} className="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày Nhận Phòng
+                    Ngày Nhận Phòng *
                   </label>
                   <input
                     type="date"
                     value={formData.checkIn}
-                    onChange={(e) => setFormData({...formData, checkIn: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({...formData, checkIn: e.target.value});
+                      if (errors.checkIn) setErrors({...errors, checkIn: ""});
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.checkIn ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-green-500"
+                    }`}
                   />
+                  {errors.checkIn && (
+                    <p className="text-red-500 text-sm mt-1">{errors.checkIn}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày Trả Phòng
+                    Ngày Trả Phòng *
                   </label>
                   <input
                     type="date"
                     value={formData.checkOut}
-                    onChange={(e) => setFormData({...formData, checkOut: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({...formData, checkOut: e.target.value});
+                      if (errors.checkOut) setErrors({...errors, checkOut: ""});
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.checkOut ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-green-500"
+                    }`}
                   />
+                  {errors.checkOut && (
+                    <p className="text-red-500 text-sm mt-1">{errors.checkOut}</p>
+                  )}
                 </div>
               </motion.div>
 
@@ -188,17 +251,25 @@ export default function CreateBooking() {
               </motion.div>
 
               <motion.div variants={fadeInUp}>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Chọn Loại Phòng</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Chọn Loại Phòng *</h3>
+                {errors.roomType && (
+                  <p className="text-red-500 text-sm mb-3">{errors.roomType}</p>
+                )}
                 <div className="grid md:grid-cols-2 gap-6">
                   {roomTypes.map((room) => (
                     <motion.div
                       key={room.id}
                       whileHover={{ y: -8 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setFormData({...formData, roomType: room.id})}
+                      onClick={() => {
+                        setFormData({...formData, roomType: room.id});
+                        if (errors.roomType) setErrors({...errors, roomType: ""});
+                      }}
                       className={`cursor-pointer rounded-2xl overflow-hidden border-2 transition-all ${
                         formData.roomType === room.id
                           ? "border-green-500 shadow-xl shadow-green-100"
+                          : errors.roomType
+                          ? "border-red-300 hover:border-red-400"
                           : "border-gray-200 hover:border-green-300"
                       }`}
                     >
@@ -247,10 +318,18 @@ export default function CreateBooking() {
                   <input
                     type="text"
                     value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({...formData, fullName: e.target.value});
+                      if (errors.fullName) setErrors({...errors, fullName: ""});
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.fullName ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-green-500"
+                    }`}
                     placeholder="Nguyễn Văn A"
                   />
+                  {errors.fullName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+                  )}
                 </motion.div>
 
                 <motion.div variants={fadeInUp}>
@@ -260,10 +339,18 @@ export default function CreateBooking() {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({...formData, email: e.target.value});
+                      if (errors.email) setErrors({...errors, email: ""});
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.email ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-green-500"
+                    }`}
                     placeholder="email@example.com"
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className="md:col-span-2">
@@ -273,10 +360,18 @@ export default function CreateBooking() {
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
+                    onChange={(e) => {
+                      setFormData({...formData, phone: e.target.value});
+                      if (errors.phone) setErrors({...errors, phone: ""});
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.phone ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-green-500"
+                    }`}
                     placeholder="0912345678"
                   />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                  )}
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className="md:col-span-2">
@@ -382,17 +477,20 @@ export default function CreateBooking() {
                 Quay Lại
               </motion.button>
             )}
-              <motion.button
+            <motion.button
               type="button"
               onClick={() => handleSubmit()}
-               whileHover={{ scale: 1.05 }}
-               whileTap={{ scale: 0.95 }}
-               disabled={step === 1 && !formData.roomType}
-               className="flex-1 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-xl font-bold hover:from-green-700 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-200"
-             >
-               {step === 3 ? "Xác Nhận Đặt Phòng" : "Tiếp Tục"}
-               <ArrowRight className="w-5 h-5" />
-             </motion.button>
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={
+                (step === 1 && (!formData.roomType || !formData.checkIn || !formData.checkOut)) ||
+                (step === 2 && (!formData.fullName || !formData.email || !formData.phone))
+              }
+              className="flex-1 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-xl font-bold hover:from-green-700 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-200"
+            >
+              {step === 3 ? "Xác Nhận Đặt Phòng" : "Tiếp Tục"}
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
           </motion.div>
         </div>
       </section>

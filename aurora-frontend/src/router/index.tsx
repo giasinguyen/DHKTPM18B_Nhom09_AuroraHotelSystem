@@ -113,6 +113,7 @@ import AdminBranchComparisonReportPage from "@/pages/admin/reports/BranchCompari
 // ==================== COMMON PAGES ====================
 import CheckInOutPage from "@/pages/commons/CheckInOut";
 import UserProfilePage from "@/pages/commons/UserProfile";
+import PaymentPage from "@/pages/client/customer/payment/PaymentPage";
 
 const router = createBrowserRouter([
   // ==================== GUEST & CUSTOMER ROUTES (Using ClientPage Layout) ====================
@@ -151,6 +152,8 @@ const router = createBrowserRouter([
       { path: "customer/booking/ConfirmBooking", element: <ConfirmBookingPage /> },
       { path: "customer/booking/:id", element: <CustomerBookingDetailPage /> },
       { path: "customer/favorites", element: <FavoriteListPage /> },
+      { path: "customer/booking/PaymentPage", element: <PaymentPage /> },
+      
       {
         path: "customer/late-checkout-requests",
         element: <LateCheckoutRequestListPage />,
