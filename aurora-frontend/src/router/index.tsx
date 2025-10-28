@@ -152,7 +152,7 @@ const router = createBrowserRouter([
       { path: "customer/booking/ConfirmBooking", element: <ConfirmBookingPage /> },
       { path: "customer/booking/:id", element: <CustomerBookingDetailPage /> },
       { path: "customer/favorites", element: <FavoriteListPage /> },
-      { path: "customer/booking/PaymentPage", element: <PaymentPage /> },
+     
       
       {
         path: "customer/late-checkout-requests",
@@ -165,7 +165,7 @@ const router = createBrowserRouter([
       {
         path: "customer/early-checkin-requests",
         element: <EarlyCheckinRequestListPage />,
-      },
+      },  
       {
         path: "customer/early-checkin-requests/upsert",
         element: <EarlyCheckinRequestUpsertPage />,
