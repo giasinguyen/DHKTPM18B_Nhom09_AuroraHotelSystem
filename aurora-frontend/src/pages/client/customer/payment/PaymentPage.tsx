@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, Building2, Check, ArrowRight, Lock, AlertCircle, Copy, CheckCircle, Download, Smartphone } from "lucide-react";
 
-export default function PaymentPage() {
+export default function CustomerPaymentPage() {
   const [bookingData, setBookingData] = useState<any>(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [copied, setCopied] = useState(false);

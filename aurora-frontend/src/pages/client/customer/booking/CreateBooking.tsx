@@ -97,7 +97,7 @@ export default function CreateBooking() {
       
       // Route based on payment method
       if (formData.paymentMethod === 'credit-card' || formData.paymentMethod === 'bank-transfer') {
-        window.location.href = '/customer/booking/PaymentPage';
+        window.location.href = '/customer/payment';
       } else {
         window.location.href = '/customer/booking/ConfirmBooking';
       }
