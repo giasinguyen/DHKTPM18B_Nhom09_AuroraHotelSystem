@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "2edb7885-d5fe-49c7-9862-88279905ca34",
-		"name": "Aurora Hotel Management System - API Tests",
+		"_postman_id": "a746e4af-4d13-46e1-873d-6741fcdfe74c",
+		"name": "Aurora Hotel Management System",
 		"description": "Comprehensive API Testing Collection for Aurora Hotel System\n\n## Test Flow\n1. **Authentication** - Login and get tokens\n2. **User Management** - Register and manage users\n3. **Branch Management** - Create and manage hotel branches\n4. **Amenity Management** - Manage hotel amenities (WiFi, TV, etc.)\n5. **Facility Management** - Manage branch facilities (Pool, Gym, Spa)\n6. **Room Type Management** - Configure room types\n7. **Room Management** - Manage individual rooms\n8. **Service Management** - Hotel services (Laundry, Room service, etc.)\n9. **Promotion Management** - Discounts and promotions\n10. **Booking Management** - Room bookings\n11. **Booking Room** - Booking-Room relationship\n12. **Service Booking** - Service bookings for guests\n13. **Payment Management** - Process payments\n14. **Role & Permission** - Manage access control\n\n## Authentication\nAll endpoints (except register and login) require Bearer token authentication.\n\n## Default Users\n- **Admin**: username=`admin`, password=`Admin@123`\n- **Manager**: username=`manager`, password=`Manager@123`\n- **Staff**: username=`staff`, password=`Staff@123`\n- **Customer**: username=`customer`, password=`Customer@123`",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "40740215"
@@ -11,7 +11,7 @@
 			"name": "01. Authentication",
 			"item": [
 				{
-					"name": "Login as Admin",
+					"name": "Register New User",
 					"event": [
 						{
 							"listen": "test",
@@ -19,13 +19,12 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
-									"    pm.collectionVariables.set('refreshToken', jsonData.result.refreshToken);",
-									"    pm.test('✅ Admin login successful', function() {",
+									"    pm.collectionVariables.set('userId', jsonData.result.id);",
+									"    pm.test('✅ User registered successfully', function() {",
 									"        pm.expect(jsonData.code).to.eql(200);",
-									"        pm.expect(jsonData.result.token).to.not.be.empty;",
+									"        pm.expect(jsonData.result.username).to.not.be.empty;",
 									"    });",
-									"    console.log('Admin Access Token:', jsonData.result.token);",
+									"    console.log('User ID:', jsonData.result.id);",
 									"}"
 								],
 								"type": "text/javascript",
@@ -35,11 +34,14 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password123\"\n}",
+							"raw": "{\n    \"username\": \"testuser_{{$timestamp}}\",\n    \"password\": \"TestUser@123\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"dob\": \"1990-01-01\",\n    \"phone\": \"0901234567\",\n    \"email\": \"testuser{{$timestamp}}@example.com\",\n    \"address\": \"123 Test Street, District 1\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -47,7 +49,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/token",
+							"raw": "{{baseUrl}}/api/v1/auth/register",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -55,15 +57,15 @@
 								"api",
 								"v1",
 								"auth",
-								"token"
+								"register"
 							]
 						},
-						"description": "Login with admin credentials to get access token"
+						"description": "Register a new user account (no authentication required)"
 					},
 					"response": []
 				},
 				{
-					"name": "Introspect Token",
+					"name": "Login",
 					"event": [
 						{
 							"listen": "test",
@@ -71,8 +73,108 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.test('✅ Token is valid', function() {",
-									"        pm.expect(jsonData.result.valid).to.be.true;",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.accessToken);",
+									"    pm.test('✅ Login successful', function() {",
+									"        pm.expect(jsonData.code).to.eql(200);",
+									"        pm.expect(jsonData.result.accessToken).to.not.be.empty;",
+									"        pm.expect(jsonData.result.user).to.not.be.empty;",
+									"    });",
+									"    console.log('Access Token:', jsonData.result.accessToken);",
+									"    console.log('User:', jsonData.result.user.username);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password123\",\n    \"sessionMeta\": {\n        \"deviceName\": \"Postman\",\n        \"deviceType\": \"Desktop\",\n        \"userAgent\": \"PostmanRuntime/7.32.0\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with credentials and session metadata. Returns access token in response body and sets refresh token as HttpOnly cookie."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('✅ Current user retrieved', function() {",
+									"        pm.expect(jsonData.result.username).to.not.be.empty;",
+									"        pm.expect(jsonData.result.roles).to.be.an('array');",
+									"        pm.expect(jsonData.result.permissions).to.be.an('array');",
+									"    });",
+									"    console.log('Current User:', jsonData.result.username);",
+									"    console.log('Roles:', jsonData.result.roles);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user session information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('✅ User details retrieved', function() {",
+									"        pm.expect(jsonData.result.id).to.not.be.empty;",
+									"        pm.expect(jsonData.result.username).to.not.be.empty;",
 									"    });",
 									"}"
 								],
@@ -83,19 +185,10 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{accessToken}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/introspect",
+							"raw": "{{baseUrl}}/api/v1/auth/me/details",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -103,10 +196,11 @@
 								"api",
 								"v1",
 								"auth",
-								"introspect"
+								"me",
+								"details"
 							]
 						},
-						"description": "Check if the current token is valid"
+						"description": "Get current authenticated user detailed information"
 					},
 					"response": []
 				},
@@ -119,9 +213,103 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('accessToken', jsonData.result.token);",
+									"    pm.collectionVariables.set('accessToken', jsonData.result.accessToken);",
 									"    pm.test('✅ Token refreshed successfully', function() {",
-									"        pm.expect(jsonData.result.token).to.not.be.empty;",
+									"        pm.expect(jsonData.result.accessToken).to.not.be.empty;",
+									"    });",
+									"    console.log('New Access Token:', jsonData.result.accessToken);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deviceName\": \"Postman\",\n    \"deviceType\": \"Desktop\",\n    \"userAgent\": \"PostmanRuntime/7.32.0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Refresh access token using refresh token from cookie. Requires refresh_token cookie to be sent automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Sessions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('✅ Sessions retrieved', function() {",
+									"        pm.expect(jsonData.result).to.be.an('array');",
+									"    });",
+									"    console.log('Total Sessions:', jsonData.result.length);",
+									"    if (jsonData.result.length > 0) {",
+									"        pm.collectionVariables.set('sessionId', jsonData.result[0].sessionId);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"sessions"
+							]
+						},
+						"description": "Get all active sessions for the current user. Requires refresh_token cookie."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.test('✅ Session removed successfully', function() {",
+									"        pm.response.to.have.status(200);",
 									"    });",
 									"}"
 								],
@@ -132,19 +320,10 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{refreshToken}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"raw": "{{baseUrl}}/api/v1/auth/sessions/{{sessionId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -152,10 +331,11 @@
 								"api",
 								"v1",
 								"auth",
-								"refresh"
+								"sessions",
+								"{{sessionId}}"
 							]
 						},
-						"description": "Get a new access token using refresh token"
+						"description": "Remove a specific session by session ID. User can only remove their own sessions."
 					},
 					"response": []
 				},
@@ -170,6 +350,7 @@
 									"    pm.test('✅ Logout successful', function() {",
 									"        pm.response.to.have.status(200);",
 									"    });",
+									"    pm.collectionVariables.set('accessToken', '');",
 									"}"
 								],
 								"type": "text/javascript",
@@ -181,15 +362,6 @@
 					"request": {
 						"method": "POST",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{accessToken}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/auth/logout",
 							"host": [
@@ -202,64 +374,16 @@
 								"logout"
 							]
 						},
-						"description": "Invalidate the current access token"
+						"description": "Logout and clear refresh token cookie. Invalidates the current session."
 					},
 					"response": []
 				}
 			],
-			"description": "Authentication endpoints for login, token management, and logout"
+			"description": "Authentication endpoints with Redis session management - Register, Login, Logout, Token refresh, and Session management"
 		},
 		{
 			"name": "02. User Management",
 			"item": [
-				{
-					"name": "Register New Customer",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('userId', jsonData.result.id);",
-									"    pm.test('✅ User registered successfully', function() {",
-									"        pm.expect(jsonData.result.username).to.not.be.empty;",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser_{{$timestamp}}\",\n    \"password\": \"TestUser@123\",\n    \"email\": \"testuser{{$timestamp}}@example.com\",\n    \"fullName\": \"Test User\",\n    \"phone\": \"0901234567\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/users/register",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"users",
-								"register"
-							]
-						},
-						"description": "Register a new customer account (no authentication required)"
-					},
-					"response": []
-				},
 				{
 					"name": "Create User (Admin)",
 					"event": [
@@ -352,7 +476,9 @@
 									"    });",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -360,7 +486,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/users/paginated?page=0&size=10&sortBy=createdDate&sortDirection=DESC",
+							"raw": "{{baseUrl}}/users/paginated?page=0&size=10&sortBy=createdAt&sortDirection=DESC",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -379,7 +505,7 @@
 								},
 								{
 									"key": "sortBy",
-									"value": "createdDate"
+									"value": "createdAt"
 								},
 								{
 									"key": "sortDirection",
@@ -567,7 +693,9 @@
 									"    });",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -1064,7 +1192,9 @@
 									"    });",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -1441,7 +1571,9 @@
 									"    });",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -2620,6 +2752,10 @@
 		},
 		{
 			"key": "reviewId",
+			"value": ""
+		},
+		{
+			"key": "sessionId",
 			"value": ""
 		}
 	]

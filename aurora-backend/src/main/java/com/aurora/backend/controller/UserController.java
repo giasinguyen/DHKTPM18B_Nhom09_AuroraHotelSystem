@@ -53,6 +53,7 @@ public class UserController {
         log.info("Fetching current user info for: {}", currentUsername);
         
         return ApiResponse.<UserResponse>builder()
+                .message("User info retrieved successfully")
                 .result(userService.getUserByUsername(currentUsername))
                 .build();
     }
@@ -63,6 +64,7 @@ public class UserController {
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest) {
         log.info("Creating new user with username: {}", userCreationRequest.getUsername());
         return ApiResponse.<UserResponse>builder()
+                .message("User created successfully")
                 .result(userService.createUser(userCreationRequest))
                 .build();
     }
@@ -72,6 +74,7 @@ public class UserController {
     ApiResponse<List<UserResponse>> getAllUsers() {
         log.info("Fetching all users");
         return ApiResponse.<List<UserResponse>>builder()
+                .message("Users retrieved successfully")
                 .result(userService.getUsers())
                 .build();
     }
@@ -94,6 +97,7 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size, sort);
         
         return ApiResponse.<Page<UserResponse>>builder()
+                .message("Users paginated successfully")
                 .result(userService.getUsersWithPagination(pageable))
                 .build();
     }
@@ -112,6 +116,7 @@ public class UserController {
         }
         
         return ApiResponse.<UserResponse>builder()
+                .message("User retrieved successfully")
                 .result(user)
                 .build();
     }
@@ -121,6 +126,7 @@ public class UserController {
     ApiResponse<UserResponse> getUserByUsername(@PathVariable("username") String username) {
         log.info("Fetching user with username: {}", username);
         return ApiResponse.<UserResponse>builder()
+                .message("User retrieved successfully")
                 .result(userService.getUserByUsername(username))
                 .build();
     }
@@ -141,6 +147,7 @@ public class UserController {
         }
         
         return ApiResponse.<UserResponse>builder()
+                .message("User updated successfully")
                 .result(userService.updateUser(userId, userUpdateRequest))
                 .build();
     }
@@ -167,6 +174,7 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size);
         
         return ApiResponse.<Page<UserResponse>>builder()
+                .message("Users searched successfully")
                 .result(userService.searchUsersByUsername(username, pageable))
                 .build();
     }

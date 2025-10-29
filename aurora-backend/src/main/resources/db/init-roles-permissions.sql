@@ -5,11 +5,11 @@
 -- =====================================================
 
 -- Xóa dữ liệu cũ (nếu có) - Đúng thứ tự foreign keys
--- DELETE FROM user_roles;           -- Xóa TẤT CẢ user-role mappings
--- DELETE FROM role_permissions;     -- Xóa role-permission mappings
--- DELETE FROM users WHERE username IN ('admin', 'manager', 'staff', 'customer');  -- Xóa sample users
--- DELETE FROM roles;                -- Xóa roles
--- DELETE FROM permissions;          -- Cuối cùng xóa permissions
+DELETE FROM user_roles;           -- Xóa TẤT CẢ user-role mappings
+DELETE FROM role_permissions;     -- Xóa role-permission mappings
+DELETE FROM users WHERE username IN ('admin', 'manager', 'staff', 'customer');  -- Xóa sample users
+DELETE FROM roles;                -- Xóa roles
+DELETE FROM permissions;          -- Cuối cùng xóa permissions
 
 -- =====================================================
 -- BƯỚC 1: TẠO CÁC PERMISSIONS

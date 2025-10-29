@@ -29,11 +29,13 @@ public class SecurityConfig {
     private final CustomJwtDecoder customJwtDecoder;
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
-            "/api/v1/auth/token",
-            "/api/v1/auth/introspect",
+            // Auth endpoints - Session management with Redis
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
             "/api/v1/auth/logout",
+            "/api/v1/auth/refresh-token",
             "/api/v1/auth/refresh",
-            "/api/v1/users/register"
+            "/api/v1/rag/"
     };
     
     private static final String[] PUBLIC_GET_ENDPOINTS = {
@@ -45,7 +47,8 @@ public class SecurityConfig {
             "/api/v1/promotions",
             "/api/v1/promotions/{id}",
             "/api/v1/services",
-            "/api/v1/services/{id}"
+            "/api/v1/services/{id}",
+            "/api/v1/rag/*",
     };
 
     @Bean
