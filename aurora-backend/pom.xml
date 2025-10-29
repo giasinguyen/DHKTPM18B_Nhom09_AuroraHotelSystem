@@ -121,6 +121,23 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- Redis for session management -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+        </dependency>
+
+        <!-- Apache Commons Codec for SHA256 hashing -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -134,6 +151,13 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
+        </dependency>
+
+        <!-- dev tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Test -->

@@ -26,6 +26,7 @@ public enum ErrorCode {
     DOB_INVALID(1014, "Date of birth must be in the past", HttpStatus.BAD_REQUEST),
     ACCOUNT_LOCKED(1015, "Account is locked due to too many failed login attempts", HttpStatus.UNAUTHORIZED),
     WEAK_PASSWORD(1016, "Password must be at least 8 characters with uppercase, lowercase, digit and special character", HttpStatus.BAD_REQUEST),
+    SESSION_NOT_FOUND(1017, "Session not found or already expired", HttpStatus.NOT_FOUND),
     
     // Amenity errors
     AMENITY_EXISTED(1100, "Amenity already exists", HttpStatus.BAD_REQUEST),

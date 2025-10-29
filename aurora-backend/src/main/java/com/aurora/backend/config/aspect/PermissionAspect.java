@@ -22,8 +22,9 @@ public class PermissionAspect {
     @Before("@annotation(requirePermission)")
     public void checkPermission(RequirePermission requirePermission) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
+            log.error("Authentication is null or not authenticated");
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
@@ -40,8 +41,10 @@ public class PermissionAspect {
         };
 
         if (!hasPermission) {
-            log.warn("User {} không có quyền: {}", 
-                    authentication.getName(), 
+            log.warn("User {} không có quyền. User permissions: {} | Required ({}): {}",
+                    authentication.getName(),
+                    userPermissions,
+                    logic,
                     String.join(", ", requiredPermissions));
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
