@@ -15,7 +15,14 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
+
+  # Spring Vector Store Init Configuration
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/init-vector-store.sql
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,8 +37,32 @@ spring:
         order_inserts: true
         order_updates: true
 
+  #  Multipart file config
+  spring:
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB
+
 # JWT Configuration
 jwt:
   signerKey: ${JWT_SIGNER_KEY}
   valid-duration: ${JWT_VALID_DURATION:3600}
   refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
+
+# Langchain4j
+langchain4j:
+  google-ai-gemini:
+    chat-model:
+      api-key: ${GEMINI_AI_KEY}
+      model-name: gemini-2.5-flash
+      log-requests-and-responses: true
+    streaming-chat-model:
+      api-key: ${GEMINI_AI_KEY}
+      model-name: gemini-2.5-flash
+      log-requests-and-responses: true
+    embedding-model:
+      api-key: ${GEMINI_AI_KEY}
+      model-name: text-embedding-004
+      output-dimensionality: 768
+      log-requests-and-responses: false
