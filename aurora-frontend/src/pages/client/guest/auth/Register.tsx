@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { registerSchema } from "@/utils/validateSchema";
+import { registerSchema } from "@/validation/validateSchema";
 import type { ValidationError } from "yup";
+import { registerApi } from "@/services/authApi";
+import { getErrorMessage } from "@/features/slices/auth/authThunk";
+import type { RegisterRequest } from "@/types/user.d.ts";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -21,8 +24,11 @@ const RegisterPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     phone: "",
+    address: "",
+    dob: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -47,20 +53,9 @@ const RegisterPage = () => {
     setError(null);
     setValidationErrors({});
 
-    setIsLoading(true);
-
     try {
       // Validate using Yup schema
       await registerSchema.validate(formData, { abortEarly: false });
-      
-      // TODO: Call register API
-      // const { confirmPassword, ...registerData } = formData;
-      // await authService.register(registerData);
-      
-      setSuccess(true);
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
     } catch (err) {
       if (err instanceof Error && err.name === 'ValidationError') {
         // Handle Yup validation errors
@@ -72,10 +67,34 @@ const RegisterPage = () => {
           }
         });
         setValidationErrors(errors);
-      } else {
-        const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
-        setError(message);
+        return;
       }
+    }
+
+    // If validation passes, proceed with registration
+    try {
+      setIsLoading(true);
+
+      // Prepare register request
+      const registerRequest: RegisterRequest = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
+        dob: formData.dob || undefined,
+      };
+
+      await registerApi(registerRequest);
+      
+      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+      navigate("/auth?mode=login");
+    } catch (err) {
+      const errorMessage = getErrorMessage(err, "Đăng ký thất bại. Vui lòng thử lại.");
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -91,27 +110,6 @@ const RegisterPage = () => {
     console.log("Google register clicked");
   };
 
-  if (success) {
-    return (
-      <PageWithCarousel>
-        <Card className="w-full max-w-md shadow-2xl backdrop-blur-sm bg-white/95">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900">Đăng ký thành công! (FAKE)</h3>
-              <p className="text-sm text-gray-600">
-                Tài khoản của bạn đã được tạo. Đang chuyển đến trang đăng nhập...
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </PageWithCarousel>
-    );
-  }
 
   return (
     <PageWithCarousel>
@@ -172,21 +170,58 @@ const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">
-                Họ và tên <span className="text-red-500">*</span>
+              <Label htmlFor="firstName">
+                Họ <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="fullName"
-                name="fullName"
+                id="firstName"
+                name="firstName"
                 type="text"
-                placeholder="Nhập họ và tên"
-                value={formData.fullName}
+                placeholder="Nhập họ"
+                value={formData.firstName}
                 onChange={handleChange}
                 disabled={isLoading}
-                className={validationErrors.fullName ? "border-red-500" : ""}
+                className={validationErrors.firstName ? "border-red-500" : ""}
               />
-              {validationErrors.fullName && (
-                <p className="text-sm text-red-500">{validationErrors.fullName}</p>
+              {validationErrors.firstName && (
+                <p className="text-sm text-red-500">{validationErrors.firstName}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName">
+                Tên <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                type="text"
+                placeholder="Nhập tên"
+                value={formData.lastName}
+                onChange={handleChange}
+                disabled={isLoading}
+                className={validationErrors.lastName ? "border-red-500" : ""}
+              />
+              {validationErrors.lastName && (
+                <p className="text-sm text-red-500">{validationErrors.lastName}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dob">Ngày sinh</Label>
+              <Input
+                id="dob"
+                name="dob"
+                type="date"
+                placeholder="Nhập ngày sinh"
+                value={formData.dob}
+                onChange={handleChange}
+                disabled={isLoading}
+                max={new Date().toISOString().split("T")[0]}
+                className={validationErrors.dob ? "border-red-500" : ""}
+              />
+              {validationErrors.dob && (
+                <p className="text-sm text-red-500">{validationErrors.dob}</p>
               )}
             </div>
 
@@ -204,6 +239,23 @@ const RegisterPage = () => {
               />
               {validationErrors.phone && (
                 <p className="text-sm text-red-500">{validationErrors.phone}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">Địa chỉ</Label>
+              <Input
+                id="address"
+                name="address"
+                type="text"
+                placeholder="Nhập địa chỉ"
+                value={formData.address}
+                onChange={handleChange}
+                disabled={isLoading}
+                className={validationErrors.address ? "border-red-500" : ""}
+              />
+              {validationErrors.address && (
+                <p className="text-sm text-red-500">{validationErrors.address}</p>
               )}
             </div>
 
@@ -345,7 +397,7 @@ const RegisterPage = () => {
           <p className="text-sm text-gray-600">
             Đã có tài khoản?{" "}
             <Link
-              to="/login"
+              to="/auth?mode=login"
               className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               Đăng nhập ngay

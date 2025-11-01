@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Calendar, MapPin, Users, Bed, DollarSign, Phone, Mail, ArrowLeft, Download, CheckCircle, Home, Wifi, Coffee, Car } from "lucide-react";
+import { Calendar, Users, Bed, DollarSign, Phone, Mail, ArrowLeft, Download, CheckCircle, Home } from "lucide-react";
 
 const bookingDetail = {
   id: "BK001234",

@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { loginAsync, fetchCurrentUserAsync, clearError, clearAuth, selectAuth } from "@/features/slices/auth/authSlice";
 import PageWithCarousel from "@/components/custom/PageWithCarousel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginSchema } from "@/utils/validateSchema";
-import { getRedirectPathByRole } from "@/utils/roleHelper";
-import { toast } from "sonner";
+import { loginSchema } from "@/validation/validateSchema";
 import type { ValidationError } from "yup";
+import { useAppDispatch } from "@/hooks/useRedux";
+import { login, getErrorMessage } from "@/features/slices/auth/authThunk";
+import type { LoginRequest } from "@/types/user.d.ts";
+import { toast } from "sonner";
+import { getRoleRedirectPath } from "@/utils/roleRedirectPathHelper";
 
 interface FormData {
   username: string;
@@ -25,8 +26,6 @@ interface ValidationErrors {
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading, error, isAuthenticated, currentUser } = useAppSelector(selectAuth);
-
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
@@ -34,40 +33,8 @@ const LoginPage = () => {
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-
-  // Check if token is actually valid when component mounts
-  useEffect(() => {
-    const checkAuthValidity = async () => {
-      if (isAuthenticated && !currentUser && !isCheckingAuth) {
-        setIsCheckingAuth(true);
-        
-        try {
-          const user = await dispatch(fetchCurrentUserAsync()).unwrap();
-          const redirectPath = getRedirectPathByRole(user);
-          toast.success("Đã đăng nhập!");
-          navigate(redirectPath);
-        } catch {
-          dispatch(clearAuth());
-        } finally {
-          setIsCheckingAuth(false);
-        }
-      } else if (isAuthenticated && currentUser) {
-        // Đã có user, redirect theo role
-        const redirectPath = getRedirectPathByRole(currentUser);
-        navigate(redirectPath);
-      }
-    };
-
-    checkAuthValidity();
-  }, [isAuthenticated, currentUser, dispatch, navigate, isCheckingAuth]);
-
-  // Clear error when component unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -90,29 +57,11 @@ const LoginPage = () => {
 
     // Clear previous errors
     setValidationErrors({});
-    dispatch(clearError());
+    setError(null);
 
     try {
       // Validate form data
       await loginSchema.validate(formData, { abortEarly: false });
-      
-      // Dispatch login action
-      const result = await dispatch(loginAsync(formData)).unwrap();
-
-      if (result.authenticated) {
-        // Fetch current user info after successful login
-        const user = await dispatch(fetchCurrentUserAsync()).unwrap();
-        
-        // Redirect based on user role
-        const redirectPath = getRedirectPathByRole(user);
-        
-        toast.success("Đăng nhập thành công!", {
-          description: "Chào mừng bạn quay trở lại!",
-          duration: 3000,
-        });
-        
-        navigate(redirectPath);
-      }
     } catch (err: unknown) {
       if (err && typeof err === "object" && "inner" in err) {
         // Yup validation errors
@@ -123,27 +72,43 @@ const LoginPage = () => {
           }
         });
         setValidationErrors(errors);
-      } else {
-        // API error
-        const errorMessage = typeof err === "string" ? err : "Đăng nhập thất bại. Vui lòng thử lại!";
-        toast.error("Đăng nhập thất bại", {
-          description: errorMessage,
-          duration: 4000,
-        });
+        return;
       }
+    }
+
+    // If validation passes, proceed with login
+    try {
+      setIsLoading(true);
+      
+      const loginRequest: LoginRequest = {
+        username: formData.username,
+        password: formData.password,
+        // sessionMeta will be auto-filled by loginApi using getSessionMeta()
+      };
+
+      const result = await dispatch(login(loginRequest)).unwrap();
+      
+      // Login successful - redirect to appropriate page based on role
+      toast.success("Đăng nhập thành công!");
+      const redirectPath = getRoleRedirectPath(result.user.roles);
+      navigate(redirectPath);
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err, "Đăng nhập thất bại");
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleFacebookLogin = () => {
-    toast.info("Chức năng đang phát triển", {
-      description: "Đăng nhập bằng Facebook sẽ sớm có mặt!",
-    });
+    // TODO: Implement Facebook login
+    console.log("Facebook login clicked");
   };
 
   const handleGoogleLogin = () => {
-    toast.info("Chức năng đang phát triển", {
-      description: "Đăng nhập bằng Google sẽ sớm có mặt!",
-    });
+    // TODO: Implement Google login
+    console.log("Google login clicked");
   };
 
   return (
@@ -187,7 +152,7 @@ const LoginPage = () => {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Mật khẩu</Label>
                 <Link
-                  to="/forgot-password"
+                  to="/auth?mode=forgot-password"
                   className="text-sm text-amber-600 hover:text-amber-700 transition-colors"
                 >
                   Quên mật khẩu?
@@ -230,15 +195,15 @@ const LoginPage = () => {
             <Button
               type="submit"
               className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 text-base font-medium"
-              disabled={isLoading || isCheckingAuth}
+              disabled={isLoading}
             >
-              {isLoading || isCheckingAuth ? (
+              {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  {isCheckingAuth ? "Đang kiểm tra..." : "Đang đăng nhập..."}
+                  Đang đăng nhập...
                 </span>
               ) : (
                 "Đăng nhập"
@@ -291,7 +256,7 @@ const LoginPage = () => {
           <p className="text-sm text-gray-600">
             Chưa có tài khoản?{" "}
             <Link
-              to="/register"
+              to="/auth?mode=register"
               className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               Đăng ký ngay

@@ -23,8 +23,9 @@ import QuickBookingPage from "@/pages/client/guest/booking/QuickBooking";
 import QuickBookingConfirmPage from "@/pages/client/guest/booking/QuickBookingConfirm";
 
 // Authentication pages
-import LoginPage from "@/pages/client/guest/auth/Login";
+import AuthPage from "@/pages/client/guest/auth";
 import RegisterPage from "@/pages/client/guest/auth/Register";
+import LoginPage from "@/pages/client/guest/auth/Login";
 import ForgotPasswordPage from "@/pages/client/guest/auth/ForgotPassword";
 import ResetPasswordPage from "@/pages/client/guest/auth/ResetPassword";
 
@@ -52,9 +53,6 @@ import FavoriteListPage from "@/pages/client/customer/favorites/FavoriteList";
 // Customer reviews
 import ReviewListPage from "@/pages/client/customer/reviews/ReviewList";
 import ReviewUpsertPage from "@/pages/client/customer/reviews/ReviewUpsert";
-
-// Customer payment
-import CustomerPaymentPage from "@/pages/client/customer/payment/PaymentPage";
 
 // ==================== STAFF PAGES ====================
 import StaffPage from "@/pages/staff/index";
@@ -130,6 +128,7 @@ const router = createBrowserRouter([
       { path: "gallery", element: <GalleryPage /> },
       { path: "news", element: <NewsPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "auth", element: <AuthPage /> },
 
       // Guest - Quick Booking
       { path: "booking/new", element: <QuickBookingPage /> },
@@ -175,7 +174,7 @@ const router = createBrowserRouter([
       },
       { path: "customer/reviews", element: <ReviewListPage /> },
       { path: "customer/reviews/upsert", element: <ReviewUpsertPage /> },
-      { path: "customer/payment", element: <CustomerPaymentPage /> },
+      { path: "customer/payment", element: <PaymentPage /> },
 
     ],
   },
