@@ -70,6 +70,7 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 
 -- Admin Permissions (Quản trị viên hệ thống)
 INSERT INTO permissions (id, name, description, created_at, updated_at, version, deleted) VALUES 
+(gen_random_uuid(), 'USER_VIEW', 'Xem danh sách tất cả người dùng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'USER_CREATE', 'Tạo tài khoản người dùng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'USER_UPDATE', 'Cập nhật tài khoản người dùng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'USER_DELETE', 'Xóa tài khoản người dùng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),

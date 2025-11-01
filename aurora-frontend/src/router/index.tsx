@@ -23,10 +23,10 @@ import QuickBookingPage from "@/pages/client/guest/booking/QuickBooking";
 import QuickBookingConfirmPage from "@/pages/client/guest/booking/QuickBookingConfirm";
 
 // Authentication pages
-import LoginPage from "@/pages/client/guest/auth/Login";
-import RegisterPage from "@/pages/client/guest/auth/Register";
-import ForgotPasswordPage from "@/pages/client/guest/auth/ForgotPassword";
-import ResetPasswordPage from "@/pages/client/guest/auth/ResetPassword";
+import AuthPage from "@/pages/client/guest/auth";
+
+// Payment pages
+import PaymentReturn from "@/pages/client/PaymentReturn";
 
 // ==================== CUSTOMER PAGES (client/customer - cần đăng nhập) ====================
 // Customer account & profile
@@ -49,9 +49,6 @@ import FavoriteListPage from "@/pages/client/customer/favorites/FavoriteList";
 // Customer reviews
 import ReviewListPage from "@/pages/client/customer/reviews/ReviewList";
 import ReviewUpsertPage from "@/pages/client/customer/reviews/ReviewUpsert";
-
-// Customer payment
-import CustomerPaymentPage from "@/pages/client/customer/payment/PaymentPage";
 
 // ==================== STAFF PAGES ====================
 import StaffPage from "@/pages/staff/index";
@@ -127,16 +124,11 @@ const router = createBrowserRouter([
       { path: "gallery", element: <GalleryPage /> },
       { path: "news", element: <NewsPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "auth", element: <AuthPage /> },
 
       // Guest - Quick Booking
       { path: "booking/new", element: <QuickBookingPage /> },
       { path: "booking/confirm", element: <QuickBookingConfirmPage /> },
-
-      // Guest - Authentication
-      { path: "register", element: <RegisterPage /> },
-      { path: "login", element: <LoginPage /> },
-      { path: "forgot-password", element: <ForgotPasswordPage /> },
-      { path: "reset-password", element: <ResetPasswordPage /> },
 
       // ==================== CUSTOMER ROUTES (cần đăng nhập) ====================
       { path: "customer/profile", element: <CustomerProfilePage /> },
@@ -169,7 +161,7 @@ const router = createBrowserRouter([
       },
       { path: "customer/reviews", element: <ReviewListPage /> },
       { path: "customer/reviews/upsert", element: <ReviewUpsertPage /> },
-      { path: "customer/payment", element: <CustomerPaymentPage /> },
+      { path: "customer/payment", element: <PaymentPage /> },
 
     ],
   },

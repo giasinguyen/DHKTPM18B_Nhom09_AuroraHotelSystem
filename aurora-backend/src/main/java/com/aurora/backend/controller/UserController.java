@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping
-    @RequirePermission({PermissionConstants.Admin.USER_CREATE, PermissionConstants.Manager.STAFF_VIEW})
+    @RequirePermission({PermissionConstants.Admin.USER_VIEW})
     ApiResponse<List<UserResponse>> getAllUsers() {
         log.info("Fetching all users");
         return ApiResponse.<List<UserResponse>>builder()
@@ -80,7 +80,7 @@ public class UserController {
     }
 
     @GetMapping("/paginated")
-    @RequirePermission({PermissionConstants.Admin.USER_CREATE, PermissionConstants.Manager.STAFF_VIEW})
+    @RequirePermission({PermissionConstants.Admin.USER_VIEW, PermissionConstants.Manager.STAFF_VIEW})
     ApiResponse<Page<UserResponse>> getUsersWithPagination(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

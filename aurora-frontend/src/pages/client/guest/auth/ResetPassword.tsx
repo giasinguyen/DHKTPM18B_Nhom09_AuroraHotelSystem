@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { resetPasswordSchema } from "@/utils/validateSchema";
+import { resetPasswordSchema } from "@/validation/validateSchema";
 import type { ValidationError } from "yup";
 
 const ResetPasswordPage = () => {
@@ -55,15 +55,9 @@ const ResetPasswordPage = () => {
       // Validate using Yup schema
       await resetPasswordSchema.validate(formData, { abortEarly: false });
       
-      // TODO: Call reset password API
-      // await resetPasswordApi({ token, password: formData.password });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       setSuccess(true);
       setTimeout(() => {
-        navigate("/login");
+        navigate("/auth?mode=login");
       }, 2000);
     } catch (err) {
       if (err instanceof Error && err.name === 'ValidationError') {
@@ -77,8 +71,7 @@ const ResetPasswordPage = () => {
         });
         setValidationErrors(errors);
       } else {
-        const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Đặt lại mật khẩu thất bại. Vui lòng thử lại.";
-        setError(message);
+        setError("Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
       }
     } finally {
       setIsLoading(false);
@@ -101,7 +94,7 @@ const ResetPasswordPage = () => {
                 Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
               </p>
               <div className="pt-4">
-                <Link to="/forgot-password">
+                <Link to="/auth?mode=forgot-password">
                   <Button className="w-full bg-amber-600 hover:bg-amber-700">
                     Yêu cầu liên kết mới
                   </Button>
@@ -260,7 +253,7 @@ const ResetPasswordPage = () => {
         <CardFooter className="flex justify-center">
           <div className="text-sm text-gray-600 text-center">
             <Link
-              to="/login"
+              to="/auth?mode=login"
               className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               ← Quay lại đăng nhập

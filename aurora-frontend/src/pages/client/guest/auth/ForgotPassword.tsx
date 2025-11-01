@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { forgotPasswordSchema } from "@/utils/validateSchema";
+import { forgotPasswordSchema } from "@/validation/validateSchema";
 import type { ValidationError } from "yup";
 
 const ForgotPasswordPage = () => {
@@ -26,12 +26,6 @@ const ForgotPasswordPage = () => {
       // Validate using Yup schema
       await forgotPasswordSchema.validate({ email }, { abortEarly: false });
       
-      // TODO: Call forgot password API
-      // await forgotPasswordApi({ email });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       setSuccess(true);
     } catch (err) {
       if (err instanceof Error && err.name === 'ValidationError') {
@@ -39,8 +33,7 @@ const ForgotPasswordPage = () => {
         const yupError = err as ValidationError;
         setValidationError(yupError.errors[0]);
       } else {
-        const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.";
-        setError(message);
+        setError("Có lỗi xảy ra. Vui lòng thử lại.");
       }
     } finally {
       setIsLoading(false);
@@ -64,7 +57,7 @@ const ForgotPasswordPage = () => {
                 Vui lòng kiểm tra hộp thư của bạn.
               </p>
               <div className="pt-4">
-                <Link to="/login">
+                <Link to="/auth?mode=login">
                   <Button className="w-full bg-amber-600 hover:bg-amber-700">
                     Quay lại đăng nhập
                   </Button>
@@ -147,7 +140,7 @@ const ForgotPasswordPage = () => {
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-gray-600 text-center">
             <Link
-              to="/login"
+              to="/auth?mode=login"
               className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               ← Quay lại đăng nhập
@@ -156,7 +149,7 @@ const ForgotPasswordPage = () => {
           <div className="text-sm text-gray-600 text-center">
             Chưa có tài khoản?{" "}
             <Link
-              to="/register"
+              to="/auth?mode=register"
               className="font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               Đăng ký ngay

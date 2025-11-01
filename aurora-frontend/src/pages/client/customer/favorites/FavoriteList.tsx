@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, type ChangeEvent } from "react";
-import { Heart, Star, MapPin, Users, Bed, DollarSign, Trash2, Eye, Search } from "lucide-react";
+import { Heart, Star, MapPin, Users, Bed, Trash2, Eye, Search } from "lucide-react";
 
 
 

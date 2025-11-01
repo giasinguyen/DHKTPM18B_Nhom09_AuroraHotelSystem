@@ -1,9 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, Building2, Check, ArrowRight, Lock, AlertCircle, Copy, CheckCircle, Download, Smartphone } from "lucide-react";
+import { CreditCard, Building2, ArrowRight, Lock, AlertCircle, Copy, CheckCircle, Download, Smartphone } from "lucide-react";
+
+interface BookingData {
+  confirmationCode: string;
+  roomName: string;
+  fullName: string;
+  guests: number;
+  checkIn: string;
+  checkOut: string;
+  roomPrice: string;
+  paymentMethod: 'credit-card' | 'bank-transfer';
+}
 
 export default function CustomerPaymentPage() {
-  const [bookingData, setBookingData] = useState<any>(null);
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
@@ -23,20 +34,7 @@ export default function CustomerPaymentPage() {
     description: ""
   };
 
-  useEffect(() => {
-    const data = sessionStorage.getItem('bookingData');
-    if (data) {
-      const parsed = JSON.parse(data);
-      setBookingData(parsed);
-      
-      // Generate VietQR when payment method is bank transfer
-      if (parsed.paymentMethod === 'bank-transfer') {
-        generateVietQR(parsed);
-      }
-    }
-  }, []);
-
-  const generateVietQR = (data: any) => {
+  const generateVietQR = useCallback((data: BookingData) => {
     // Remove commas and convert to number
     const amount = data.roomPrice.replace(/,/g, '');
     const description = `${data.confirmationCode} ${data.fullName}`;
@@ -45,7 +43,20 @@ export default function CustomerPaymentPage() {
     const qrUrl = `https://img.vietqr.io/image/${bankInfo.bankId}-${bankInfo.accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(bankInfo.accountName)}`;
     
     setQrCodeUrl(qrUrl);
-  };
+  }, [bankInfo.bankId, bankInfo.accountNo, bankInfo.accountName]);
+
+  useEffect(() => {
+    const data = sessionStorage.getItem('bookingData');
+    if (data) {
+      const parsed = JSON.parse(data) as BookingData;
+      setBookingData(parsed);
+      
+      // Generate VietQR when payment method is bank transfer
+      if (parsed.paymentMethod === 'bank-transfer') {
+        generateVietQR(parsed);
+      }
+    }
+  }, [generateVietQR]);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -67,6 +78,7 @@ export default function CustomerPaymentPage() {
   };
 
   const handleDownloadQR = () => {
+    if (!bookingData) return;
     const link = document.createElement('a');
     link.href = qrCodeUrl;
     link.download = `QR-${bookingData.confirmationCode}.png`;
