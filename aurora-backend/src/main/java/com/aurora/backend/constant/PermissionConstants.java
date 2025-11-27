@@ -32,6 +32,10 @@ public final class PermissionConstants {
         public static final String BOOKING_CREATE_MANUAL = "BOOKING_CREATE_MANUAL";
         public static final String BOOKING_UPDATE_ALL = "BOOKING_UPDATE_ALL";
         public static final String BOOKING_CANCEL_ALL = "BOOKING_CANCEL_ALL";
+        public static final String BOOKING_CONFIRM = "BOOKING_CONFIRM";
+        public static final String BOOKING_CHECKIN = "BOOKING_CHECKIN";
+        public static final String BOOKING_CHECKOUT = "BOOKING_CHECKOUT";
+        public static final String BOOKING_MANAGE = "BOOKING_MANAGE"; // No-show, etc
         public static final String ROOM_STATUS_UPDATE = "ROOM_STATUS_UPDATE";
         public static final String CHECKIN_PROCESS = "CHECKIN_PROCESS";
         public static final String CHECKOUT_PROCESS = "CHECKOUT_PROCESS";
@@ -39,6 +43,7 @@ public final class PermissionConstants {
         public static final String PAYMENT_VIEW_ALL = "PAYMENT_VIEW_ALL";
         public static final String SERVICE_MANAGE = "SERVICE_MANAGE";
         public static final String REVIEW_VIEW_ALL = "REVIEW_VIEW_ALL";
+        public static final String DASHBOARD_VIEW_STAFF = "DASHBOARD_VIEW_STAFF";
     }
 
     public static final class Manager {
@@ -57,6 +62,7 @@ public final class PermissionConstants {
         public static final String STAFF_VIEW = "STAFF_VIEW";
         public static final String REVIEW_VIEW_ALL = "REVIEW_VIEW_ALL";
         public static final String REVIEW_MODERATE = "REVIEW_MODERATE";
+        public static final String DASHBOARD_VIEW_MANAGER = "DASHBOARD_VIEW_MANAGER";
     }
 
     public static final class Admin {
@@ -81,5 +87,6 @@ public final class PermissionConstants {
         public static final String REVIEW_VIEW_ALL = "REVIEW_VIEW_ALL";
         public static final String REVIEW_MODERATE = "REVIEW_MODERATE";
         public static final String REVIEW_UPDATE_ALL = "REVIEW_UPDATE_ALL";
+        public static final String DASHBOARD_VIEW_ADMIN = "DASHBOARD_VIEW_ADMIN";
     }
 }

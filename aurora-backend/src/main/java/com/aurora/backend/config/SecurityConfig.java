@@ -26,6 +26,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+
+    private final CustomJwtDecoder customJwtDecoder;
+    private final CustomJwtAuthenticationConverter customJwtAuthenticationConverter;
+
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             // Auth endpoints - Session management with Redis
             "/api/v1/auth/register",
@@ -33,14 +37,27 @@ public class SecurityConfig {
             "/api/v1/auth/logout",
             "/api/v1/auth/refresh-token",
             "/api/v1/auth/refresh",
-            "/api/v1/rag/",
+            
+            // Password reset endpoints - PUBLIC for forgot/reset password
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password",
+            
+            // Email verification endpoints - PUBLIC
+            "/api/v1/auth/verify-email",
+            "/api/v1/auth/resend-verification-email",
+            
             "/api/v1/rag/**",
-            "/api/v1/document",
-            "/api/v1/document/",
-            "/api/v1/document/**",
+            "/api/v1/documents/**",
+
+            // Room availability - PUBLIC for availability check
+            "/api/v1/room-availability/check-multiple",
 
             // VNPay IPN callback - MUST be public for VNPay server-to-server callback
             "/api/v1/payments/vnpay/ipn",
+            
+            // Cloudinary upload endpoints
+            "/api/v1/cloudinary/upload",
+            "/api/v1/cloudinary/upload-multiple",
 
             // Test endpoints - For testing purposes only (remove in production)
             "/api/v1/test/**"
@@ -48,20 +65,27 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/api/v1/test/**",
             "/actuator/**",
-            "/api/v1/hotels/**",
+            "/api/v1/branches/**",
             "/api/v1/rooms/search",
             "/api/v1/rooms/{id}",
-            "/api/v1/promotions",
-            "/api/v1/promotions/{id}",
-            "/api/v1/services",
-            "/api/v1/services/{id}",
+            "/api/v1/room-types/**",
+            "/api/v1/promotions/**",
+            "/api/v1/services/**",
+            "/api/v1/facilities/**",
+            "/api/v1/amenities/**",
             "/api/v1/rag/**",
-            "/api/v1/document",
-            "/api/v1/document/**",
-            // VNPay return URL - Public for customer redirect after payment
-            "/api/v1/payments/vnpay/return"
+            "/api/v1/documents/**",
+            "/api/v1/payments/vnpay/return",
+            
+            // Cloudinary test endpoint
+            "/api/v1/cloudinary/test",
+            
+            // Room availability - PUBLIC for checking availability
+            "/api/v1/room-availability/check/**",
+            "/api/v1/room-availability/find-available/**",
+            "/api/v1/room-availability/calendar/**",
+            "/api/v1/room-availability/count-available/**"
     };
-    private final CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -76,11 +100,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/v1/document/**").permitAll() // TODO: Delete this in production
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/document/**").permitAll() // TODO: Delete this in production
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/test/**").permitAll() // Test cleanup endpoint
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/cloudinary/delete/**").permitAll() // Cloudinary delete endpoint
+                .requestMatchers(HttpMethod.GET, "/api/v1/cloudinary/optimize/**").permitAll() // Cloudinary optimize endpoint
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .jwtAuthenticationConverter(customJwtAuthenticationConverter))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 .accessDeniedHandler(new JwtAccessDeniedHandler()));
 
@@ -121,14 +147,16 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
 
-        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
-        authenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+//    @Bean
+//    JwtAuthenticationConverter jwtAuthenticationConverter() {
+//        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+//        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+//
+//        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+//        authenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+//
+//        return authenticationConverter;
+//    }
 
-        return authenticationConverter;
-    }
 }

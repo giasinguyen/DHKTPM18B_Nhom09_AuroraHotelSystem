@@ -52,8 +52,10 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'CUSTOMER_VIEW', 'Xem thông tin khách hàng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PAYMENT_VIEW_ALL', 'Xem tất cả thanh toán', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'SERVICE_MANAGE', 'Quản lý dịch vụ bổ sung', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
-(gen_random_uuid(), 'REVIEW_VIEW_ALL', 'Xem tất cả đánh giá', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
+(gen_random_uuid(), 'REVIEW_VIEW_ALL', 'Xem tất cả đánh giá', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DASHBOARD_VIEW_STAFF', 'Truy cập dashboard cho nhân viên', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
+
 
 -- Manager Permissions (Quản lý)
 INSERT INTO permissions (id, name, description, created_at, updated_at, version, deleted) VALUES 
@@ -65,12 +67,14 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'PROMOTION_CREATE', 'Tạo khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_UPDATE', 'Cập nhật khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_DELETE', 'Xóa khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
-(gen_random_uuid(),     'BRANCH_VIEW_STATS', 'Xem thống kê chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'BRANCH_VIEW_STATS', 'Xem thống kê chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'REPORT_VIEW', 'Xem báo cáo thống kê', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'REPORT_EXPORT', 'Xuất báo cáo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'STAFF_VIEW', 'Xem danh sách nhân viên', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
-(gen_random_uuid(), 'REVIEW_MODERATE', 'Phê duyệt/Từ chối đánh giá', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
+(gen_random_uuid(), 'REVIEW_MODERATE', 'Phê duyệt/Từ chối đánh giá', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DASHBOARD_VIEW_MANAGER', 'Truy cập dashboard quản lý branch', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
+
 
 -- Admin Permissions (Quản trị viên hệ thống)
 INSERT INTO permissions (id, name, description, created_at, updated_at, version, deleted) VALUES 
@@ -92,8 +96,10 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'BRANCH_DELETE', 'Xóa chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BRANCH_ASSIGN_MANAGER', 'Gán quản lý cho chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BRANCH_REMOVE_MANAGER', 'Gỡ quản lý khỏi chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
-(gen_random_uuid(), 'REVIEW_UPDATE_ALL', 'Cập nhật mọi đánh giá (chỉ Admin)', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
+(gen_random_uuid(), 'REVIEW_UPDATE_ALL', 'Cập nhật mọi đánh giá (chỉ Admin)', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DASHBOARD_VIEW_ADMIN', 'Truy cập dashboard tổng quan hệ thống', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
+
 
 -- =====================================================
 -- BƯỚC 2: TẠO CÁC ROLES
@@ -182,9 +188,11 @@ AND p.name IN (
     'PAYMENT_VIEW_ALL',
     'SERVICE_MANAGE',
     -- Review permissions
-    'REVIEW_VIEW_ALL'
+    'REVIEW_VIEW_ALL',
+    'DASHBOARD_VIEW_STAFF'
 )
 ON CONFLICT DO NOTHING;
+
 
 -- MANAGER Role: Kế thừa STAFF + Quản lý chi nhánh và báo cáo
 INSERT INTO role_permissions (role_id, permission_id)
@@ -227,9 +235,11 @@ AND p.name IN (
     'STAFF_VIEW',
     -- Review permissions
     'REVIEW_VIEW_ALL',
-    'REVIEW_MODERATE'
+    'REVIEW_MODERATE',
+    'DASHBOARD_VIEW_MANAGER'
 )
 ON CONFLICT DO NOTHING;
+
 
 -- ADMIN Role: Toàn quyền hệ thống
 INSERT INTO role_permissions (role_id, permission_id)
@@ -250,7 +260,7 @@ ON CONFLICT DO NOTHING;
 -- Admin user (Full attributes)
 INSERT INTO users (
     id, username, password, first_name, last_name, dob, phone, email, address,
-    avatar_url, assigned_branch_id, active, last_login_at, 
+    avatar_url, assigned_branch_id, active, email_verified, last_login_at, 
     failed_login_attempts, locked_until, lock_reason,
     created_at, updated_at, version, deleted
 )
@@ -265,8 +275,9 @@ VALUES (
     'admin@aurorahotel.com',
     'System Office - Aurora Hotel HQ',
     'https://i.pravatar.cc/150?img=33', -- Avatar mẫu
-    NULL, -- Admin không thuộc chi nhánh cụ thể
-    true, -- Active
+    NULL,
+    true,
+    true,
     NULL, -- Chưa login lần nào
     0, -- Không có failed attempts
     NULL, -- Không bị khóa
@@ -287,7 +298,7 @@ ON CONFLICT DO NOTHING;
 -- Manager user (Full attributes - sẽ được assign vào branch sau)
 INSERT INTO users (
     id, username, password, first_name, last_name, dob, phone, email, address,
-    avatar_url, assigned_branch_id, active, last_login_at, 
+    avatar_url, assigned_branch_id, active, email_verified, last_login_at, 
     failed_login_attempts, locked_until, lock_reason,
     created_at, updated_at, version, deleted
 )
@@ -302,7 +313,8 @@ VALUES (
     'manager@aurorahotel.com',
     'Hanoi, Vietnam',
     'https://i.pravatar.cc/150?img=12',
-    NULL, -- Sẽ được assign sau khi tạo branch
+    NULL,
+    true,
     true,
     NULL,
     0,
@@ -324,7 +336,7 @@ ON CONFLICT DO NOTHING;
 -- Staff user (Full attributes - sẽ được assign vào branch sau)
 INSERT INTO users (
     id, username, password, first_name, last_name, dob, phone, email, address,
-    avatar_url, assigned_branch_id, active, last_login_at, 
+    avatar_url, assigned_branch_id, active, email_verified, last_login_at, 
     failed_login_attempts, locked_until, lock_reason,
     created_at, updated_at, version, deleted
 )
@@ -339,7 +351,8 @@ VALUES (
     'staff@aurorahotel.com',
     'Hanoi, Vietnam',
     'https://i.pravatar.cc/150?img=47',
-    NULL, -- Sẽ được assign sau khi tạo branch
+    NULL,
+    true,
     true,
     NULL,
     0,
@@ -361,7 +374,7 @@ ON CONFLICT DO NOTHING;
 -- Customer user (Full attributes - không có assigned_branch_id)
 INSERT INTO users (
     id, username, password, first_name, last_name, dob, phone, email, address,
-    avatar_url, assigned_branch_id, active, last_login_at, 
+    avatar_url, assigned_branch_id, active, email_verified, last_login_at, 
     failed_login_attempts, locked_until, lock_reason,
     created_at, updated_at, version, deleted
 )
@@ -376,7 +389,8 @@ VALUES (
     'customer@gmail.com',
     '123 Le Loi, District 1, Ho Chi Minh City, Vietnam',
     'https://i.pravatar.cc/150?img=68',
-    NULL, -- Customer không có assigned branch
+    NULL,
+    true,
     true,
     NULL,
     0,
