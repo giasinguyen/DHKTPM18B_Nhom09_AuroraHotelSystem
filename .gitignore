@@ -37,6 +37,3 @@ build/
 
 ### PostgreSQL Data ###
 pgdata/
-
-### Large Video Files ###
-aurora-frontend/src/assets/videos/*.mp4
