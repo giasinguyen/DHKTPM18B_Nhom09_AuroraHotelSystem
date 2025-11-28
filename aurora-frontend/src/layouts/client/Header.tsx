@@ -78,6 +78,10 @@ export default function Header() {
     dispatch(setLanguage(value));
   };
 
+  const handleNavClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <header
       className={
@@ -91,7 +95,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1">
           {/* Logo - Desktop */}
-          <Link to="/" className="hidden lg:flex items-center space-x-3">
+          <Link to="/" onClick={handleNavClick} className="hidden lg:flex items-center space-x-3">
             <div className="w-28 h-28 flex items-center justify-center">
               <img
                 src="/src/assets/images/commons/aurora-logo.png"
@@ -107,6 +111,7 @@ export default function Header() {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={handleNavClick}
                 className={
                   "text-sm font-medium tracking-wide transition-all hover:opacity-80 " +
                   (isScrolled ? "text-gray-700" : "text-white/90")
@@ -218,7 +223,10 @@ export default function Header() {
                           ? "text-primary"
                           : "text-gray-700")
                       }
-                      onClick={() => setIsDrawerOpen(false)}
+                      onClick={() => {
+                        setIsDrawerOpen(false);
+                        handleNavClick();
+                      }}
                     >
                       {item.label}
                     </Link>
@@ -280,6 +288,7 @@ export default function Header() {
             {/* Mobile Logo - Center */}
             <Link
               to="/"
+              onClick={handleNavClick}
               className="absolute left-1/2 transform -translate-x-1/2"
             >
               <div className="w-28 h-28 flex items-center justify-center">

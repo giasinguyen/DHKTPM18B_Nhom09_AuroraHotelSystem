@@ -23,7 +23,7 @@ public interface ServiceRepository extends JpaRepository<Service, String> {
     @Query("SELECT s FROM Service s WHERE " +
            "(:branch IS NULL OR s.branch = :branch) AND " +
            "(:type IS NULL OR :type = '' OR s.type = :type) AND " +
-           "(:name IS NULL OR :name = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+           "(:name IS NULL OR :name = '' OR CAST(s.name AS string) LIKE CONCAT('%', CAST(:name AS string), '%'))")
     Page<Service> findByFilters(@Param("branch") Branch branch,
                               @Param("type") String type,
                               @Param("name") String name,

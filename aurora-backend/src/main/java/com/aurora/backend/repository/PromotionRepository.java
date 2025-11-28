@@ -18,8 +18,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, String> {
     Page<Promotion> findByActive(Boolean active, Pageable pageable);
     
     @Query("SELECT p FROM Promotion p WHERE " +
-           "(:code IS NULL OR LOWER(p.code) LIKE LOWER(CONCAT('%', :code, '%'))) AND " +
-           "(:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+           "(:code IS NULL OR CAST(p.code AS string) LIKE CONCAT('%', CAST(:code AS string), '%')) AND " +
+           "(:name IS NULL OR CAST(p.name AS string) LIKE CONCAT('%', CAST(:name AS string), '%')) AND " +
            "(:active IS NULL OR p.active = :active) AND " +
            "(:startDate IS NULL OR p.startAt >= :startDate) AND " +
            "(:endDate IS NULL OR p.endAt <= :endDate)")
