@@ -1,31 +1,11 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import LazyImage from "@/components/custom/LazyImage";
-import Autoplay from "embla-carousel-autoplay";
-import Fade from "embla-carousel-fade";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useInView, type Variants } from "framer-motion";
 
-const bannerImages = [
-  "/src/assets/images/banners/aurora-banner-01.jpg",
-  "/src/assets/images/banners/aurora-banner-02.jpg",
-  "/src/assets/images/banners/aurora-banner-03.jpg",
-  "/src/assets/images/banners/aurora-banner-04.jpg",
-  "/src/assets/images/banners/aurora-banner-05.jpg",
-];
-
 export default function HomePage() {
   const { t } = useTranslation("home");
-  const autoplayPlugin = useRef(
-    Autoplay({ delay: 2500, stopOnInteraction: false })
-  );
 
   // Refs for intersection observer
   const aboutRef = useRef(null);
@@ -78,33 +58,19 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Carousel */}
+      {/* Hero Section with Video */}
       <section className="relative h-screen w-full">
-        <Carousel
-          opts={{
-            loop: true,
-            duration: 30,
-          }}
-          plugins={[Fade(), autoplayPlugin.current]}
-          className="w-full h-full"
-        >
-          <CarouselContent className="h-screen">
-            {bannerImages.map((image, index) => (
-              <CarouselItem key={index} className="h-screen">
-                <div className="relative h-full w-full">
-                  <img
-                    src={image}
-                    alt={t("hero.banner") + " " + (index + 1)}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/30" />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-4 bg-white/20 border-white text-white hover:bg-white hover:text-primary" />
-          <CarouselNext className="right-4 bg-white/20 border-white text-white hover:bg-white hover:text-primary" />
-        </Carousel>
+        <div className="relative h-full w-full">
+          <video
+            src="/src/assets/videos/aurora_hotel_2025-11-28_v1.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/30" />
+        </div>
 
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <motion.div 

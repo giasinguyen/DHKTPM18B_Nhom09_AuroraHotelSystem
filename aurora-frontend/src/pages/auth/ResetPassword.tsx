@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import PageWithCarousel from "@/components/custom/PageWithCarousel";
+import VideoBanner from "@/components/custom/VideoBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,7 +80,7 @@ const ResetPasswordPage = () => {
 
   if (!token) {
     return (
-      <PageWithCarousel>
+      <VideoBanner>
         <Card className="w-full max-w-md shadow-2xl backdrop-blur-sm bg-white/95">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -103,13 +103,13 @@ const ResetPasswordPage = () => {
             </div>
           </CardContent>
         </Card>
-      </PageWithCarousel>
+      </VideoBanner>
     );
   }
 
   if (success) {
     return (
-      <PageWithCarousel>
+      <VideoBanner>
         <Card className="w-full max-w-md shadow-2xl backdrop-blur-sm bg-white/95">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -125,12 +125,12 @@ const ResetPasswordPage = () => {
             </div>
           </CardContent>
         </Card>
-      </PageWithCarousel>
+      </VideoBanner>
     );
   }
 
   return (
-    <PageWithCarousel>
+    <VideoBanner>
       <Card className="w-full max-w-md shadow-2xl backdrop-blur-sm bg-white/95">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
@@ -261,7 +261,7 @@ const ResetPasswordPage = () => {
           </div>
         </CardFooter>
       </Card>
-    </PageWithCarousel>
+    </VideoBanner>
   );
 };
 
