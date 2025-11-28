@@ -67,7 +67,7 @@ export default function PromotionList() {
   const [selectedStatus, setSelectedStatus] = useState('');
   
   // Sorting
-  const [sortColumn, setSortColumn] = useState('id');
+  const [sortColumn, setSortColumn] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   // Dialogs

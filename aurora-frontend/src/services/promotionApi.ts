@@ -78,8 +78,8 @@ export const promotionApi = {
       endDate,
       page = 0, 
       size = 10, 
-      sortBy = 'id', 
-      sortDir = 'asc' 
+      sortBy = 'createdAt', 
+      sortDir = 'desc' 
     } = params;
     
     const response = await axiosClient.get<ApiResponse<SpringPage<Promotion>>>(
