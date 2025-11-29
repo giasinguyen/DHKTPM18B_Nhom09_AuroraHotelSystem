@@ -15,8 +15,8 @@ public interface PermissionRepository extends JpaRepository<Permission, String> 
     Page<Permission> findByDescriptionContainingIgnoreCase(String description, Pageable pageable);
     
     @Query("SELECT p FROM Permission p WHERE " +
-           "(:name IS NULL OR :name = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
-           "(:description IS NULL OR :description = '' OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%')))")
+           "(:name IS NULL OR :name = '' OR CAST(p.name AS string) LIKE CONCAT('%', CAST(:name AS string), '%')) AND " +
+           "(:description IS NULL OR :description = '' OR CAST(p.description AS string) LIKE CONCAT('%', CAST(:description AS string), '%'))")
     Page<Permission> findByFilters(@Param("name") String name,
                                   @Param("description") String description,
                                   Pageable pageable);
