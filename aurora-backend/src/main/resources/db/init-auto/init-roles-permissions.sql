@@ -20,8 +20,10 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'BRANCH_VIEW', 'Xem thông tin chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'ROOM_VIEW', 'Xem thông tin phòng và giá', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'ROOM_SEARCH', 'Tìm kiếm phòng trống', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'ROOM_TYPE_VIEW', 'Xem loại phòng và thông tin chi tiết', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_VIEW', 'Xem khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
-(gen_random_uuid(), 'SERVICE_VIEW', 'Xem dịch vụ bổ sung', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
+(gen_random_uuid(), 'SERVICE_VIEW', 'Xem dịch vụ bổ sung', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'NEWS_VIEW', 'Xem tin tức và thông báo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
 
 -- Customer Permissions (Khách hàng đã đăng ký)
@@ -43,6 +45,10 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'BOOKING_CREATE_MANUAL', 'Tạo đặt phòng thủ công', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BOOKING_UPDATE_ALL', 'Cập nhật bất kỳ đặt phòng nào', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BOOKING_CANCEL_ALL', 'Hủy bất kỳ đặt phòng nào', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'BOOKING_CONFIRM', 'Xác nhận đặt phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'BOOKING_CHECKIN', 'Xử lý check-in đặt phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'BOOKING_CHECKOUT', 'Xử lý check-out đặt phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'BOOKING_MANAGE', 'Quản lý đặt phòng (no-show, etc)', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'ROOM_STATUS_UPDATE', 'Cập nhật trạng thái phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'CHECKIN_PROCESS', 'Xử lý check-in', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'CHECKOUT_PROCESS', 'Xử lý check-out', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
@@ -59,10 +65,19 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'ROOM_CREATE', 'Tạo phòng mới', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'ROOM_UPDATE', 'Cập nhật thông tin phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'ROOM_DELETE', 'Xóa phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'ROOM_TYPE_CREATE', 'Tạo loại phòng mới', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'ROOM_TYPE_UPDATE', 'Cập nhật loại phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'ROOM_TYPE_DELETE', 'Xóa loại phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PRICE_UPDATE', 'Cập nhật giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'SERVICE_CREATE', 'Tạo dịch vụ mới', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'SERVICE_UPDATE', 'Cập nhật dịch vụ', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'SERVICE_DELETE', 'Xóa dịch vụ', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_CREATE', 'Tạo khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_UPDATE', 'Cập nhật khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'PROMOTION_DELETE', 'Xóa khuyến mãi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'NEWS_CREATE', 'Tạo tin tức mới', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'NEWS_UPDATE', 'Cập nhật tin tức', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'NEWS_DELETE', 'Xóa tin tức', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BRANCH_VIEW_STATS', 'Xem thống kê chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'REPORT_VIEW', 'Xem báo cáo thống kê', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'REPORT_EXPORT', 'Xuất báo cáo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
@@ -91,6 +106,10 @@ INSERT INTO permissions (id, name, description, created_at, updated_at, version,
 (gen_random_uuid(), 'BRANCH_DELETE', 'Xóa chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BRANCH_ASSIGN_MANAGER', 'Gán quản lý cho chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'BRANCH_REMOVE_MANAGER', 'Gỡ quản lý khỏi chi nhánh', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DOCUMENT_VIEW', 'Xem tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DOCUMENT_CREATE', 'Tải lên tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DOCUMENT_UPDATE', 'Cập nhật tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+(gen_random_uuid(), 'DOCUMENT_DELETE', 'Xóa tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
 (gen_random_uuid(), 'DASHBOARD_VIEW_ADMIN', 'Truy cập dashboard tổng quan hệ thống', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
 
@@ -120,8 +139,10 @@ AND p.name IN (
     'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
+    'ROOM_TYPE_VIEW',
     'PROMOTION_VIEW',
-    'SERVICE_VIEW'
+    'SERVICE_VIEW',
+    'NEWS_VIEW'
 )
 ON CONFLICT DO NOTHING;
 
@@ -135,8 +156,10 @@ AND p.name IN (
     'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
+    'ROOM_TYPE_VIEW',
     'PROMOTION_VIEW',
     'SERVICE_VIEW',
+    'NEWS_VIEW',
     -- Customer specific permissions
     'BOOKING_CREATE',
     'BOOKING_VIEW_OWN',
@@ -160,8 +183,10 @@ AND p.name IN (
     'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
+    'ROOM_TYPE_VIEW',
     'PROMOTION_VIEW',
     'SERVICE_VIEW',
+    'NEWS_VIEW',
     'BOOKING_CREATE',
     'BOOKING_VIEW_OWN',
     'PROFILE_VIEW',
@@ -171,6 +196,10 @@ AND p.name IN (
     'BOOKING_CREATE_MANUAL',
     'BOOKING_UPDATE_ALL',
     'BOOKING_CANCEL_ALL',
+    'BOOKING_CONFIRM',
+    'BOOKING_CHECKIN',
+    'BOOKING_CHECKOUT',
+    'BOOKING_MANAGE',
     'ROOM_STATUS_UPDATE',
     'CHECKIN_PROCESS',
     'CHECKOUT_PROCESS',
@@ -192,8 +221,10 @@ AND p.name IN (
     'BRANCH_VIEW',
     'ROOM_VIEW',
     'ROOM_SEARCH',
+    'ROOM_TYPE_VIEW',
     'PROMOTION_VIEW',
     'SERVICE_VIEW',
+    'NEWS_VIEW',
     'BOOKING_CREATE',
     'BOOKING_VIEW_OWN',
     'PROFILE_VIEW',
@@ -202,6 +233,10 @@ AND p.name IN (
     'BOOKING_CREATE_MANUAL',
     'BOOKING_UPDATE_ALL',
     'BOOKING_CANCEL_ALL',
+    'BOOKING_CONFIRM',
+    'BOOKING_CHECKIN',
+    'BOOKING_CHECKOUT',
+    'BOOKING_MANAGE',
     'ROOM_STATUS_UPDATE',
     'CHECKIN_PROCESS',
     'CHECKOUT_PROCESS',
@@ -213,10 +248,19 @@ AND p.name IN (
     'ROOM_CREATE',
     'ROOM_UPDATE',
     'ROOM_DELETE',
+    'ROOM_TYPE_CREATE',
+    'ROOM_TYPE_UPDATE',
+    'ROOM_TYPE_DELETE',
     'PRICE_UPDATE',
+    'SERVICE_CREATE',
+    'SERVICE_UPDATE',
+    'SERVICE_DELETE',
     'PROMOTION_CREATE',
     'PROMOTION_UPDATE',
     'PROMOTION_DELETE',
+    'NEWS_CREATE',
+    'NEWS_UPDATE',
+    'NEWS_DELETE',
     'BRANCH_VIEW_STATS',
     'REPORT_VIEW',
     'REPORT_EXPORT',
@@ -396,21 +440,29 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================
 -- HOÀN THÀNH
--- Tổng số Permissions: 54 (bao gồm 6 permissions cho Review System)
+-- Tổng số Permissions: ~75+ (bao gồm tất cả permissions cho hệ thống)
 -- Tổng số Roles: 5 (GUEST, CUSTOMER, STAFF, MANAGER, ADMIN)
 -- Sample Users: 4 (admin, manager, staff, customer)
--- Review System Permissions:
---    - REVIEW_CREATE: Khách hàng tạo đánh giá (CUSTOMER)
---    - REVIEW_UPDATE_OWN: Khách hàng sửa đánh giá của mình (CUSTOMER)
---    - REVIEW_DELETE_OWN: Khách hàng xóa đánh giá của mình (CUSTOMER)
---    - REVIEW_VIEW_ALL: Xem tất cả đánh giá (STAFF, MANAGER, ADMIN)
---    - REVIEW_MODERATE: Phê duyệt/Từ chối đánh giá (MANAGER, ADMIN)
---    - REVIEW_UPDATE_ALL: Cập nhật mọi đánh giá (ADMIN only)
+
+-- PERMISSIONS THEO NHÓM:
+-- 1. Guest Permissions (7): BRANCH_VIEW, ROOM_VIEW, ROOM_SEARCH, ROOM_TYPE_VIEW, PROMOTION_VIEW, SERVICE_VIEW, NEWS_VIEW
+-- 2. Customer Permissions (9): + BOOKING_CREATE, BOOKING_VIEW_OWN, BOOKING_CANCEL_OWN, BOOKING_UPDATE_OWN, PAYMENT_CREATE, PAYMENT_VIEW_OWN, PROFILE_VIEW, PROFILE_UPDATE, SERVICE_REGISTER
+-- 3. Staff Permissions (16): + BOOKING_VIEW_ALL, BOOKING_CREATE_MANUAL, BOOKING_UPDATE_ALL, BOOKING_CANCEL_ALL, BOOKING_CONFIRM, BOOKING_CHECKIN, BOOKING_CHECKOUT, BOOKING_MANAGE, ROOM_STATUS_UPDATE, CHECKIN_PROCESS, CHECKOUT_PROCESS, CUSTOMER_VIEW, PAYMENT_VIEW_ALL, SERVICE_MANAGE, DASHBOARD_VIEW_STAFF
+-- 4. Manager Permissions (23+): + BOOKING_APPROVE, ROOM_CREATE, ROOM_UPDATE, ROOM_DELETE, ROOM_TYPE_CREATE, ROOM_TYPE_UPDATE, ROOM_TYPE_DELETE, PRICE_UPDATE, SERVICE_CREATE, SERVICE_UPDATE, SERVICE_DELETE, PROMOTION_CREATE, PROMOTION_UPDATE, PROMOTION_DELETE, NEWS_CREATE, NEWS_UPDATE, NEWS_DELETE, BRANCH_VIEW_STATS, REPORT_VIEW, REPORT_EXPORT, STAFF_VIEW, DASHBOARD_VIEW_MANAGER
+-- 5. Admin Permissions: Tất cả permissions (CROSS JOIN với tất cả permissions)
+
+-- PERMISSIONS MỚI ĐÃ THÊM:
+-- - ROOM_TYPE_VIEW, ROOM_TYPE_CREATE, ROOM_TYPE_UPDATE, ROOM_TYPE_DELETE (Room Type Management)
+-- - SERVICE_CREATE, SERVICE_UPDATE, SERVICE_DELETE (Service Management chi tiết)
+-- - NEWS_VIEW, NEWS_CREATE, NEWS_UPDATE, NEWS_DELETE (News Management)
+-- - DOCUMENT_VIEW, DOCUMENT_CREATE, DOCUMENT_UPDATE, DOCUMENT_DELETE (Document Management)
+-- - BOOKING_CONFIRM, BOOKING_CHECKIN, BOOKING_CHECKOUT, BOOKING_MANAGE (Staff Booking Operations)
 
 -- LƯU Ý:
--- 1. Chạy script này TRƯỚC khi chạy init-test-data.sql
+-- 1. Chạy script này TRƯỚC khi chạy init-db-pg-admin.sql
 -- 2. Manager và Staff sẽ được assign vào branch sau khi tạo branches
 -- 3. Password mặc định cho tất cả users: "password123"
 -- 4. Avatar URLs sử dụng pravatar.cc (service ảnh avatar ngẫu nhiên)
 -- 5. Tất cả users đều ACTIVE và chưa bị khóa
+-- 6. ADMIN role có TẤT CẢ permissions (CROSS JOIN) - không cần gán thủ công
 -- =====================================================
