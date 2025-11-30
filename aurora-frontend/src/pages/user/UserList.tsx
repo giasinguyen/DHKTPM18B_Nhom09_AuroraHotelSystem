@@ -9,11 +9,8 @@ import {
   Shield,
   Calendar,
   Mail,
-  CheckCircle2,
-  XCircle,
   UserX,
   UserCheck,
-  Plus,
   Phone,
 } from 'lucide-react';
 

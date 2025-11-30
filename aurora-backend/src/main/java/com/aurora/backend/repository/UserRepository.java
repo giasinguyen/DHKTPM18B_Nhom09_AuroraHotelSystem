@@ -47,4 +47,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     ORDER BY period_label
     """, nativeQuery = true)
     List<Object[]> countCustomersByPeriodNative(@Param("format") String format);
+
+    long countByAssignedBranchId(String branchId);
 }

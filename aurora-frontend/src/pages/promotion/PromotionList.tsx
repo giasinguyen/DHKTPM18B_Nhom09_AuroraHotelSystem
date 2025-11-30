@@ -25,7 +25,7 @@ import {
 } from '@/components/custom';
 
 import { promotionApi } from '@/services/promotionApi';
-import type { Promotion, PromotionStatus, getPromotionStatus, PROMOTION_STATUS_CONFIG } from '@/types/promotion.types';
+import type { Promotion, PromotionStatus } from '@/types/promotion.types';
 
 // Get promotion status
 const getStatus = (promotion: Promotion): PromotionStatus => {

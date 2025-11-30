@@ -89,8 +89,6 @@ const PromotionUpsertPage = () => {
       <div className="space-y-6">
         <PromotionDetailCard
           promotion={promotion}
-          onEdit={() => navigate(`/admin/promotions/upsert?id=${promotionId}`)}
-          onBack={() => navigate('/admin/promotions')}
         />
       </div>
     );
