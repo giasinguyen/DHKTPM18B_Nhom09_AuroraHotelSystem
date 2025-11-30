@@ -2,32 +2,27 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Building2,
   CalendarCheck,
   Users,
   BarChart3,
   PieChart as PieChartIcon,
-  ArrowUpRight,
-  ArrowDownRight,
 } from 'lucide-react';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
   Area,
+  Line,
   ComposedChart,
   Legend,
   PieChart as RechartsPie,
   Pie,
   Cell,
+  BarChart,
+  Bar,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -71,7 +66,6 @@ import type {
 import { toast } from 'sonner';
 
 // Colors
-const COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'];
 const BRANCH_COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'];
 
 // Format currency
@@ -96,15 +90,15 @@ const formatFullCurrency = (value: number) => {
 export default function AdminRevenueReport() {
   // State
   const [dateRange, setDateRange] = useState<ReportDateRange>({
-    dateFrom: null,
-    dateTo: null,
+    dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    dateTo: new Date().toISOString().split('T')[0],
   });
   const [groupBy, setGroupBy] = useState<DashboardGroupBy>('MONTH');
   const [loading, setLoading] = useState(false);
 
   // Data states
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
-  const [revenueStats, setRevenueStats] = useState<RevenueStatistics | null>(null);
+  const [revenueStats, setRevenueStats] = useState<RevenueStatistics[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodRevenue | null>(null);
   const [branchData, setBranchData] = useState<BranchComparisonData[]>([]);
 
@@ -133,18 +127,16 @@ export default function AdminRevenueReport() {
   }, [dateRange.dateFrom, dateRange.dateTo, groupBy]);
 
   useEffect(() => {
-    if (dateRange.dateFrom || dateRange.dateTo) {
-      fetchData();
-    }
-  }, [fetchData, dateRange.dateFrom, dateRange.dateTo]);
+    fetchData();
+  }, [fetchData]);
 
-  // Chart data
-  const revenueChartData = revenueStats?.dataPoints?.map(point => ({
-    name: point.label,
+  // Chart data from revenue stats array
+  const revenueChartData = revenueStats.map((point: RevenueStatistics) => ({
+    name: point.periodLabel,
     revenue: point.revenue,
-    bookings: point.bookings,
-    average: point.bookings > 0 ? Math.round(point.revenue / point.bookings) : 0,
-  })) || [];
+    bookings: point.bookingCount,
+    average: point.bookingCount > 0 ? Math.round(point.revenue / point.bookingCount) : 0,
+  }));
 
   const paymentMethodData = paymentMethods ? [
     { name: 'Tiền mặt', value: paymentMethods.cash || 0, color: '#10b981' },
@@ -449,7 +441,7 @@ export default function AdminRevenueReport() {
                       outerRadius={120}
                       paddingAngle={3}
                       dataKey="revenue"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                     >
                       {branchRevenueData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -569,7 +561,7 @@ export default function AdminRevenueReport() {
                       outerRadius={120}
                       paddingAngle={3}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                     >
                       {paymentMethodData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />

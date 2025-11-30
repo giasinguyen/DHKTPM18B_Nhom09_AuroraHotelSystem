@@ -407,7 +407,7 @@ export interface OverviewExportData {
     occupancyRate: number;
   };
   revenueByMonth?: { period: string; revenue: number; bookings: number }[];
-  topRoomTypes?: { name: string; bookings: number; revenue: number }[];
+  topRoomTypes?: { name: string; bookings: number; revenue?: number }[];
 }
 
 export const exportOverviewReport = async (
@@ -561,12 +561,22 @@ export interface OccupancyExportData {
   occupancyRate: number;
   availableRooms: number;
   occupiedRooms: number;
-  branchOccupancy: { 
+  branchOccupancy?: { 
     branchName: string; 
     roomCount: number; 
     occupancyRate: number; 
     staffCount: number;
     averageRating: number;
+  }[];
+  weeklyTrend?: {
+    dayName: string;
+    occupancyRate: number;
+    roomsUsed: number;
+  }[];
+  topRoomTypes?: {
+    name: string;
+    bookings: number;
+    revenue?: number;
   }[];
 }
 
@@ -597,7 +607,7 @@ export const exportOccupancyReport = async (
           { header: 'Nhân viên', key: 'staffCount', width: 12, format: (v) => formatNumber(v as number) },
           { header: 'Đánh giá', key: 'averageRating', width: 12, format: (v) => `${(v as number).toFixed(1)} ★` },
         ],
-        data: data.branchOccupancy,
+        data: data.branchOccupancy ?? [],
       },
     ],
   };

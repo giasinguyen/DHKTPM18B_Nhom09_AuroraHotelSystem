@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2, User as UserIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { UserForm, UserDetailCard, PermissionManager } from './components';
+import { UserForm } from './components';
 import { getUserById, createUser, updateUser } from '@/services/userApi';
 import type { User, UserCreationRequest, UserUpdateRequest } from '@/types/user.types';
 import { APP_COLOR } from '@/utils/constant';

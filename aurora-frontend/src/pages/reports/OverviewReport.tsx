@@ -176,8 +176,7 @@ export default function OverviewReport() {
       })),
       topRoomTypes: topRoomTypes.map(rt => ({
         name: rt.roomTypeName,
-        bookings: rt.bookingCount,
-        revenue: rt.totalRevenue,
+        bookings: rt.bookings,
       })),
     };
   }, [dateRange, overview, occupancyStats, revenueStats, topRoomTypes]);

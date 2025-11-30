@@ -16,6 +16,7 @@ import {
   type OccupancyExportData,
   type BranchComparisonExportData,
   type ShiftExportData,
+  type ShiftExportOptions,
 } from '@/utils/exportUtils';
 
 export type ExportFormat = 'pdf' | 'excel' | 'csv';
@@ -26,6 +27,11 @@ interface UseReportExportOptions {
   onExportStart?: () => void;
   onExportSuccess?: (format: ExportFormat) => void;
   onExportError?: (error: Error) => void;
+}
+
+interface ShiftReportData {
+  shifts: ShiftExportData[];
+  options: ShiftExportOptions;
 }
 
 interface UseReportExportReturn {
@@ -42,7 +48,7 @@ type ReportExportDataUnion =
   | RevenueExportData
   | OccupancyExportData
   | BranchComparisonExportData
-  | ShiftExportData;
+  | ShiftReportData;
 
 /**
  * Hook for handling report exports
@@ -73,9 +79,11 @@ export function useReportExport(options: UseReportExportOptions): UseReportExpor
         case 'branch-comparison':
           await exportBranchComparisonReport(data as BranchComparisonExportData, format);
           break;
-        case 'shift':
-          await exportShiftReport(data as ShiftExportData, format);
+        case 'shift': {
+          const shiftData = data as ShiftReportData;
+          await exportShiftReport(shiftData.shifts, shiftData.options);
           break;
+        }
         default:
           throw new Error(`Unknown report type: ${reportType}`);
       }

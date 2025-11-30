@@ -9,11 +9,8 @@ import {
   Sun,
   Sunset,
   Moon,
-  TrendingUp,
 } from 'lucide-react';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -92,12 +89,20 @@ const getShiftIcon = (type: 'MORNING' | 'AFTERNOON' | 'NIGHT') => {
   }
 };
 
+// Get default date range (last 7 days)
+const getDefaultDateRange = (): ReportDateRange => {
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(weekAgo.getDate() - 6);
+  return {
+    dateFrom: weekAgo.toISOString().split('T')[0],
+    dateTo: today.toISOString().split('T')[0],
+  };
+};
+
 export default function ShiftReport() {
   // State
-  const [dateRange, setDateRange] = useState<ReportDateRange>({
-    dateFrom: null,
-    dateTo: null,
-  });
+  const [dateRange, setDateRange] = useState<ReportDateRange>(getDefaultDateRange);
   const [branchId, setBranchId] = useState<string | null>(null);
   const [selectedShift, setSelectedShift] = useState<'all' | 'MORNING' | 'AFTERNOON' | 'NIGHT'>('all');
   const [loading, setLoading] = useState(false);
@@ -127,10 +132,8 @@ export default function ShiftReport() {
   }, [dateRange.dateFrom, dateRange.dateTo, branchId]);
 
   useEffect(() => {
-    if (dateRange.dateFrom || dateRange.dateTo) {
-      fetchData();
-    }
-  }, [fetchData, dateRange.dateFrom, dateRange.dateTo]);
+    fetchData();
+  }, [fetchData]);
 
   // Filter shifts
   const filteredShifts = selectedShift === 'all' 
@@ -205,7 +208,7 @@ export default function ShiftReport() {
 
   // Prepare export data
   const shiftExportData: ShiftExportData[] = filteredShifts.map(shift => ({
-    date: shift.date,
+    date: shift.shiftDate,
     shiftType: shift.shiftType === 'MORNING' ? 'Ca sáng' : shift.shiftType === 'AFTERNOON' ? 'Ca chiều' : 'Ca đêm',
     staffName: shift.staffName,
     checkIns: shift.checkIns,
@@ -221,8 +224,8 @@ export default function ShiftReport() {
         format: 'pdf',
         title: 'Báo cáo thống kê ca làm việc',
         dateRange: {
-          from: dateRange.from,
-          to: dateRange.to,
+          from: dateRange.dateFrom,
+          to: dateRange.dateTo,
         },
       });
       toast.success('Đã xuất báo cáo PDF thành công!');
@@ -238,8 +241,8 @@ export default function ShiftReport() {
         format: 'excel',
         title: 'Báo cáo thống kê ca làm việc',
         dateRange: {
-          from: dateRange.from,
-          to: dateRange.to,
+          from: dateRange.dateFrom,
+          to: dateRange.dateTo,
         },
       });
       toast.success('Đã xuất báo cáo Excel thành công!');
@@ -454,7 +457,7 @@ export default function ShiftReport() {
                   outerRadius={90}
                   paddingAngle={3}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                 >
                   {shiftDistributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
