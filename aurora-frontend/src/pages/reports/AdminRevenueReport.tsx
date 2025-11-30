@@ -60,6 +60,7 @@ import {
   getAdminOverview,
 } from '@/services/dashboardApi';
 import { getBranchComparison } from '@/services/reportApi';
+import { exportRevenueReport, type RevenueExportData } from '@/utils/exportUtils';
 import type { ReportDateRange, BranchComparisonData } from '@/types/report.types';
 import type { 
   RevenueStatistics, 
@@ -165,15 +166,48 @@ export default function AdminRevenueReport() {
   const totalBookings = branchData.reduce((sum, b) => sum + b.totalBookings, 0);
   const avgRevenue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
 
+  // Prepare export data
+  const getExportData = useCallback((): RevenueExportData => {
+    const paymentTotal = paymentMethodData.reduce((sum, p) => sum + p.value, 0);
+    return {
+      dateRange: {
+        from: dateRange.dateFrom,
+        to: dateRange.dateTo,
+      },
+      totalRevenue: overview?.totalRevenue || totalRevenue,
+      totalBookings: overview?.totalBookings || totalBookings,
+      averageBookingValue: avgRevenue || (overview?.totalRevenue || 0) / (overview?.totalBookings || 1),
+      revenueGrowth: 15.3, // TODO: Calculate from actual data
+      revenueData: revenueChartData.map(item => ({
+        period: item.name,
+        revenue: item.revenue,
+        bookings: item.bookings,
+      })),
+      branchRevenue: branchData.map(b => ({
+        branchName: b.branchName,
+        revenue: b.totalRevenue,
+        bookings: b.totalBookings,
+        percentage: totalRevenue > 0 ? (b.totalRevenue / totalRevenue) * 100 : 0,
+      })),
+      paymentMethods: paymentMethodData.map(p => ({
+        method: p.name,
+        amount: p.value,
+        percentage: paymentTotal > 0 ? (p.value / paymentTotal) * 100 : 0,
+      })),
+    };
+  }, [dateRange, overview, totalRevenue, totalBookings, avgRevenue, revenueChartData, branchData, paymentMethodData]);
+
   // Export handlers
   const handleExportPDF = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success('Đã xuất báo cáo PDF');
+    await exportRevenueReport(getExportData(), 'pdf');
   };
 
   const handleExportExcel = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success('Đã xuất báo cáo Excel');
+    await exportRevenueReport(getExportData(), 'excel');
+  };
+
+  const handleExportCSV = async () => {
+    await exportRevenueReport(getExportData(), 'csv');
   };
 
   return (
@@ -187,6 +221,7 @@ export default function AdminRevenueReport() {
         <ExportButtons
           onExportPDF={handleExportPDF}
           onExportExcel={handleExportExcel}
+          onExportCSV={handleExportCSV}
           loading={loading}
         />
       </div>

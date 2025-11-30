@@ -123,6 +123,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserResponse> getUsersByRoleName(String roleName, Pageable pageable) {
+        log.info("Fetching users with role: {} - page {}, size {}",
+                roleName, pageable.getPageNumber(), pageable.getPageSize());
+        return userRepository.findAllByRoleNamePaginated(roleName, pageable)
+                .map(userMapper::toUserResponse);
+    }
+
+    @Override
     public UserResponse getUser(String id) {
         log.info("Fetching user by ID: {}", id);
         User user = userRepository.findById(id)

@@ -34,6 +34,24 @@ export const getUsersPaginated = async (params?: UserSearchParams): Promise<ApiR
 };
 
 /**
+ * Get users by role name with pagination
+ */
+export const getUsersByRole = async (
+  roleName: string,
+  params?: { page?: number; size?: number; sortBy?: string; sortDir?: string }
+): Promise<ApiResponse<PageResponseDto<User>>> => {
+  const response = await axiosClient.get(`${BASE_URL}/role/${roleName}`, {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sortBy: params?.sortBy ?? 'username',
+      sortDirection: params?.sortDir ?? 'asc',
+    }
+  });
+  return response.data;
+};
+
+/**
  * Get user by ID
  */
 export const getUserById = async (id: string): Promise<ApiResponse<User>> => {

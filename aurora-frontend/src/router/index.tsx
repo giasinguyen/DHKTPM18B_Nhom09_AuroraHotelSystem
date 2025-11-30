@@ -79,6 +79,7 @@ import ShiftReportPage from "@/pages/reports/ShiftReport";
 
 // Role
 import RoleManagementPage from "@/pages/role/RoleManagement";
+import RoleDetailPage from "@/pages/role/RoleDetail";
 
 // Rooms
 import RoomListPage from "@/pages/rooms/RoomList";
@@ -203,6 +204,7 @@ const router = createBrowserRouter([
       { path: "users/detail", element: <UserDetailPage /> },
       { path: "users/:id/assign-branch", element: <AssignBranchPage /> },
       { path: "roles", element: <RoleManagementPage /> },
+      { path: "roles/:id", element: <RoleDetailPage /> },
       { path: "documents", element: <DocumentListPage /> },
       { path: "documents/upsert", element: <DocumentUpsertPage /> },
       { path: "reports/overview", element: <OverviewReportPage /> },
