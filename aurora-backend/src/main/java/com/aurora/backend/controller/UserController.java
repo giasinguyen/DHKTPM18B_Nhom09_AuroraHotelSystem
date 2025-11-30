@@ -102,6 +102,29 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/role/{roleName}")
+    @RequirePermission({PermissionConstants.Admin.ROLE_CREATE})
+    ApiResponse<Page<UserResponse>> getUsersByRole(
+            @PathVariable("roleName") String roleName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+        
+        log.info("Fetching users with role: {} - page: {}, size: {}", roleName, page, size);
+        
+        Sort sort = sortDirection.equalsIgnoreCase("desc") 
+                ? Sort.by(sortBy).descending() 
+                : Sort.by(sortBy).ascending();
+        
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        return ApiResponse.<Page<UserResponse>>builder()
+                .message("Users by role retrieved successfully")
+                .result(userService.getUsersByRoleName(roleName, pageable))
+                .build();
+    }
+
     @GetMapping("/{userId}")
     @RequirePermission({PermissionConstants.Admin.USER_VIEW, PermissionConstants.Manager.STAFF_VIEW, PermissionConstants.Customer.PROFILE_VIEW})
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {

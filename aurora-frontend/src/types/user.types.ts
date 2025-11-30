@@ -90,9 +90,8 @@ export interface RoleCreationRequest {
 }
 
 export interface RoleUpdateRequest {
-  name?: string;
   description?: string;
-  permissions?: string[];
+  permissionIds?: string[];
 }
 
 export interface RoleSearchParams {
