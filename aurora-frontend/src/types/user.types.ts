@@ -46,6 +46,15 @@ export interface UserUpdateRequest {
   active?: boolean;
 }
 
+export interface ProfileUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  dob?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
 // User Permission Override - để tắt/bật quyền cho từng user
 export interface UserPermissionOverride {
   userId: string;

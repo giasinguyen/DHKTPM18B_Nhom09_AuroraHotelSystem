@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.aurora.backend.config.annotation.RequirePermission;
 import com.aurora.backend.constant.PermissionConstants;
+import com.aurora.backend.dto.request.ProfileUpdateRequest;
 import com.aurora.backend.dto.request.UserCreationRequest;
 import com.aurora.backend.dto.request.UserRegistrationRequest;
 import com.aurora.backend.dto.request.UserUpdateRequest;
@@ -55,6 +56,21 @@ public class UserController {
         return ApiResponse.<UserResponse>builder()
                 .message("User info retrieved successfully")
                 .result(userService.getUserByUsername(currentUsername))
+                .build();
+    }
+
+    @PutMapping("/myInfo")
+    @RequirePermission(PermissionConstants.Customer.PROFILE_UPDATE)
+    ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid ProfileUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        log.info("Updating current user info for: {}", currentUsername);
+        
+        UserResponse currentUser = userService.getUserByUsername(currentUsername);
+        
+        return ApiResponse.<UserResponse>builder()
+                .message("User info updated successfully")
+                .result(userService.updateMyProfile(currentUser.getId(), request))
                 .build();
     }
 

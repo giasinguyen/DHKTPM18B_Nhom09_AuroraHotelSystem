@@ -4,6 +4,7 @@ import type {
   User, 
   UserCreationRequest, 
   UserUpdateRequest, 
+  ProfileUpdateRequest,
   UserSearchParams,
   UpdateUserPermissionsRequest
 } from '@/types/user.types';
@@ -72,6 +73,14 @@ export const getUserByUsername = async (username: string): Promise<ApiResponse<U
  */
 export const getMyInfo = async (): Promise<ApiResponse<User>> => {
   const response = await axiosClient.get(`${BASE_URL}/myInfo`);
+  return response.data;
+};
+
+/**
+ * Update current logged-in user info (self profile update)
+ */
+export const updateMyInfo = async (data: ProfileUpdateRequest): Promise<ApiResponse<User>> => {
+  const response = await axiosClient.put(`${BASE_URL}/myInfo`, data);
   return response.data;
 };
 
