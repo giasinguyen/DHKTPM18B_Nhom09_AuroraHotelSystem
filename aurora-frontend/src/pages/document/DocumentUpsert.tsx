@@ -1,24 +1,17 @@
-import DocViewer, { DocViewerRenderers } from "react-doc-viewer"
-import { ArrowLeft, CheckCircle2, CloudUpload, FileText, PenSquare } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
 
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { SheetDescription } from "@/components/ui/sheet"
+import React, { useState, useCallback, useRef, useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import DocViewer, { DocViewerRenderers } from "react-doc-viewer"
+import { ArrowLeft, Upload, FileText, Eye, Trash2 } from "lucide-react"
 import type { DocumentItem } from "@/features/documents/data"
 import { mockDocuments } from "@/features/documents/data"
-import { cn } from "@/lib/utils"
-import { FileIcon, defaultStyles } from "react-file-icon"
-import type { DefaultExtensionType } from "react-file-icon"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 const ACCEPTED_EXTENSIONS = [
   "pdf",
@@ -38,24 +31,15 @@ const ACCEPTED_EXTENSIONS = [
 
 const ACCEPT_ATTRIBUTE = ACCEPTED_EXTENSIONS.map((ext) => `.${ext}`).join(",")
 
-const previewableExtensions = new Set([
-  "pdf",
-  "doc",
-  "docx",
-  "ppt",
-  "pptx",
-  "xls",
-  "xlsx",
-  "csv",
-  "txt",
-  "md",
-  "png",
-  "jpg",
-  "jpeg",
-  "gif",
-  "svg",
-  "webp",
-])
+const DOCUMENT_CATEGORIES = [
+  { value: "operations", label: "Vận hành" },
+  { value: "policy", label: "Chính sách" },
+  { value: "training", label: "Đào tạo" },
+  { value: "financial", label: "Tài chính" },
+  { value: "legal", label: "Pháp lý" },
+  { value: "marketing", label: "Marketing" },
+  { value: "other", label: "Khác" },
+]
 
 type MetadataState = {
   title: string
@@ -68,295 +52,359 @@ type MetadataState = {
 const DEFAULT_METADATA: MetadataState = {
   title: "",
   category: "operations",
-  owner: "",
+  owner: "Admin User", // Mặc định là người dùng hiện tại
   description: "",
   tags: "",
+}
+
+type FileInfo = {
+  file: File
+  name: string
+  size: string
+  type: string
+  url: string
+  fileData?: string // Base64 data for DocViewer
 }
 
 export default function DocumentUpsertPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const docId = searchParams.get("docId")
-
-  const existingDocument = useMemo<DocumentItem | null>(() => {
-    if (!docId) return null
-    return mockDocuments.find((document) => document.id === docId) ?? null
-  }, [docId])
-
-  const mode = existingDocument ? "edit" : "create"
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const objectUrlRef = useRef<string | null>(null)
-
-  const [isDragging, setIsDragging] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const isEditing = Boolean(docId)
+  
   const [metadata, setMetadata] = useState<MetadataState>(DEFAULT_METADATA)
-  const [previewDocument, setPreviewDocument] = useState<{
-    uri: string
-    fileType?: string
-  } | null>(null)
+  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null)
+  const [existingDocument, setExistingDocument] = useState<DocumentItem | null>(null)
 
+  // Load existing document data when editing
   useEffect(() => {
-    if (!existingDocument) return
-    setMetadata({
-      title: existingDocument.name.replace(/\.[^/.]+$/, ""),
-      category: "operations",
-      owner: existingDocument.owner,
-      description: "",
-      tags: existingDocument.starred ? "quan-trong,ghi-chu" : "",
-    })
-    setPreviewDocument({
-      uri: existingDocument.url,
-      fileType: existingDocument.extension,
-    })
-  }, [existingDocument])
-
-  useEffect(() => {
-    return () => {
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current)
+    if (isEditing && docId) {
+      const document = mockDocuments.find(doc => doc.id === docId)
+      if (document) {
+        setExistingDocument(document)
+        setMetadata({
+          title: document.name.replace(/\.[^/.]+$/, ""),
+          category: "operations", // Default since not in DocumentItem
+          owner: document.owner,
+          description: "", // Default since not in DocumentItem
+          tags: "", // Default since not in DocumentItem
+        })
+        // For editing, we show the existing document preview
+        setFileInfo({
+          file: new File([], document.name), // Placeholder file
+          name: document.name,
+          size: document.size,
+          type: document.extension,
+          url: document.url,
+          // For existing documents, we'll use uri instead of fileData
+        })
       }
     }
+  }, [isEditing, docId])
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFileLoading, setIsFileLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 B"
+    const k = 1024
+    const sizes = ["B", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
+
+  const getFileExtension = (filename: string): string => {
+    return filename.split(".").pop()?.toLowerCase() || ""
+  }
+
+  const isFileSupported = useCallback((filename: string): boolean => {
+    const extension = getFileExtension(filename)
+    return ACCEPTED_EXTENSIONS.includes(extension)
   }, [])
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return
-    const file = files[0]
-    const extension = file.name.split(".").pop()?.toLowerCase() ?? ""
-
-    if (!ACCEPTED_EXTENSIONS.includes(extension)) {
-      setValidationError(
-        "Định dạng tệp không hợp lệ. Vui lòng chọn pdf, docx, md, txt, xlsx hoặc hình ảnh."
-      )
+  const handleFileSelect = useCallback(async (file: File) => {
+    if (!isFileSupported(file.name)) {
+      alert(`Định dạng file không được hỗ trợ. Chỉ chấp nhận: ${ACCEPTED_EXTENSIONS.join(", ")}`)
       return
     }
 
-    setValidationError(null)
-    setUploadedFile(file)
-    setMetadata((prev) => ({
-      ...prev,
-      title: prev.title || file.name.replace(/\.[^/.]+$/, ""),
-    }))
+    setIsFileLoading(true)
+    try {
+      // Convert file to base64 for DocViewer
+      const fileData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(new Error('Failed to read file'))
+        reader.readAsDataURL(file)
+      })
 
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current)
+      const url = URL.createObjectURL(file)
+      const newFileInfo: FileInfo = {
+        file,
+        name: file.name,
+        size: formatFileSize(file.size),
+        type: getFileExtension(file.name),
+        url,
+        fileData, // Add fileData for DocViewer
+      }
+
+      setFileInfo(newFileInfo)
+      
+      // Auto-fill title from filename if empty
+      if (!metadata.title) {
+        const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "")
+        setMetadata(prev => ({ ...prev, title: nameWithoutExtension }))
+      }
+    } catch (error) {
+      console.error('Error reading file:', error)
+      alert('Không thể đọc file. Vui lòng thử lại với file khác.')
+    } finally {
+      setIsFileLoading(false)
     }
-    const objectUrl = URL.createObjectURL(file)
-    objectUrlRef.current = objectUrl
-    setPreviewDocument({
-      uri: objectUrl,
-      fileType: extension,
-    })
-  }
+  }, [metadata.title, isFileSupported])
 
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragging(true)
-  }
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      handleFileSelect(files[0])
+    }
+  }, [handleFileSelect])
 
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-      setIsDragging(false)
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }, [])
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      handleFileSelect(files[0])
     }
   }
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragging(false)
-    handleFiles(event.dataTransfer.files)
+  const handleClearFile = () => {
+    if (fileInfo?.url) {
+      URL.revokeObjectURL(fileInfo.url)
+    }
+    setFileInfo(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
-  const canPreview =
-    !!previewDocument?.fileType &&
-    previewableExtensions.has(previewDocument.fileType.toLowerCase())
-
-  const handleMetadataChange = (
-    field: keyof MetadataState,
-    value: string
-  ) => {
-    setMetadata((prev) => ({ ...prev, [field]: value }))
+  const handleMetadataChange = (field: keyof MetadataState, value: string) => {
+    setMetadata(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    // Placeholder for integration with API
-    console.table({
-      mode,
-      docId,
-      metadata,
-      fileName: uploadedFile?.name ?? existingDocument?.name,
-    })
+  const handleSubmit = async () => {
+    if (!fileInfo && !isEditing) {
+      alert("Vui lòng chọn file để tải lên")
+      return
+    }
+
+    if (!metadata.title.trim()) {
+      alert("Vui lòng nhập tiêu đề tài liệu")
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      console.log("Document metadata:", metadata)
+      console.log("File info:", fileInfo)
+      console.log("Existing document:", existingDocument)
+      
+      alert(isEditing ? "Cập nhật tài liệu thành công!" : "Tải lên tài liệu thành công!")
+      navigate("/admin/documents")
+    } catch (error) {
+      alert("Có lỗi xảy ra. Vui lòng thử lại!")
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const selectedExtension =
-    previewDocument?.fileType ?? existingDocument?.extension ?? "doc"
+  const docs = fileInfo ? [
+    fileInfo.fileData 
+      ? { 
+          uri: fileInfo.fileData, // Use base64 data as URI
+          fileName: fileInfo.name,
+          fileType: fileInfo.type
+        }
+      : { 
+          uri: fileInfo.url, 
+          fileName: fileInfo.name,
+          fileType: fileInfo.type
+        }
+  ] : []
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 py-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 py-10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4">
+        {/* Header */}
+        <header className="space-y-2">
           <div className="flex items-center gap-3">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="gap-2"
               onClick={() => navigate("/admin/documents")}
+              className="flex items-center gap-2"
             >
-              <ArrowLeft className="size-4" />
-              Trở về danh sách
+              <ArrowLeft className="h-4 w-4" />
+              Quay lại
             </Button>
-            <h1 className="text-2xl font-semibold text-slate-900">
-              {mode === "edit" ? "Chỉnh sửa tài liệu" : "Tải tài liệu mới"}
-            </h1>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/80">
+                Document Hub
+              </p>
+              <h1 className="text-3xl font-bold text-slate-900">
+                {isEditing ? "Chỉnh sửa tài liệu" : "Thêm tài liệu mới"}
+              </h1>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm font-medium text-primary">
-            <PenSquare className="size-4" />
-            {mode === "edit" ? "Chế độ chỉnh sửa" : "Chế độ tải lên"}
-          </div>
-        </div>
+          <p className="text-muted-foreground max-w-2xl">
+            {isEditing 
+              ? "Cập nhật thông tin và nội dung tài liệu" 
+              : "Tải lên tài liệu mới và điền thông tin metadata cho hệ thống quản lý Aurora Hotel"
+            }
+          </p>
+        </header>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="border-muted/70 bg-white/90 shadow-sm">
-            <CardHeader>
-              <CardTitle>Khu vực tải tệp</CardTitle>
-              <CardDescription>
-                Hỗ trợ kéo & thả hoặc chọn tệp từ thiết bị của bạn. Chỉ chấp
-                nhận các định dạng phổ biến.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={cn(
-                  "border-muted/60 bg-muted/20 flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed px-6 py-10 text-center transition",
-                  isDragging && "border-primary bg-primary/5"
-                )}
-              >
-                <CloudUpload className="text-primary size-10" />
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    Kéo & thả tệp vào đây
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    hoặc
-                    <button
-                      type="button"
-                      className="text-primary ml-1 underline-offset-2 hover:underline"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      chọn từ thiết bị
-                    </button>
-                  </p>
-                  <p className="text-muted-foreground mt-2 text-xs">
-                    Hỗ trợ: {ACCEPTED_EXTENSIONS.join(", ").toUpperCase()}
-                  </p>
-                </div>
-                <Input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={ACCEPT_ATTRIBUTE}
-                  className="hidden"
-                  onChange={(event) => handleFiles(event.target.files)}
-                />
-                {validationError && (
-                  <p className="text-destructive text-sm">{validationError}</p>
-                )}
-              </div>
-
-              {(uploadedFile || existingDocument) && (
-                <div className="rounded-xl border bg-white/70 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-primary/10 p-2">
-                      <FileText className="text-primary size-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium">
-                        {uploadedFile?.name ?? existingDocument?.name}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {uploadedFile
-                          ? formatFileSize(uploadedFile.size)
-                          : existingDocument?.size}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="rounded-2xl border bg-white/90 p-4 shadow-inner">
-                {previewDocument ? (
-                  canPreview ? (
-                    <DocViewer
-                      documents={[previewDocument]}
-                      pluginRenderers={DocViewerRenderers}
-                      className="h-[480px] overflow-hidden rounded-xl"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - File Upload & Metadata */}
+          <div className="space-y-6">
+            {/* File Upload Area */}
+            {!fileInfo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5" />
+                    Tải lên tài liệu
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                      isDragOver
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">
+                      Kéo thả file vào đây hoặc click để chọn
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Hỗ trợ các định dạng: {ACCEPTED_EXTENSIONS.join(", ").toUpperCase()}
+                    </p>
+                    <Button variant="outline">Chọn file</Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPT_ATTRIBUTE}
+                      onChange={handleFileInputChange}
+                      className="hidden"
                     />
-                  ) : (
-                    <PreviewFallback extension={selectedExtension} />
-                  )
-                ) : (
-                  <div className="text-muted-foreground flex h-[320px] flex-col items-center justify-center gap-3 text-center">
-                    <CheckCircle2 className="size-10" />
-                    <p>Chọn một tệp để xem trước nội dung tại đây.</p>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            )}
 
-          <Card className="border-muted/70 bg-white/90 shadow-sm">
-            <form onSubmit={handleSubmit}>
+            {/* File Info */}
+            {fileInfo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Thông tin file
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearFile}
+                      className="flex items-center gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Xóa file
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Tên file:</span>
+                    <span className="text-sm">{fileInfo.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Dung lượng:</span>
+                    <span className="text-sm">{fileInfo.size}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Định dạng:</span>
+                    <Badge variant="secondary">{fileInfo.type.toUpperCase()}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Metadata Form */}
+            <Card>
               <CardHeader>
-                <CardTitle>Thông tin metadata</CardTitle>
-                <CardDescription>
-                  Điền thông tin để giúp đội ngũ dễ dàng tìm kiếm và phân loại
-                  tài liệu.
-                </CardDescription>
+                <CardTitle>Thông tin tài liệu</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tiêu đề</Label>
+                  <Label htmlFor="title">Tiêu đề *</Label>
                   <Input
                     id="title"
                     value={metadata.title}
-                    onChange={(event) =>
-                      handleMetadataChange("title", event.target.value)
-                    }
-                    placeholder="VD: Báo cáo doanh thu tháng 10"
+                    onChange={(e) => handleMetadataChange("title", e.target.value)}
+                    placeholder="Nhập tiêu đề tài liệu"
                   />
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Danh mục</Label>
-                    <select
-                      id="category"
-                      value={metadata.category}
-                      onChange={(event) =>
-                        handleMetadataChange("category", event.target.value)
-                      }
-                      className="border-input bg-background focus-visible:ring-ring focus-visible:ring-2 block w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition"
-                    >
-                      <option value="operations">Vận hành</option>
-                      <option value="finance">Tài chính</option>
-                      <option value="marketing">Marketing</option>
-                      <option value="hr">Nhân sự</option>
-                    </select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Loại tài liệu</Label>
+                  <Select
+                    value={metadata.category}
+                    onValueChange={(value) => handleMetadataChange("category", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn loại tài liệu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOCUMENT_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="owner">Chủ sở hữu</Label>
-                    <Input
-                      id="owner"
-                      value={metadata.owner}
-                      onChange={(event) =>
-                        handleMetadataChange("owner", event.target.value)
-                      }
-                      placeholder="VD: Nguyen Van A"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="owner">Người gửi</Label>
+                  <Input
+                    id="owner"
+                    value={metadata.owner}
+                    onChange={(e) => handleMetadataChange("owner", e.target.value)}
+                    placeholder="Tên người gửi"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -364,82 +412,109 @@ export default function DocumentUpsertPage() {
                   <Input
                     id="tags"
                     value={metadata.tags}
-                    onChange={(event) =>
-                      handleMetadataChange("tags", event.target.value)
-                    }
-                    placeholder="VD: quan-trong, ke-hoach-2025"
+                    onChange={(e) => handleMetadataChange("tags", e.target.value)}
+                    placeholder="Nhập tags, ngăn cách bởi dấu phẩy"
                   />
-                  <SheetDescription className="!mt-0">
-                    Sử dụng dấu phẩy để phân tách thẻ.
-                  </SheetDescription>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Mô tả</Label>
-                  <textarea
+                  <Textarea
                     id="description"
                     value={metadata.description}
-                    onChange={(event) =>
-                      handleMetadataChange("description", event.target.value)
-                    }
-                    rows={5}
-                    className="border-input bg-background focus-visible:ring-ring focus-visible:ring-2 block w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition"
-                    placeholder="Thêm ghi chú để mọi người hiểu rõ hơn về tài liệu này..."
+                    onChange={(e) => handleMetadataChange("description", e.target.value)}
+                    placeholder="Nhập mô tả chi tiết về tài liệu"
+                    rows={4}
                   />
                 </div>
-
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-                  <Button type="submit" className="flex-1 gap-2">
-                    <CheckCircle2 className="size-4" />
-                    Lưu tài liệu
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => navigate("/admin/documents")}
-                  >
-                    Hủy
-                  </Button>
-                </div>
-
-                <p className="text-muted-foreground text-xs">
-                  *Lưu ý: Tính năng lưu thực tế sẽ được kết nối với API quản lý
-                  tài liệu ở giai đoạn sau.
-                </p>
               </CardContent>
-            </form>
-          </Card>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {isLoading ? (
+                  "Đang xử lý..."
+                ) : (
+                  isEditing ? "Cập nhật tài liệu" : "Tải lên tài liệu"
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/admin/documents")}
+                disabled={isLoading}
+              >
+                Hủy
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Column - Document Preview */}
+          <div className="space-y-6">
+            <Card className="h-fit">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Xem trước tài liệu
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!fileInfo ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-500">
+                      Chọn file để xem trước nội dung tài liệu
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden" style={{ height: "600px" }}>
+                    {isFileLoading ? (
+                      <div className="flex h-full items-center justify-center p-8">
+                        <div className="space-y-4 text-center">
+                          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                          <p className="text-sm text-gray-500">Đang xử lý file...</p>
+                        </div>
+                      </div>
+                    ) : docs.length > 0 ? (
+                      <DocViewer
+                        documents={docs}
+                        pluginRenderers={DocViewerRenderers}
+                        config={{
+                          header: {
+                            disableHeader: false,
+                            disableFileName: false,
+                            retainURLParams: false,
+                          },
+                        }}
+                        style={{ height: "100%" }}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-8 text-center">
+                        <div className="space-y-4">
+                          <FileText className="h-16 w-16 mx-auto text-gray-400" />
+                          <div>
+                            <p className="font-medium text-gray-900">{fileInfo.name}</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Không thể hiển thị xem trước cho file này
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              File sẽ được tải lên và có thể xem sau khi lưu
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
   )
-}
-
-const DEFAULT_STYLE_KEYS = Object.keys(defaultStyles) as DefaultExtensionType[]
-
-const PreviewFallback = ({ extension }: { extension: string }) => {
-  const normalized = extension.toLowerCase()
-  const styleKey = DEFAULT_STYLE_KEYS.includes(normalized as DefaultExtensionType)
-    ? (normalized as DefaultExtensionType)
-    : (normalized === "pdf" ? "pdf" : "doc")
-  const style = defaultStyles[styleKey]
-  return (
-    <div className="flex h-[420px] flex-col items-center justify-center gap-4 text-center text-muted-foreground">
-      <div className="size-24 rounded-2xl border bg-muted/60 p-4">
-        <FileIcon extension={normalized} {...style} />
-      </div>
-      <p>Không thể hiển thị bản xem trước cho loại tệp này.</p>
-    </div>
-  )
-}
-
-const formatFileSize = (size: number) => {
-  if (size >= 1024 * 1024) {
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`
-  }
-  if (size >= 1024) {
-    return `${(size / 1024).toFixed(1)} KB`
-  }
-  return `${size} B`
 }

@@ -47,17 +47,6 @@ export const mockDocuments: DocumentItem[] = [
     url: "https://filesamples.com/samples/document/pptx/sample2.pptx",
   },
   {
-    id: "doc-4",
-    name: "Checklist van hanh.docx",
-    extension: "docx",
-    mimeType:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    owner: "Pham Thu",
-    size: "620 KB",
-    updatedAt: "2025-02-27T16:00:00.000Z",
-    url: "https://filesamples.com/samples/document/docx/sample3.docx",
-  },
-  {
     id: "doc-5",
     name: "Catalogue phong tong thong.png",
     extension: "png",

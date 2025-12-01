@@ -1,11 +1,11 @@
-import DocViewer, { DocViewerRenderers } from "react-doc-viewer"
-import { CalendarDays, Download, PenSquare, Share2, User } from "lucide-react"
-import { FileIcon, defaultStyles } from "react-file-icon"
-import type { DefaultExtensionType } from "react-file-icon"
+import DocViewer, { DocViewerRenderers } from "react-doc-viewer";
+import { CalendarDays, Download, PenSquare, User } from "lucide-react";
+import { FileIcon, defaultStyles } from "react-file-icon";
+import type { DefaultExtensionType } from "react-file-icon";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -13,15 +13,15 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
-import type { DocumentItem } from "@/features/documents/data"
+} from "@/components/ui/sheet";
+import type { DocumentItem } from "@/features/documents/data";
 
 type DocumentPreviewProps = {
-  document: DocumentItem | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit?: (document: DocumentItem) => void
-}
+  document: DocumentItem | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: (document: DocumentItem) => void;
+};
 
 const previewableExtensions = new Set([
   "pdf",
@@ -37,7 +37,7 @@ const previewableExtensions = new Set([
   "jpg",
   "jpeg",
   "gif",
-])
+]);
 
 export const DocumentPreview = ({
   document,
@@ -46,21 +46,22 @@ export const DocumentPreview = ({
   onEdit,
 }: DocumentPreviewProps) => {
   const canPreview =
-    !!document && previewableExtensions.has(document.extension.toLowerCase())
+    !!document && previewableExtensions.has(document.extension.toLowerCase());
   const viewerDocuments = document
     ? [{ uri: document.url, fileType: document.extension }]
-    : []
+    : [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-xl p-0">
+      <SheetContent side="right" className="sm:max-w-xl p-0 flex flex-col">
         {document ? (
           <>
-            <SheetHeader className="border-b bg-muted/50">
+            <SheetHeader className="border-b bg-muted/50 shrink-0">
               <div className="flex flex-col gap-2 text-left">
                 <SheetTitle>{document.name}</SheetTitle>
                 <SheetDescription>
-                  Cập nhật {formatUpdatedAt(document.updatedAt)} · {document.size}
+                  Cập nhật {formatUpdatedAt(document.updatedAt)} ·{" "}
+                  {document.size}
                 </SheetDescription>
                 <Badge variant="secondary" className="w-fit uppercase">
                   {document.extension}
@@ -68,7 +69,7 @@ export const DocumentPreview = ({
               </div>
             </SheetHeader>
 
-            <div className="bg-muted/40 px-4 py-3">
+            <div className="bg-muted/40 px-4 py-3 shrink-0">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="size-4" />
                 <span>Chủ sở hữu: </span>
@@ -78,8 +79,8 @@ export const DocumentPreview = ({
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
-              <div className="space-y-4 p-4">
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="space-y-4 p-4 pb-24">
                 <div className="rounded-xl border bg-white/90 p-3 shadow-inner">
                   {canPreview ? (
                     <DocViewer
@@ -99,7 +100,9 @@ export const DocumentPreview = ({
                   <dl className="mt-3 space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <dt className="text-muted-foreground">Loại tệp</dt>
-                      <dd className="font-medium uppercase">{document.mimeType}</dd>
+                      <dd className="font-medium uppercase">
+                        {document.mimeType}
+                      </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-muted-foreground">Kích thước</dt>
@@ -117,23 +120,19 @@ export const DocumentPreview = ({
               </div>
             </ScrollArea>
 
-            <SheetFooter className="border-t bg-white">
+            <SheetFooter className="border-t bg-white shrink-0 mt-auto">
               <div className="flex w-full flex-col gap-2 sm:flex-row">
-                <Button className="w-full gap-2">
+                <Button className="w-1/2 gap-2">
                   <Download className="size-4" />
                   Tải xuống
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full gap-2"
+                  className="w-1/2 gap-2"
                   onClick={() => document && onEdit?.(document)}
                 >
                   <PenSquare className="size-4" />
                   Chỉnh sửa
-                </Button>
-                <Button variant="outline" className="w-full gap-2">
-                  <Share2 className="size-4" />
-                  Chia sẻ
                 </Button>
               </div>
             </SheetFooter>
@@ -145,18 +144,21 @@ export const DocumentPreview = ({
         )}
       </SheetContent>
     </Sheet>
-  )
-}
+  );
+};
 
-const DEFAULT_STYLE_KEYS = Object.keys(defaultStyles) as DefaultExtensionType[]
+const DEFAULT_STYLE_KEYS = Object.keys(defaultStyles) as DefaultExtensionType[];
 
 const PreviewFallback = ({ extension }: { extension: string }) => {
-  const normalized = extension.toLowerCase()
-  const style = defaultStyles[
-    DEFAULT_STYLE_KEYS.includes(normalized as DefaultExtensionType)
-      ? (normalized as DefaultExtensionType)
-      : (normalized === "pdf" ? "pdf" : "doc")
-  ]
+  const normalized = extension.toLowerCase();
+  const style =
+    defaultStyles[
+      DEFAULT_STYLE_KEYS.includes(normalized as DefaultExtensionType)
+        ? (normalized as DefaultExtensionType)
+        : normalized === "pdf"
+        ? "pdf"
+        : "doc"
+    ];
   return (
     <div className="flex h-[420px] flex-col items-center justify-center gap-4 text-center text-muted-foreground">
       <div className="size-24 rounded-2xl border bg-muted/60 p-4">
@@ -164,13 +166,13 @@ const PreviewFallback = ({ extension }: { extension: string }) => {
       </div>
       <p>Không thể hiển thị bản xem trước cho loại tệp này.</p>
     </div>
-  )
-}
+  );
+};
 
 const formatUpdatedAt = (value: string) =>
   new Intl.DateTimeFormat("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(new Date(value))
-
+  }).format(new Date(value)
+);
