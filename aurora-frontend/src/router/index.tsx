@@ -33,6 +33,8 @@ import GuestRoomListPage from "@/pages/common/RoomList";
 import PaymentReturnPage from "@/pages/common/PaymentReturn";
 import AboutPage from "@/pages/common/About";
 import AccommodationPage from "@/pages/common/Accommodation";
+import AccommodationCategoryPage from "@/pages/common/AccommodationCategory";
+import BookingPage from "@/pages/common/Booking";
 // Common - Customer Area
 import ProfilePage from "@/pages/common/customer/account/Profile";
 import ProfileUpsertPage from "@/pages/common/customer/account/ProfileUpsert";
@@ -106,6 +108,8 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "accommodation", element: <AccommodationPage /> },
+      { path: "accommodation/:categoryId", element: <AccommodationCategoryPage /> },
+      { path: "booking", element: <BookingPage /> },
       { path: "service", element: <ServicePage /> },
       { path: "branches", element: <GuestBranchListPage /> },
       { path: "rooms", element: <GuestRoomListPage /> },
@@ -118,10 +122,10 @@ const router = createBrowserRouter([
       // Customer
       { path: "profile", element: <ProfilePage /> },
       { path: "profile/upsert", element: <ProfileUpsertPage /> },
-      { path: "booking", element: <CustomerBookingListPage /> },
-      { path: "booking/create", element: <CreateBookingPage /> },
-      { path: "booking/confirm", element: <ConfirmBookingPage /> },
-      { path: "booking/:id", element: <CustomerBookingDetailPage /> },
+      { path: "my-bookings", element: <CustomerBookingListPage /> },
+      { path: "my-bookings/create", element: <CreateBookingPage /> },
+      { path: "my-bookings/confirm", element: <ConfirmBookingPage /> },
+      { path: "my-bookings/:id", element: <CustomerBookingDetailPage /> },
       { path: "favorites", element: <FavoriteListPage /> },
       { path: "late-checkout-requests", element: <LateCheckoutRequestListPage /> },
       { path: "late-checkout-requests/upsert", element: <LateCheckoutRequestUpsertPage /> },

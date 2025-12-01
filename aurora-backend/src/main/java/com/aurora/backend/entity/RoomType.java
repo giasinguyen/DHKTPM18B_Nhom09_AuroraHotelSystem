@@ -32,10 +32,14 @@ public class RoomType extends BaseEntity {
     @JoinColumn(name = "branch_id", nullable = false)
     Branch branch;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    RoomCategory category;  // Hạng phòng: Standard, Deluxe, Presidential Suite
+
     @NotBlank(message = "Room type name is required")
     @Size(max = 100, message = "Name cannot exceed 100 characters")
     @Column(nullable = false, length = 100)
-    String name;   // Deluxe, Suite, Standard, Premium...
+    String name;   // Single Bedroom City View, Couple Bedroom Sea View...
     
     @NotBlank(message = "Room type code is required")
     @Pattern(regexp = "^[A-Z]{3,5}$", message = "Code must be 3-5 uppercase letters")

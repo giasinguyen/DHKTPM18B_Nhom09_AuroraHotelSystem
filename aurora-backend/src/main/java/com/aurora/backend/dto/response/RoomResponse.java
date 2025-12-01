@@ -23,5 +23,6 @@ public class RoomResponse {
     Integer capacityAdults;
     Integer capacityChildren;
     Double sizeM2;
+    String viewType;
     List<String> images;
 }
