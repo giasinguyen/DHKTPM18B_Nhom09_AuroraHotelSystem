@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cyntler/react-doc-viewer": "^1.17.1",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -46,7 +47,6 @@
     "motion": "^12.23.24",
     "npm": "^11.6.4",
     "react": "^19.1.1",
-    "react-doc-viewer": "^0.1.15",
     "react-dom": "^19.1.1",
     "react-file-icon": "^1.6.0",
     "react-hook-form": "^7.67.0",

@@ -44,10 +44,6 @@ const DocumentListPage = () => {
             Document Hub
           </p>
           <h1 className="text-3xl font-bold text-slate-900">Quản lý tài liệu</h1>
-          <p className="text-muted-foreground max-w-2xl">
-            Theo dõi, tìm kiếm và xem nhanh toàn bộ tài liệu nội bộ giống như trải nghiệm Google
-            Drive, được tối ưu cho quy trình tại Aurora Hotel.
-          </p>
         </header>
 
         <DocumentToolbar

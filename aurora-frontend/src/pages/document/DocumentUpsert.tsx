@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import DocViewer, { DocViewerRenderers } from "react-doc-viewer"
+import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer"
 import { ArrowLeft, Upload, FileText, Eye, Trash2 } from "lucide-react"
 import type { DocumentItem } from "@/features/documents/data"
 import { mockDocuments } from "@/features/documents/data"
@@ -15,18 +15,8 @@ import { Badge } from "@/components/ui/badge"
 
 const ACCEPTED_EXTENSIONS = [
   "pdf",
-  "doc",
-  "docx",
   "md",
   "txt",
-  "xlsx",
-  "xls",
-  "png",
-  "jpg",
-  "jpeg",
-  "gif",
-  "svg",
-  "webp",
 ]
 
 const ACCEPT_ATTRIBUTE = ACCEPTED_EXTENSIONS.map((ext) => `.${ext}`).join(",")
@@ -250,20 +240,20 @@ export default function DocumentUpsertPage() {
   ] : []
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 py-10">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4">
+    <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 py-4">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4">
         {/* Header */}
         <header className="space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/admin/documents")}
+            className="flex items-center gap-2 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại
+          </Button>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/admin/documents")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Quay lại
-            </Button>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/80">
                 Document Hub
@@ -273,12 +263,6 @@ export default function DocumentUpsertPage() {
               </h1>
             </div>
           </div>
-          <p className="text-muted-foreground max-w-2xl">
-            {isEditing 
-              ? "Cập nhật thông tin và nội dung tài liệu" 
-              : "Tải lên tài liệu mới và điền thông tin metadata cho hệ thống quản lý Aurora Hotel"
-            }
-          </p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -338,7 +322,7 @@ export default function DocumentUpsertPage() {
                       variant="outline"
                       size="sm"
                       onClick={handleClearFile}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                       Xóa file
@@ -369,7 +353,7 @@ export default function DocumentUpsertPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tiêu đề *</Label>
+                  <Label htmlFor="title">Tiêu đề <span className="text-red-400">*</span></Label>
                   <Input
                     id="title"
                     value={metadata.title}
