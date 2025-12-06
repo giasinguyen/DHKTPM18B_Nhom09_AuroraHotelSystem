@@ -25,6 +25,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/utils/exportUtils';
+import fallbackImage from '@/assets/images/commons/fallback.png';
+
+// Fallback image for broken image URLs
+const FALLBACK_IMAGE = fallbackImage;
 
 interface BookingRoom {
   roomId: string;
@@ -220,6 +224,14 @@ export default function BookingPage() {
     setSelectedRoom(room);
     setCurrentImageIndex(0);
     setIsModalOpen(true);
+  };
+
+  // Handle image load errors with fallback
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.src !== FALLBACK_IMAGE) {
+      img.src = FALLBACK_IMAGE;
+    }
   };
 
   const handleAddRoom = (room: Room, currentRoomType?: RoomType) => {
@@ -489,9 +501,10 @@ export default function BookingPage() {
                           {/* Image */}
                           <div className="md:w-64 flex-shrink-0 relative group">
                             <img
-                              src={room.images?.[0] || currentRoomType.images?.[0] || "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&h=600&fit=crop"}
+                              src={room.images?.[0] || currentRoomType.images?.[0] || FALLBACK_IMAGE}
                               alt={currentRoomType.name}
                               className="w-full h-48 md:h-full object-cover"
+                              onError={handleImageError}
                             />
                             <Button
                               variant="secondary"
@@ -618,6 +631,7 @@ export default function BookingPage() {
                               src={room.imageUrl} 
                               alt={room.roomTypeName}
                               className="w-12 h-12 object-cover rounded"
+                              onError={handleImageError}
                             />
                           )}
                           <div className="flex-grow">
@@ -692,10 +706,11 @@ export default function BookingPage() {
                     roomType.images?.[currentImageIndex] || 
                     selectedRoom.images?.[0] || 
                     roomType.images?.[0] || 
-                    "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=1200&h=800&fit=crop")
+                    FALLBACK_IMAGE)
                   }
                   alt={`${roomType.name} - Ảnh ${currentImageIndex + 1}`}
                   className="w-full h-96 object-cover rounded-lg"
+                  onError={handleImageError}
                 />
                 
                 {/* Image Navigation */}
