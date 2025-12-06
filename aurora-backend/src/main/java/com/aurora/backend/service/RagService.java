@@ -7,7 +7,7 @@ import dev.langchain4j.service.spring.AiService;
 import reactor.core.publisher.Flux;
 
 @AiService
-public interface GeminiService {
+public interface RagService {
     @SystemMessage("""
                     Bạn là một trợ lý AI thông minh và thân thiện ☺️ của Khách sạn Aurora. Sử dụng các phần ngữ cảnh sau để trả lời câu hỏi.
                     Nếu bạn không biết câu trả lời, hãy thành thật nói rằng bạn không có thông tin về điều đó, và đề nghị khách hàng liên hệ trực tiếp với lễ tân khách sạn.
