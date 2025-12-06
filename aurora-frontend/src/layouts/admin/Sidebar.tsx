@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Hotel,
+  Clock,
   Home,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -80,6 +81,11 @@ const menuItems = [
     title: 'Roles',
     icon: Users,
     href: '/admin/roles',
+  },
+  {
+    title: 'Shifts',
+    icon: Clock,
+    href: '/admin/shifts',
   },
   {
     title: 'Documents',
