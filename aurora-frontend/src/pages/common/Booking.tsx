@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { roomTypeApi, roomApi, roomCategoryApi } from '@/services/roomApi';
 import type { RoomType, Room, RoomCategory } from '@/types/room.types';
-import { useAppSelector } from '@/hooks/useRedux';
 import { toast } from 'sonner';
 import { Loader2, ChevronLeft, Users, Maximize, Bed, Eye, X, Trash2, Calendar } from 'lucide-react';
 import VideoHero from '@/components/custom/VideoHero';
@@ -64,8 +63,8 @@ export default function BookingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  const currentBranch = useAppSelector((state) => state.branch.currentBranch);
-  const branchId = currentBranch?.apiId || 'branch-hcm-001';
+  // Get branchId from localStorage
+  const branchId = localStorage.getItem('branchId') || 'branch-hcm-001';
   
   // Booking state - Initialize from localStorage
   const [bookingRooms, setBookingRooms] = useState<BookingRoom[]>(() => {
