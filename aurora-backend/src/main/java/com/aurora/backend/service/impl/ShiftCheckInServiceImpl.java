@@ -93,6 +93,7 @@ public class ShiftCheckInServiceImpl implements ShiftCheckInService {
         // Create check-in record
         ShiftCheckIn checkIn = ShiftCheckIn.builder()
             .assignment(assignment)
+            .staff(assignment.getStaff())
             .checkInTime(LocalDateTime.now())
             .isLate(isLate)
             .lateMinutes(isLate ? lateMinutes : null)

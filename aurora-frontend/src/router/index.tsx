@@ -97,7 +97,7 @@ import ServiceUpsertPage from "@/pages/services/ServiceUpsert";
 
 // Shifts
 import ShiftManagementPage from "@/pages/shifts/ShiftManagement";
-import StaffCheckInPage from "@/pages/shifts/StaffCheckIn";
+import StaffShiftDashboard from "@/pages/shifts/StaffShiftDashboard";
 
 // User (shared)
 import UserDetailPage from "@/pages/user/UserDetail";
@@ -155,8 +155,8 @@ const router = createBrowserRouter([
       { path: "booking/:id", element: <BookingDetailPage /> },
       { path: "users/upsert", element: <UserUpsertPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
-      { path: "shifts", element: <StaffCheckInPage /> },
-      { path: "my-shift", element: <StaffCheckInPage /> },
+      { path: "shifts", element: <StaffShiftDashboard /> },
+      { path: "my-shift", element: <StaffShiftDashboard /> },
       { path: "profile", element: <UserProfilePage /> },
     ],
   },

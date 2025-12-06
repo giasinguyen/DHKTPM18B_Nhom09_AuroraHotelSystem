@@ -119,7 +119,7 @@ public class ShiftCheckInController {
     }
     
     @GetMapping("/staff/{staffId}/is-checked-in")
-    @PreAuthorize("hasAnyAuthority('SHIFT_VIEW', 'ADMIN', 'MANAGER', 'STAFF') or #staffId == authentication.principal.id")
+    @PreAuthorize("hasAnyAuthority('SHIFT_VIEW_OWN', 'SHIFT_VIEW', 'ADMIN', 'MANAGER') or #staffId == authentication.principal.id")
     public ResponseEntity<ApiResponse<Boolean>> isStaffCheckedIn(@PathVariable String staffId) {
         boolean isCheckedIn = shiftCheckInService.isStaffCheckedIn(staffId);
         return ResponseEntity.ok(
@@ -131,7 +131,7 @@ public class ShiftCheckInController {
     }
     
     @GetMapping("/staff/{staffId}/current")
-    @PreAuthorize("hasAnyAuthority('SHIFT_VIEW', 'ADMIN', 'MANAGER', 'STAFF') or #staffId == authentication.principal.id")
+    @PreAuthorize("hasAnyAuthority('SHIFT_VIEW_OWN', 'SHIFT_VIEW', 'ADMIN', 'MANAGER') or #staffId == authentication.principal.id")
     public ResponseEntity<ApiResponse<ShiftCheckInResponse>> getCurrentCheckIn(
             @PathVariable String staffId) {
         

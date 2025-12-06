@@ -9,7 +9,7 @@ import {
   checkIsCheckedIn,
   checkHasActiveShift,
 } from '@/features/slices/shiftSlice';
-import { staffShiftApi } from '@/services/shiftApi';
+import { staffShiftApi, shiftCheckInApi } from '@/services/shiftApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,9 +22,16 @@ import {
   Timer,
   LogIn,
   LogOut,
+  History,
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  CalendarDays,
 } from 'lucide-react';
-import { format, differenceInMinutes } from 'date-fns';
+import { format, differenceInMinutes, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 
 const StaffCheckIn = () => {
   const dispatch = useAppDispatch();
@@ -36,6 +43,10 @@ const StaffCheckIn = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [location, setLocation] = useState<string>('');
   const [upcomingShifts, setUpcomingShifts] = useState<any[]>([]);
+  const [shiftHistory, setShiftHistory] = useState<any[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<any>(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [calendarShifts, setCalendarShifts] = useState<any[]>([]);
 
   // Update current time every second
   useEffect(() => {
@@ -119,8 +130,8 @@ const StaffCheckIn = () => {
 
     const now = new Date();
     const shiftDate = new Date(currentAssignment.shiftDate);
-    const [startHour, startMinute] = currentAssignment.workShift.startTime.split(':').map(Number);
-    const [endHour, endMinute] = currentAssignment.workShift.endTime.split(':').map(Number);
+    const [startHour, startMinute] = currentAssignment.startTime.split(':').map(Number);
+    const [endHour, endMinute] = currentAssignment.endTime.split(':').map(Number);
 
     const shiftStart = new Date(shiftDate);
     shiftStart.setHours(startHour, startMinute, 0);
@@ -207,12 +218,12 @@ const StaffCheckIn = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Shift</p>
-                    <p className="font-semibold">{currentAssignment.workShift.name}</p>
+                    <p className="font-semibold">{currentAssignment.workShiftName}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Time</p>
                     <p className="font-semibold">
-                      {currentAssignment.workShift.startTime} - {currentAssignment.workShift.endTime}
+                      {currentAssignment.startTime} - {currentAssignment.endTime}
                     </p>
                   </div>
                   <div>
@@ -336,10 +347,10 @@ const StaffCheckIn = () => {
                   <div className="flex items-center gap-4">
                     <div
                       className="w-2 h-12 rounded"
-                      style={{ backgroundColor: shift.workShift.colorCode }}
+                      style={{ backgroundColor: shift.shiftColorCode }}
                     />
                     <div>
-                      <p className="font-semibold">{shift.workShift.name}</p>
+                      <p className="font-semibold">{shift.workShiftName}</p>
                       <p className="text-sm text-gray-500">
                         {format(new Date(shift.shiftDate), 'EEEE, MMM d, yyyy')}
                       </p>
@@ -347,7 +358,7 @@ const StaffCheckIn = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
-                      {shift.workShift.startTime} - {shift.workShift.endTime}
+                      {shift.startTime} - {shift.endTime}
                     </p>
                     <Badge variant="outline">{shift.status}</Badge>
                   </div>
