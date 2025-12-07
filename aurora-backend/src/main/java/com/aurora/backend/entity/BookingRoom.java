@@ -63,8 +63,5 @@ public class BookingRoom extends BaseEntity {
     BigDecimal totalAmount; // Tổng tiền cho phòng này (calculated: pricePerNight * nights + charges)
     
     @Column(length = 500)
-    String guestNames;
-    
-    @Column(length = 500)
     String roomNotes;
 }

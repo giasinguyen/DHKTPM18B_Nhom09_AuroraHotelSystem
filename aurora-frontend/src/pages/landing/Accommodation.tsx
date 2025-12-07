@@ -56,7 +56,7 @@ export default function AccommodationPage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-4 text-gray-800">
-            Chọn Hạng Phòng
+            Hạng Phòng
           </h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Từ phòng tiêu chuẩn đến suite tổng thống, chúng tôi có đầy đủ các hạng phòng phù hợp với nhu cầu của bạn

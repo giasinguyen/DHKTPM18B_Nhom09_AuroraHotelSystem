@@ -1140,11 +1140,30 @@ ON CONFLICT (code) DO NOTHING;
 -- 11. BOOKINGS (Đặt phòng)
 -- Tạo 2 bookings cho HCM
 -- ============================================================================
+-- Add new columns for guest information (if not exists)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bookings' AND column_name = 'guest_full_name') THEN
+        ALTER TABLE bookings ADD COLUMN guest_full_name VARCHAR(200);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bookings' AND column_name = 'guest_email') THEN
+        ALTER TABLE bookings ADD COLUMN guest_email VARCHAR(100);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bookings' AND column_name = 'guest_phone') THEN
+        ALTER TABLE bookings ADD COLUMN guest_phone VARCHAR(20);
+    END IF;
+    -- Make customer_id nullable for walk-in guests
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bookings' AND column_name = 'customer_id' AND is_nullable = 'NO') THEN
+        ALTER TABLE bookings ALTER COLUMN customer_id DROP NOT NULL;
+    END IF;
+END $$;
+
 INSERT INTO bookings (
     id, booking_code, branch_id, customer_id, applied_promotion_id,
     checkin, checkout, special_request,
+    guest_full_name, guest_email, guest_phone,
     status, payment_status,
-    subtotal_price, discount_amount, total_price, deposit_amount,
+    subtotal_price, discount_amount, total_price,
     email_sent, sms_sent,
     created_at, updated_at, version, deleted
 ) VALUES 
@@ -1158,12 +1177,14 @@ INSERT INTO bookings (
     CURRENT_DATE + INTERVAL '5 days',
     CURRENT_DATE + INTERVAL '8 days',
     'Phòng tầng cao, view đẹp. Early check-in nếu có thể',
+    NULL, -- guest_full_name (customer exists)
+    NULL, -- guest_email (customer exists)
+    NULL, -- guest_phone (customer exists)
     'CONFIRMED',
-    'DEPOSIT_PAID',
+    'PAID', -- Payment successful
     4500000.00,
     0.00,
     4500000.00,
-    2250000.00,
     true, false,
     NOW(), NOW(), 0, false
 ),
@@ -1177,12 +1198,14 @@ INSERT INTO bookings (
     CURRENT_DATE - INTERVAL '2 days',
     CURRENT_DATE + INTERVAL '3 days',
     NULL,
+    NULL, -- guest_full_name (customer exists)
+    NULL, -- guest_email (customer exists)
+    NULL, -- guest_phone (customer exists)
     'CHECKED_IN',
     'PAID',
     11000000.00,
     0.00,
     11000000.00,
-    NULL,
     true, true,
     NOW(), NOW(), 0, false
 )
@@ -1192,10 +1215,18 @@ ON CONFLICT (booking_code) DO NOTHING;
 -- 12. BOOKING ROOMS (Chi tiết phòng đặt)
 -- Tạo 2 booking rooms cho HCM
 -- ============================================================================
+-- Add room_notes column if not exists
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'booking_rooms' AND column_name = 'room_notes') THEN
+        ALTER TABLE booking_rooms ADD COLUMN room_notes VARCHAR(500);
+    END IF;
+END $$;
+
 INSERT INTO booking_rooms (
     id, booking_id, room_id,
     price_per_night, nights, actual_adults, actual_children,
-    total_amount, guest_names,
+    total_amount, room_notes,
     created_at, updated_at, version, deleted
 ) VALUES 
 -- Booking 1: Standard Couple Sea View (room 502 - đang OCCUPIED)
@@ -1207,7 +1238,7 @@ INSERT INTO booking_rooms (
     3,
     2, 0,
     4500000.00,
-    'Nguyen Van A, Nguyen Thi B',
+    NULL, -- room_notes
     NOW(), NOW(), 0, false
 ),
 -- Booking 2: Deluxe Couple Sea View (room 1001)
@@ -1219,7 +1250,7 @@ INSERT INTO booking_rooms (
     5,
     2, 0,
     11000000.00,
-    'Tran Van C, Tran Thi D',
+    NULL, -- room_notes
     NOW(), NOW(), 0, false
 )
 ON CONFLICT DO NOTHING;

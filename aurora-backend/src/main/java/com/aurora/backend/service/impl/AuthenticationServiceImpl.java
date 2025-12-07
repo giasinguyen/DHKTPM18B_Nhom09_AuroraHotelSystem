@@ -435,6 +435,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
                 .roles(roleNames)
                 .permissions(permissions)

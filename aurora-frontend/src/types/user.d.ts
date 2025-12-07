@@ -19,6 +19,7 @@ export interface UserSessionResponse {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   avatarUrl: string;
   roles: string[];
   permissions: string[];

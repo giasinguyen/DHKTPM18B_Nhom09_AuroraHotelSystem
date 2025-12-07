@@ -20,8 +20,13 @@ public class BookingCreationRequest {
     @NotBlank(message = "BRANCH_ID_REQUIRED")
     String branchId;
     
-    @NotBlank(message = "CUSTOMER_ID_REQUIRED")
+    // Customer ID is optional - null for walk-in guests
     String customerId;
+    
+    // Guest information (required if customerId is null)
+    String guestFullName;
+    String guestEmail;
+    String guestPhone;
     
     @NotNull(message = "BOOKING_DATE_REQUIRED")
     @Future(message = "CHECKIN_DATE_FUTURE")

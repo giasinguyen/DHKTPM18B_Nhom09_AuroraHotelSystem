@@ -14,12 +14,16 @@ public interface BookingMapper {
     @Mapping(target = "customer.id", source = "customerId")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "bookingCode", ignore = true)
+    @Mapping(target = "customer", ignore = true) // Will be set manually in service
     Booking toBooking(BookingCreationRequest request);
     
     @Mapping(target = "branchId", source = "branch.id")
     @Mapping(target = "branchName", source = "branch.name")
-    @Mapping(target = "customerId", source = "customer.id")
-    @Mapping(target = "customerName", expression = "java(booking.getCustomer().getFirstName() + \" \" + booking.getCustomer().getLastName())")
+    @Mapping(target = "customerId", expression = "java(booking.getCustomer() != null ? booking.getCustomer().getId() : null)")
+    @Mapping(target = "customerName", expression = "java(booking.getCustomer() != null ? (booking.getCustomer().getFirstName() + \" \" + booking.getCustomer().getLastName()).trim() : booking.getGuestFullName())")
+    @Mapping(target = "guestFullName", source = "guestFullName")
+    @Mapping(target = "guestEmail", source = "guestEmail")
+    @Mapping(target = "guestPhone", source = "guestPhone")
     BookingResponse toBookingResponse(Booking booking);
     
     @Mapping(target = "id", ignore = true)

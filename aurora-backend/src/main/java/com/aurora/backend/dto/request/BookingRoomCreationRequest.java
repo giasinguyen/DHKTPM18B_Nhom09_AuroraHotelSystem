@@ -25,4 +25,6 @@ public class BookingRoomCreationRequest {
     @NotNull(message = "NIGHTS_REQUIRED")
     @Positive(message = "NIGHTS_POSITIVE")
     Integer nights;
+    
+    String roomNotes; // Ghi chú cho phòng này (từ step 02)
 }

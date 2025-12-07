@@ -19,6 +19,10 @@ public class BookingResponse {
     String branchName;
     String customerId;
     String customerName;
+    // Guest information (for walk-in guests)
+    String guestFullName;
+    String guestEmail;
+    String guestPhone;
     LocalDate checkin;
     LocalDate checkout;
     Double totalPrice;
