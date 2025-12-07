@@ -3,6 +3,7 @@ package com.aurora.backend.service.impl;
 import com.aurora.backend.dto.request.NewsCreationRequest;
 import com.aurora.backend.dto.request.NewsUpdateRequest;
 import com.aurora.backend.dto.request.NewsVisibilityRequest;
+import com.aurora.backend.dto.response.NewsListResponse;
 import com.aurora.backend.dto.response.NewsResponse;
 import com.aurora.backend.entity.News;
 import com.aurora.backend.enums.ErrorCode;
@@ -30,13 +31,13 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NewsResponse> getPublicNews() {
+    public List<NewsListResponse> getPublicNews() {
         log.info("Getting all public news");
 
         List<News> newsList = newsRepository.findByIsPublicTrueAndStatus(NewsStatus.PUBLISHED);
 
         return newsList.stream()
-                .map(newsMapper::toNewsResponse)
+                .map(newsMapper::toNewsListResponse)
                 .collect(Collectors.toList());
     }
 
@@ -53,13 +54,13 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NewsResponse> getAllNews() {
+    public List<NewsListResponse> getAllNews() {
         log.info("Getting all news (admin)");
 
         List<News> newsList = newsRepository.findAll();
 
         return newsList.stream()
-                .map(newsMapper::toNewsResponse)
+                .map(newsMapper::toNewsListResponse)
                 .collect(Collectors.toList());
     }
 

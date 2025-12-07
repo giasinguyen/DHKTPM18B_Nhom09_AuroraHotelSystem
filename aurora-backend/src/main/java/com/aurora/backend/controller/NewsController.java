@@ -7,6 +7,7 @@ import com.aurora.backend.dto.request.NewsUpdateRequest;
 import com.aurora.backend.dto.request.NewsVisibilityRequest;
 import com.aurora.backend.dto.response.ApiResponse;
 import com.aurora.backend.dto.response.ImageAssetResponse;
+import com.aurora.backend.dto.response.NewsListResponse;
 import com.aurora.backend.dto.response.NewsResponse;
 import com.aurora.backend.service.ImageAssetService;
 import com.aurora.backend.service.NewsService;
@@ -36,13 +37,13 @@ public class NewsController {
 
     // Public endpoints
     @GetMapping("/public")
-    public ResponseEntity<ApiResponse<List<NewsResponse>>> getPublicNews() {
+    public ResponseEntity<ApiResponse<List<NewsListResponse>>> getPublicNews() {
         log.info("Request to get all public news");
 
-        List<NewsResponse> newsList = newsService.getPublicNews();
+        List<NewsListResponse> newsList = newsService.getPublicNews();
 
         return ResponseEntity.ok(
-                ApiResponse.<List<NewsResponse>>builder()
+                ApiResponse.<List<NewsListResponse>>builder()
                         .message("Public news retrieved successfully")
                         .result(newsList)
                         .build()
@@ -66,13 +67,13 @@ public class NewsController {
     // Admin endpoints
     @GetMapping
     @RequirePermission(PermissionConstants.Admin.NEWS_VIEW_ALL)
-    public ResponseEntity<ApiResponse<List<NewsResponse>>> getAllNews() {
+    public ResponseEntity<ApiResponse<List<NewsListResponse>>> getAllNews() {
         log.info("Request to get all news (admin)");
 
-        List<NewsResponse> newsList = newsService.getAllNews();
+        List<NewsListResponse> newsList = newsService.getAllNews();
 
         return ResponseEntity.ok(
-                ApiResponse.<List<NewsResponse>>builder()
+                ApiResponse.<List<NewsListResponse>>builder()
                         .message("All news retrieved successfully")
                         .result(newsList)
                         .build()

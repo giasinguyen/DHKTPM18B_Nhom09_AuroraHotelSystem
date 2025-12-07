@@ -2,6 +2,7 @@ package com.aurora.backend.mapper;
 
 import com.aurora.backend.dto.request.NewsCreationRequest;
 import com.aurora.backend.dto.request.NewsUpdateRequest;
+import com.aurora.backend.dto.response.NewsListResponse;
 import com.aurora.backend.dto.response.NewsResponse;
 import com.aurora.backend.entity.News;
 import org.mapstruct.Mapper;
@@ -14,6 +15,8 @@ public interface NewsMapper {
     News toNews(NewsCreationRequest request);
     
     NewsResponse toNewsResponse(News news);
+    
+    NewsListResponse toNewsListResponse(News news);
     
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
