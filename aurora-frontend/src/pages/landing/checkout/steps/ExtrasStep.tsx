@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
-import { Plus, Minus, Clock, Users, Calendar, DoorOpen } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/utils/exportUtils";
-import fallbackImage from "@/assets/images/commons/fallback.png";
+import { RoomCard, ServiceSelectionModal, RoomDetailModal } from "@/components/booking";
+import { roomApi, roomTypeApi } from "@/services/roomApi";
 import type { CheckoutData, RoomExtras } from "../index";
-import type { HotelService } from "@/types/service.types";
-import { serviceApi } from "@/services/serviceApi";
+import type { Room, RoomType } from "@/types/room.types";
 
 interface ExtrasStepProps {
   checkoutData: CheckoutData;
@@ -21,45 +20,67 @@ export default function ExtrasStep({
   checkoutData,
   updateCheckoutData,
 }: ExtrasStepProps) {
-  const [services, setServices] = useState<HotelService[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const { rooms, roomExtras } = checkoutData;
-
   const branchId = localStorage.getItem("branchId") || "branch-hcm-001";
 
-  // Fetch services on mount
+  const [roomDetails, setRoomDetails] = useState<Array<{ room: Room; roomType: RoomType }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedRoomForService, setSelectedRoomForService] = useState<string | null>(null);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [selectedRoomForView, setSelectedRoomForView] = useState<Room | null>(null);
+  const [currentRoomType, setCurrentRoomType] = useState<RoomType | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  // Fetch room details from API
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchRoomDetails = async () => {
       try {
         setLoading(true);
-        const response = await serviceApi.search({
-          hotelId: branchId,
-          page: 0,
-          size: 100,
-        });
-        if (response.result?.content) {
-          setServices(
-            response.result.content.filter((s) => s.active !== false)
-          );
-        }
+        const details = await Promise.all(
+          rooms.map(async (bookingRoom) => {
+            try {
+              const roomRes = await roomApi.getById(bookingRoom.roomId);
+              const room = roomRes.result;
+
+              const roomTypeRes = await roomTypeApi.getById(bookingRoom.roomTypeId);
+              const roomType = roomTypeRes.result;
+
+              if (room && roomType) {
+                return { room, roomType };
+              }
+              return null;
+            } catch (error) {
+              console.error(`Failed to fetch room ${bookingRoom.roomId}:`, error);
+              return null;
+            }
+          })
+        );
+
+        const validDetails = details.filter((d): d is { room: Room; roomType: RoomType } => d !== null);
+        setRoomDetails(validDetails);
       } catch (error) {
-        console.error("Failed to fetch services:", error);
+        console.error("❌ Failed to fetch room details:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchServices();
-  }, [branchId]);
+    if (rooms && rooms.length > 0) {
+      fetchRoomDetails();
+    } else {
+      setLoading(false);
+    }
+  }, [rooms]);
 
   // Initialize roomExtras for new rooms
   useEffect(() => {
     const updatedExtras = { ...roomExtras };
     let hasChanges = false;
 
-    rooms.forEach((room) => {
-      if (!updatedExtras[room.roomId]) {
-        updatedExtras[room.roomId] = {
+    rooms.forEach((bookingRoom) => {
+      if (!updatedExtras[bookingRoom.roomId]) {
+        updatedExtras[bookingRoom.roomId] = {
           services: [],
           note: "",
         };
@@ -80,62 +101,15 @@ export default function ExtrasStep({
     }
   }, [rooms, roomExtras, updateCheckoutData]);
 
-  const handleServiceToggle = (roomId: string, service: HotelService) => {
-    const roomExtra = roomExtras[roomId] || { services: [], note: "" };
-    const existingIndex = roomExtra.services.findIndex(
-      (s) => s.serviceId === service.id
-    );
-
-    const updatedServices = [...roomExtra.services];
-
-    if (existingIndex >= 0) {
-      // Remove service
-      updatedServices.splice(existingIndex, 1);
-    } else {
-      // Add service with quantity 1
-      updatedServices.push({
-        serviceId: service.id,
-        serviceName: service.name,
-        price: service.basePrice,
-        quantity: 1,
-      });
-    }
-
-    updateRoomExtras(roomId, {
-      ...roomExtra,
-      services: updatedServices,
-    });
+  const handleSelectService = (roomId: string) => {
+    console.log("🔘 handleSelectService called with roomId:", roomId);
+    console.log("🔘 branchId:", branchId);
+    setSelectedRoomForService(roomId);
+    setIsServiceModalOpen(true);
+    console.log("🔘 Modal state set - isServiceModalOpen should be true");
   };
 
-  const handleQuantityChange = (
-    roomId: string,
-    serviceId: string,
-    delta: number
-  ) => {
-    const roomExtra = roomExtras[roomId] || { services: [], note: "" };
-    const updatedServices = roomExtra.services.map((s) => {
-      if (s.serviceId === serviceId) {
-        const newQuantity = Math.max(1, s.quantity + delta);
-        return { ...s, quantity: newQuantity };
-      }
-      return s;
-    });
-
-    updateRoomExtras(roomId, {
-      ...roomExtra,
-      services: updatedServices,
-    });
-  };
-
-  const handleNoteChange = (roomId: string, note: string) => {
-    const roomExtra = roomExtras[roomId] || { services: [], note: "" };
-    updateRoomExtras(roomId, {
-      ...roomExtra,
-      note,
-    });
-  };
-
-  const updateRoomExtras = (roomId: string, extras: RoomExtras) => {
+  const handleSaveService = (roomId: string, extras: RoomExtras) => {
     updateCheckoutData({
       roomExtras: {
         ...roomExtras,
@@ -144,21 +118,30 @@ export default function ExtrasStep({
     });
   };
 
-  const isServiceSelected = (roomId: string, serviceId: string) => {
-    const roomExtra = roomExtras[roomId];
-    return roomExtra?.services.some((s) => s.serviceId === serviceId) || false;
+  const handleViewImages = (room: Room) => {
+    const roomTypeForRoom = roomDetails.find((rd) => rd.room.id === room.id)?.roomType;
+    setSelectedRoomForView(room);
+    setCurrentRoomType(roomTypeForRoom || null);
+    setIsViewModalOpen(true);
   };
 
-  const getServiceQuantity = (roomId: string, serviceId: string) => {
-    const roomExtra = roomExtras[roomId];
-    const service = roomExtra?.services.find((s) => s.serviceId === serviceId);
-    return service?.quantity || 0;
+  const handleNoteChange = (roomId: string, note: string) => {
+    const roomExtra = roomExtras[roomId] || { services: [], note: "" };
+    updateCheckoutData({
+      roomExtras: {
+        ...roomExtras,
+        [roomId]: {
+          ...roomExtra,
+          note,
+        },
+      },
+    });
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <p className="text-gray-500">Đang tải dịch vụ...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -172,196 +155,80 @@ export default function ExtrasStep({
         </p>
       </div>
 
-      {/* Room Sections */}
-      {rooms.map((room, roomIndex) => {
-        const roomExtra = roomExtras[room.roomId] || {
-          services: [],
-          note: "",
-        };
+      {/* Room Cards */}
+      <div className="space-y-4">
+        {roomDetails.map(({ room, roomType }) => {
+          // room.id is the same as bookingRoom.roomId (we fetched room by bookingRoom.roomId)
+          const roomId = room.id;
+          
+          const roomExtra = roomExtras[roomId] || {
+            services: [],
+            note: "",
+          };
 
-        return (
-          <Card key={room.roomId} className="border-2">
-            <CardHeader className="bg-gray-50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <DoorOpen className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">
-                    Phòng {roomIndex + 1}: {room.roomTypeName}
-                  </CardTitle>
-                  <p className="text-sm text-gray-600">
-                    {room.roomNumber} • {formatCurrency(room.basePrice)}/đêm
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              {/* Services for this room */}
-              <div>
-                <h3 className="font-semibold mb-4">Chọn dịch vụ</h3>
-                <div className="space-y-3">
-                  {services.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-4">
-                      Không có dịch vụ nào khả dụng
-                    </p>
-                  ) : (
-                    services.map((service) => {
-                      const isSelected = isServiceSelected(
-                        room.roomId,
-                        service.id
-                      );
-                      const quantity = getServiceQuantity(
-                        room.roomId,
-                        service.id
-                      );
+          return (
+            <div key={room.id} className="space-y-4">
+              <RoomCard
+                room={room}
+                roomType={roomType}
+                showActionButton={true}
+                actionButtonVariant="service"
+                actionButtonText="Chọn dịch vụ"
+                onActionClick={() => {
+                  console.log("🔘 Clicked Chọn dịch vụ for room.id:", room.id);
+                  handleSelectService(roomId);
+                }}
+                onViewImages={handleViewImages}
+                roomExtras={roomExtra}
+              />
 
-                      return (
-                        <Card
-                          key={service.id}
-                          className={`cursor-pointer transition-all ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "hover:border-gray-300"
-                          }`}
-                          onClick={() => handleServiceToggle(room.roomId, service)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex gap-4">
-                              {/* Service Image */}
-                              <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                                <img
-                                  src={service.images?.[0] || fallbackImage}
-                                  alt={service.name}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.src = fallbackImage;
-                                  }}
-                                />
-                              </div>
+              {/* Note Section */}
+              <Card>
+                <CardContent className="pt-6">
+                  <Label htmlFor={`note-${room.id}`} className="text-sm font-semibold">
+                    Ghi chú cho phòng này
+                  </Label>
+                  <Textarea
+                    id={`note-${room.id}`}
+                    placeholder="E.g., late check-in, room preferences, dietary requirements..."
+                    value={roomExtra.note || ""}
+                    onChange={(e) => handleNoteChange(roomId, e.target.value)}
+                    className="mt-2"
+                    rows={3}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          );
+        })}
+      </div>
 
-                              {/* Service Info */}
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between">
-                                  <div>
-                                    <h4 className="font-semibold">
-                                      {service.name}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                      {service.description}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                      {service.durationMinutes && (
-                                        <Badge variant="outline" className="text-xs">
-                                          <Clock className="h-3 w-3 mr-1" />
-                                          {service.durationMinutes} phút
-                                        </Badge>
-                                      )}
-                                      {service.maxCapacityPerSlot && (
-                                        <Badge variant="outline" className="text-xs">
-                                          <Users className="h-3 w-3 mr-1" />
-                                          {service.maxCapacityPerSlot} người
-                                        </Badge>
-                                      )}
-                                      {service.operatingHours && (
-                                        <Badge variant="outline" className="text-xs">
-                                          <Calendar className="h-3 w-3 mr-1" />
-                                          {service.operatingHours}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="text-lg font-bold text-primary">
-                                      {formatCurrency(service.basePrice)}
-                                    </p>
-                                    {service.unit && (
-                                      <p className="text-xs text-gray-500">
-                                        /{service.unit}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
+      {/* Service Selection Modal */}
+      {selectedRoomForService && (
+        <ServiceSelectionModal
+          open={isServiceModalOpen}
+          onOpenChange={(open) => {
+            console.log("🔄 ServiceSelectionModal onOpenChange:", open);
+            setIsServiceModalOpen(open);
+            if (!open) {
+              setSelectedRoomForService(null);
+            }
+          }}
+          roomId={selectedRoomForService}
+          roomExtras={roomExtras[selectedRoomForService] || { services: [], note: "" }}
+          branchId={branchId}
+          onSave={handleSaveService}
+        />
+      )}
 
-                                {/* Quantity Selector (only if selected) */}
-                                {isSelected && (
-                                  <div className="flex items-center gap-3 mt-4 pt-4 border-t">
-                                    <Label className="text-sm">Số lượng:</Label>
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChange(
-                                            room.roomId,
-                                            service.id,
-                                            -1
-                                          );
-                                        }}
-                                      >
-                                        <Minus className="h-4 w-4" />
-                                      </Button>
-                                      <span className="w-12 text-center font-semibold">
-                                        {quantity}
-                                      </span>
-                                      <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleQuantityChange(
-                                            room.roomId,
-                                            service.id,
-                                            1
-                                          );
-                                        }}
-                                      >
-                                        <Plus className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                    <div className="ml-auto">
-                                      <p className="text-sm font-semibold">
-                                        Tổng:{" "}
-                                        {formatCurrency(service.basePrice * quantity)}
-                                      </p>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Note for this room */}
-              <div>
-                <Label htmlFor={`note-${room.roomId}`} className="text-sm font-semibold">
-                  Ghi chú cho phòng này
-                </Label>
-                <Textarea
-                  id={`note-${room.roomId}`}
-                  placeholder="E.g., late check-in, room preferences, dietary requirements..."
-                  value={roomExtra.note || ""}
-                  onChange={(e) =>
-                    handleNoteChange(room.roomId, e.target.value)
-                  }
-                  className="mt-2"
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+      {/* Room Detail Modal */}
+      <RoomDetailModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        room={selectedRoomForView}
+        roomType={currentRoomType}
+        mode="checkout"
+      />
     </div>
   );
 }

@@ -13,6 +13,8 @@ export interface BookingRoom {
   imageUrl?: string;
 }
 
+import type { RoomExtras } from "@/pages/landing/checkout";
+
 interface BookingSummaryProps {
   // Booking info
   checkIn: string;
@@ -22,6 +24,9 @@ interface BookingSummaryProps {
   
   // Selected rooms
   bookingRooms: BookingRoom[];
+  
+  // Room extras (services per room)
+  roomExtras?: Record<string, RoomExtras>;
   
   // Callbacks
   onRemoveRoom?: (roomId: string) => void;
@@ -39,6 +44,7 @@ export default function BookingSummary({
   guests,
   nights,
   bookingRooms,
+  roomExtras,
   onRemoveRoom,
   onClearAll,
   onProceed,
@@ -49,7 +55,22 @@ export default function BookingSummary({
     return bookingRooms.reduce((sum, room) => sum + room.basePrice, 0);
   };
 
-  const totalPrice = calculateTotalPrice() * nights;
+  const calculateServicesTotal = () => {
+    if (!roomExtras) return 0;
+    return Object.values(roomExtras).reduce((total, extras) => {
+      return (
+        total +
+        extras.services.reduce(
+          (sum, service) => sum + service.price * service.quantity,
+          0
+        )
+      );
+    }, 0);
+  };
+
+  const roomsTotal = calculateTotalPrice() * nights;
+  const servicesTotal = calculateServicesTotal();
+  const totalPrice = roomsTotal + servicesTotal;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -161,6 +182,18 @@ export default function BookingSummary({
           <span className="text-gray-600">Số đêm</span>
           <span>x {nights}</span>
         </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Tổng phòng</span>
+          <span>{formatCurrency(roomsTotal)}</span>
+        </div>
+        {servicesTotal > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Dịch vụ bổ sung</span>
+            <span className="text-primary font-semibold">
+              {formatCurrency(servicesTotal)}
+            </span>
+          </div>
+        )}
         <div className="flex justify-between font-bold text-lg pt-2 border-t">
           <span>Total</span>
           <span className="text-amber-600">

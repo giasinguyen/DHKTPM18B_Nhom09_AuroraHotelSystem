@@ -1,10 +1,11 @@
-import { Eye, Maximize, Users, Bed } from "lucide-react";
+import { Eye, Maximize, Users, Bed, ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/utils/exportUtils";
 import fallbackImage from "@/assets/images/commons/fallback.png";
 import type { Room, RoomType } from "@/types/room.types";
+import type { RoomExtras } from "@/pages/landing/checkout";
 
 interface RoomCardProps {
   room: Room;
@@ -14,8 +15,9 @@ interface RoomCardProps {
   onViewImages?: (room: Room) => void;
   showActionButton?: boolean;
   actionButtonText?: string;
-  actionButtonVariant?: "select" | "edit";
+  actionButtonVariant?: "select" | "edit" | "service";
   onActionClick?: () => void;
+  roomExtras?: RoomExtras; // Services selected for this room
 }
 
 export default function RoomCard({
@@ -28,6 +30,7 @@ export default function RoomCard({
   actionButtonText,
   actionButtonVariant = "select",
   onActionClick,
+  roomExtras,
 }: RoomCardProps) {
   const getRoomStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
@@ -111,6 +114,40 @@ export default function RoomCard({
             </div>
           </div>
 
+          {/* Selected Services */}
+          {roomExtras && roomExtras.services.length > 0 && (
+            <div className="mb-3 pt-3 border-t">
+              <div className="flex items-center gap-2 mb-2">
+                <ShoppingBag className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold text-gray-700">
+                  Dịch vụ đã chọn ({roomExtras.services.length})
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {roomExtras.services.map((service) => (
+                  <Badge
+                    key={service.serviceId}
+                    variant="outline"
+                    className="text-xs bg-primary/10 border-primary/30"
+                  >
+                    {service.serviceName} x{service.quantity}
+                  </Badge>
+                ))}
+              </div>
+              <div className="mt-2 text-sm text-gray-600">
+                <span>Tổng dịch vụ: </span>
+                <span className="font-semibold text-primary">
+                  {formatCurrency(
+                    roomExtras.services.reduce(
+                      (sum, s) => sum + s.price * s.quantity,
+                      0
+                    )
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-3 border-t">
             <div>
               <p className="text-sm text-gray-500">Giá</p>
@@ -136,11 +173,17 @@ export default function RoomCard({
                     ? isSelected
                       ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
                       : "bg-amber-600 hover:bg-amber-700"
+                    : actionButtonVariant === "service"
+                    ? "bg-primary hover:bg-primary/90"
                     : "bg-primary hover:bg-primary/90"
                 }
               >
                 {actionButtonText ||
-                  (isSelected ? "Đã chọn" : "Chọn phòng")}
+                  (actionButtonVariant === "service"
+                    ? "Chọn dịch vụ"
+                    : isSelected
+                    ? "Đã chọn"
+                    : "Chọn phòng")}
               </Button>
             )}
           </div>

@@ -287,8 +287,8 @@ export default function CheckoutPage() {
         {/* Progress Bar */}
         <ProgressBar currentStep={currentStep} />
 
-        {currentStep === 1 ? (
-          // Step 1: Use same layout as Booking page (no Card wrapper, use BookingSummary)
+        {currentStep === 1 || currentStep === 2 ? (
+          // Step 1 & 2: Use same layout as Booking page (no Card wrapper, use BookingSummary)
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
@@ -304,14 +304,16 @@ export default function CheckoutPage() {
                   <ChevronLeft className="h-4 w-4" />
                   Quay lại
                 </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-                >
-                  Tiếp theo
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                {currentStep < 4 && (
+                  <Button
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                  >
+                    Tiếp theo
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -323,6 +325,7 @@ export default function CheckoutPage() {
                 guests={checkoutData.guests}
                 nights={checkoutData.nights}
                 bookingRooms={checkoutData.rooms}
+                roomExtras={checkoutData.roomExtras}
                 showProceedButton={false}
               />
             </div>
