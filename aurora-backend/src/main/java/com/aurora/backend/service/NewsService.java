@@ -15,6 +15,8 @@ public interface NewsService {
     
     List<NewsListResponse> getAllNews();
     
+    NewsResponse getNewsBySlug(String slug);
+    
     NewsResponse createNews(NewsCreationRequest request);
     
     NewsResponse updateNews(String id, NewsUpdateRequest request);

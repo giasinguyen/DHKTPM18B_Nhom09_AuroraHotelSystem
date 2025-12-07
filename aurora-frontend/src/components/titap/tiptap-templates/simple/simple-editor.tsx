@@ -39,7 +39,7 @@ import { HeadingDropdownMenu } from "@/components/titap/tiptap-ui/heading-dropdo
 import { ImageUploadButton } from "@/components/titap/tiptap-ui/image-upload-button"
 import { ListDropdownMenu } from "@/components/titap/tiptap-ui/list-dropdown-menu"
 import { BlockquoteButton } from "@/components/titap/tiptap-ui/blockquote-button"
-import { CodeBlockButton } from "@/components/titap/tiptap-ui/code-block-button"
+// import { CodeBlockButton } from "@/components/titap/tiptap-ui/code-block-button"
 import {
   ColorHighlightPopover,
   ColorHighlightPopoverContent,
@@ -98,11 +98,11 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
         <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
+          types={["bulletList", "orderedList"]}
           portal={isMobile}
         />
         <BlockquoteButton />
-        <CodeBlockButton />
+        {/* <CodeBlockButton /> */}
       </ToolbarGroup>
 
       <ToolbarSeparator />
@@ -110,9 +110,9 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <MarkButton type="bold" />
         <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
         <MarkButton type="underline" />
+        <MarkButton type="strike" />
+        {/* <MarkButton type="code" /> */}
         {!isMobile ? (
           <ColorHighlightPopover />
         ) : (
@@ -183,7 +183,12 @@ const MobileToolbarContent = ({
   </>
 )
 
-export function SimpleEditor() {
+interface SimpleEditorProps {
+  initialContent?: string;
+  onChange?: (html: string) => void;
+}
+
+export function SimpleEditor({ initialContent = "", onChange }: SimpleEditorProps = {}) {
   const isMobile = useIsBreakpoint()
   const { height } = useWindowSize()
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -228,7 +233,12 @@ export function SimpleEditor() {
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content,
+    content: initialContent || content,
+    onUpdate: ({ editor }) => {
+      if (onChange) {
+        onChange(editor.getHTML());
+      }
+    },
   })
 
   const rect = useCursorVisibility({

@@ -65,6 +65,17 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public NewsResponse getNewsBySlug(String slug) {
+        log.info("Getting news by slug (admin): {}", slug);
+
+        News news = newsRepository.findBySlug(slug)
+                .orElseThrow(() -> new AppException(ErrorCode.NEWS_NOT_FOUND));
+
+        return newsMapper.toNewsResponse(news);
+    }
+
+    @Override
     @Transactional
     public NewsResponse createNews(NewsCreationRequest request) {
         log.info("Creating news: title={}, slug={}, id={}", request.getTitle(), request.getSlug(), request.getId());

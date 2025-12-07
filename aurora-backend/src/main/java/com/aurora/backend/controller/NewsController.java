@@ -80,6 +80,21 @@ public class NewsController {
         );
     }
 
+    @GetMapping("/{slug}")
+    @RequirePermission(PermissionConstants.Admin.NEWS_VIEW_ALL)
+    public ResponseEntity<ApiResponse<NewsResponse>> getNewsBySlug(@PathVariable String slug) {
+        log.info("Request to get news by slug (admin): {}", slug);
+
+        NewsResponse news = newsService.getNewsBySlug(slug);
+
+        return ResponseEntity.ok(
+                ApiResponse.<NewsResponse>builder()
+                        .message("News retrieved successfully")
+                        .result(news)
+                        .build()
+        );
+    }
+
     @PostMapping
     @RequirePermission(PermissionConstants.Admin.NEWS_CREATE)
     public ResponseEntity<ApiResponse<NewsResponse>> createNews(@Valid @RequestBody NewsCreationRequest request) {

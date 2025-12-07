@@ -66,6 +66,7 @@ import DocumentUpsertPage from "@/pages/document/DocumentUpsert";
 // News
 import NewsListPage from "@/pages/news/NewsList";
 import NewsUpsertPage from "@/pages/news/NewsUpsert";
+import NewsPreview from "@/pages/news/NewsPreview";
 
 // Promotion
 import PromotionListPage from "@/pages/promotion/PromotionList";
@@ -187,6 +188,7 @@ const router = createBrowserRouter([
       { path: "promotions/upsert", element: <PromotionUpsertPage /> },
       { path: "news", element: <NewsListPage /> },
       { path: "news/upsert", element: <NewsUpsertPage /> },
+      { path: "news/upsert/:slug", element: <NewsUpsertPage /> },
       { path: "reports/revenue", element: <RevenueReportPage /> },
       { path: "reports/occupancy", element: <OccupancyReportPage /> },
       { path: "profile", element: <UserProfilePage /> },
@@ -214,6 +216,8 @@ const router = createBrowserRouter([
       { path: "promotions/upsert", element: <PromotionUpsertPage /> },
       { path: "news", element: <NewsListPage /> },
       { path: "news/upsert", element: <NewsUpsertPage /> },
+      { path: "news/upsert/:slug", element: <NewsUpsertPage /> },
+      { path: "news/preview/:slug", element: <NewsPreview /> },
       { path: "branches", element: <BranchListPage /> },
       { path: "branches/upsert", element: <BranchUpsertPage /> },
       { path: "users", element: <UserListPage /> },

@@ -94,6 +94,24 @@ export interface NewsSearchParams {
   sortDir?: 'asc' | 'desc';
 }
 
+export interface NewsVisibilityRequest {
+  isPublic: boolean;
+}
+
+export interface NewsResponse {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+  isPublic: boolean;
+  status: NewsStatus;
+  publishedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
 // Category configurations
 export const NEWS_CATEGORY_CONFIG: Record<NewsCategory, { label: string; color: string }> = {
   ANNOUNCEMENT: { label: 'Thông báo', color: 'bg-blue-100 text-blue-800' },
