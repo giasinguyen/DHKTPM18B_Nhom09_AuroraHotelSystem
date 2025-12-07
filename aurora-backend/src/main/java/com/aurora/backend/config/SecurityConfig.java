@@ -23,8 +23,6 @@ import java.util.List;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             // Auth endpoints - Session management with Redis
             "/api/v1/auth/register",
@@ -41,8 +39,8 @@ public class SecurityConfig {
             "/api/v1/auth/verify-email",
             "/api/v1/auth/resend-verification-email",
 
+            // RAG chatbot
             "/api/v1/rag/**",
-            "/api/v1/documents/**",
 
             // Room availability - PUBLIC for availability check
             "/api/v1/room-availability/check-multiple",
@@ -71,7 +69,7 @@ public class SecurityConfig {
             "/api/v1/facilities/**",
             "/api/v1/amenities/**",
             "/api/v1/rag/**",
-            "/api/v1/documents/**",
+            "/api/v1/news/public/**",
             "/api/v1/payments/vnpay/return",
 
             // Cloudinary test endpoint
