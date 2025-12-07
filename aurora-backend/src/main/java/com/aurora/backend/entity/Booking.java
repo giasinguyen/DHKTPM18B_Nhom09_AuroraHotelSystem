@@ -68,9 +68,6 @@ public class Booking extends BaseEntity {
     @Column(precision = 12, scale = 2)
     BigDecimal totalPrice;   // Tổng tiền sau promo + services
     
-    @Column(precision = 12, scale = 2)
-    BigDecimal depositAmount; // Tiền đặt cọc
-    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default

@@ -51,6 +51,9 @@ public class SecurityConfig {
 
             // Room availability - PUBLIC for availability check
             "/api/v1/room-availability/check-multiple",
+            
+            // Booking checkout - PUBLIC for customers and walk-in guests
+            "/api/v1/bookings/checkout",
 
             // VNPay IPN callback - MUST be public for VNPay server-to-server callback
             "/api/v1/payments/vnpay/ipn",

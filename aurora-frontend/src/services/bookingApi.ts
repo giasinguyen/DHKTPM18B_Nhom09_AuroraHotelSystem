@@ -129,6 +129,15 @@ export const bookingApi = {
     );
     return response.data;
   },
+
+  // Complete checkout (create booking with rooms and services)
+  checkout: async (data: import('@/types/checkout.types').CheckoutRequest) => {
+    const response = await axiosClient.post<ApiResponse<Booking>>(
+      `${BOOKING_BASE_URL}/checkout`,
+      data
+    );
+    return response.data;
+  },
 };
 
 export default bookingApi;

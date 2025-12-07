@@ -87,6 +87,7 @@ public enum ErrorCode {
     PAYMENT_AMOUNT_POSITIVE(1604, "Payment amount must be positive", HttpStatus.BAD_REQUEST),
     INVALID_PAYMENT_AMOUNT(1605, "Invalid payment amount", HttpStatus.BAD_REQUEST),
     PAYMENT_EXCEEDS_TOTAL(1606, "Payment amount exceeds booking total price", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_SUCCESSFUL(1607, "Payment was not successful. Booking cannot be created.", HttpStatus.BAD_REQUEST),
     
     // Role errors
     ROLE_NOT_EXISTED(1700, "Role not found", HttpStatus.NOT_FOUND),

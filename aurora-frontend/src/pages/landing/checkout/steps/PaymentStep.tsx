@@ -1,10 +1,16 @@
-import { CreditCard, Building2, Lock, Wallet, Smartphone, Globe } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CreditCard, Building2, Lock, Wallet, Smartphone, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { BookingSummary } from "@/components/booking";
+import { bookingApi } from "@/services/bookingApi";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
 import type { CheckoutData } from "../index";
+import type { RootState } from "@/features/store";
+import type { CheckoutRequest } from "@/types/checkout.types";
 
 interface PaymentStepProps {
   checkoutData: CheckoutData;
@@ -15,7 +21,16 @@ export default function PaymentStep({
   checkoutData,
   updateCheckoutData,
 }: PaymentStepProps) {
-  const { paymentMethod, rooms, checkIn, checkOut, guests, nights, roomExtras } = checkoutData;
+  const navigate = useNavigate();
+  const { paymentMethod, rooms, checkIn, checkOut, guests, nights, roomExtras, guestInfo } = checkoutData;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get current user from Redux
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const isLogin = useSelector((state: RootState) => state.auth.isLogin);
+  
+  // Get branchId from localStorage
+  const branchId = localStorage.getItem("branchId") || "branch-hcm-001";
 
   const handlePaymentMethodChange = (value: string) => {
     updateCheckoutData({
@@ -23,30 +38,80 @@ export default function PaymentStep({
     });
   };
 
-  const handleCompleteBooking = () => {
-    // Log all checkout data for checking
-    console.log("========================================");
-    console.log("📋 COMPLETE BOOKING - FULL DATA:");
-    console.log("========================================");
-    console.log("1. Booking Information:");
-    console.log("   - Check-in:", checkIn);
-    console.log("   - Check-out:", checkOut);
-    console.log("   - Guests:", guests);
-    console.log("   - Nights:", nights);
-    console.log("");
-    console.log("2. Selected Rooms:", rooms);
-    console.log("");
-    console.log("3. Room Extras (Services & Notes):", roomExtras);
-    console.log("");
-    console.log("4. Guest Information:", checkoutData.guestInfo);
-    console.log("");
-    console.log("5. Payment Method:", paymentMethod);
-    console.log("");
-    console.log("6. Full Checkout Data:", JSON.stringify(checkoutData, null, 2));
-    console.log("========================================");
-    
-    // TODO: Call API to create booking
-    // Navigate to confirmation page
+  const handleCompleteBooking = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // Prepare rooms data
+      const roomBookings = rooms.map((room) => ({
+        roomId: room.roomId,
+        pricePerNight: room.basePrice,
+        roomNotes: roomExtras[room.roomId]?.note || "",
+      }));
+      
+      // Prepare services data (flatten from roomExtras)
+      const serviceBookings: CheckoutRequest["services"] = [];
+      if (roomExtras) {
+        Object.entries(roomExtras).forEach(([roomId, extras]) => {
+          if (extras.services && extras.services.length > 0) {
+            extras.services.forEach((service) => {
+              serviceBookings.push({
+                serviceId: service.serviceId,
+                roomId: roomId,
+                quantity: service.quantity,
+                price: service.price,
+              });
+            });
+          }
+        });
+      }
+      
+      // Prepare checkout request
+      // Since user clicked "Hoàn tất đặt phòng", payment is considered successful
+      const checkoutRequest: CheckoutRequest = {
+        branchId: branchId,
+        customerId: isLogin && currentUser?.id ? currentUser.id : null,
+        guestFullName: guestInfo?.fullName,
+        guestEmail: guestInfo?.email,
+        guestPhone: guestInfo?.phone,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        guests: guests,
+        nights: nights,
+        specialRequests: guestInfo?.specialRequests || "",
+        paymentMethod: paymentMethod || "cash",
+        paymentSuccess: true, // Payment is successful when user confirms booking
+        rooms: roomBookings,
+        services: serviceBookings.length > 0 ? serviceBookings : undefined,
+      };
+      
+      // Call API
+      const response = await bookingApi.checkout(checkoutRequest);
+      
+      if (response.result) {
+        toast.success("Đặt phòng thành công!");
+        
+        // Clear localStorage
+        localStorage.removeItem("bookingRooms");
+        localStorage.removeItem("bookingFilter");
+        localStorage.removeItem("checkoutData");
+        
+        // Navigate to success page with booking ID
+        navigate(`/booking/success?bookingId=${response.result.id}&bookingCode=${response.result.bookingCode}`);
+      }
+    } catch (error: unknown) {
+      console.error("Failed to create booking:", error);
+      const errorMessage = 
+        (error && typeof error === 'object' && 'response' in error && 
+         error.response && typeof error.response === 'object' && 'data' in error.response &&
+         error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data &&
+         typeof error.response.data.message === 'string')
+          ? error.response.data.message 
+          : "Đặt phòng thất bại. Vui lòng thử lại.";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -176,11 +241,18 @@ export default function PaymentStep({
       <div className="pt-4">
         <Button
           onClick={handleCompleteBooking}
-          disabled={!paymentMethod}
+          disabled={!paymentMethod || isSubmitting}
           className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
           size="lg"
         >
-          Hoàn tất đặt phòng
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              Đang xử lý...
+            </>
+          ) : (
+            "Hoàn tất đặt phòng"
+          )}
         </Button>
         <p className="text-xs text-center text-gray-500 mt-2">
           Bằng cách hoàn tất đặt phòng này, bạn đồng ý với Điều khoản & Điều kiện của chúng tôi

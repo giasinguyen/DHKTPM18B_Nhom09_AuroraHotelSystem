@@ -7,6 +7,7 @@ import com.aurora.backend.dto.request.BookingConfirmRequest;
 import com.aurora.backend.dto.request.BookingCreationRequest;
 import com.aurora.backend.dto.request.BookingModificationRequest;
 import com.aurora.backend.dto.request.BookingUpdateRequest;
+import com.aurora.backend.dto.request.CheckoutRequest;
 import com.aurora.backend.dto.response.ApiResponse;
 import com.aurora.backend.dto.response.BookingCancellationResponse;
 import com.aurora.backend.dto.response.BookingResponse;
@@ -39,6 +40,16 @@ public class BookingController {
         return ApiResponse.<BookingResponse>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Booking created successfully")
+                .result(response)
+                .build();
+    }
+    
+    @PostMapping("/checkout")
+    public ApiResponse<BookingResponse> checkoutComplete(@Valid @RequestBody CheckoutRequest request) {
+        BookingResponse response = bookingService.checkoutComplete(request);
+        return ApiResponse.<BookingResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Booking completed successfully")
                 .result(response)
                 .build();
     }

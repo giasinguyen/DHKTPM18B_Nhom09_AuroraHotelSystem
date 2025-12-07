@@ -1163,7 +1163,7 @@ INSERT INTO bookings (
     checkin, checkout, special_request,
     guest_full_name, guest_email, guest_phone,
     status, payment_status,
-    subtotal_price, discount_amount, total_price, deposit_amount,
+    subtotal_price, discount_amount, total_price,
     email_sent, sms_sent,
     created_at, updated_at, version, deleted
 ) VALUES 
@@ -1181,11 +1181,10 @@ INSERT INTO bookings (
     NULL, -- guest_email (customer exists)
     NULL, -- guest_phone (customer exists)
     'CONFIRMED',
-    'DEPOSIT_PAID',
+    'PAID', -- Payment successful
     4500000.00,
     0.00,
     4500000.00,
-    2250000.00,
     true, false,
     NOW(), NOW(), 0, false
 ),
@@ -1207,7 +1206,6 @@ INSERT INTO bookings (
     11000000.00,
     0.00,
     11000000.00,
-    NULL,
     true, true,
     NOW(), NOW(), 0, false
 )
@@ -1228,7 +1226,7 @@ END $$;
 INSERT INTO booking_rooms (
     id, booking_id, room_id,
     price_per_night, nights, actual_adults, actual_children,
-    total_amount, guest_names, room_notes,
+    total_amount, room_notes,
     created_at, updated_at, version, deleted
 ) VALUES 
 -- Booking 1: Standard Couple Sea View (room 502 - đang OCCUPIED)
@@ -1240,7 +1238,6 @@ INSERT INTO booking_rooms (
     3,
     2, 0,
     4500000.00,
-    'Nguyen Van A, Nguyen Thi B',
     NULL, -- room_notes
     NOW(), NOW(), 0, false
 ),
@@ -1253,7 +1250,6 @@ INSERT INTO booking_rooms (
     5,
     2, 0,
     11000000.00,
-    'Tran Van C, Tran Thi D',
     NULL, -- room_notes
     NOW(), NOW(), 0, false
 )

@@ -26,4 +26,5 @@ public interface BookingService {
     BookingResponse checkOutBooking(String bookingId, String checkedOutBy);
     BookingResponse markNoShow(String bookingId, String reason);
     void autoConfirmAfterPayment(String bookingId);
+    BookingResponse checkoutComplete(com.aurora.backend.dto.request.CheckoutRequest request);
 }
