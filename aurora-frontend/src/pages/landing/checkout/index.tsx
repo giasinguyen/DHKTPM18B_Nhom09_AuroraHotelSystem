@@ -9,7 +9,6 @@ import ConfirmBookingStep from "./steps/ConfirmBookingStep";
 import ExtrasStep from "./steps/ExtrasStep";
 import GuestDetailsStep from "./steps/GuestDetailsStep";
 import PaymentStep from "./steps/PaymentStep";
-import PriceSummary from "./components/PriceSummary";
 import { BookingSummary } from "@/components/booking";
 import type { BookingRoom } from "./types";
 
@@ -45,7 +44,7 @@ export interface CheckoutData {
   };
 
   // Step 4: Payment
-  paymentMethod?: "credit-card" | "bank-transfer";
+  paymentMethod?: "cash" | "vnpay" | "momo" | "visa";
 }
 
 export default function CheckoutPage() {
@@ -97,13 +96,14 @@ export default function CheckoutPage() {
       };
     });
 
-    const newCheckoutData = {
+    const newCheckoutData: CheckoutData = {
       rooms,
       checkIn,
       checkOut,
       guests,
       nights,
       roomExtras,
+      paymentMethod: "cash", // Default to cash payment
     };
 
     console.log("📦 Initialized checkoutData with", rooms.length, "rooms");
@@ -165,6 +165,13 @@ export default function CheckoutPage() {
   useEffect(() => {
     localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
   }, [checkoutData]);
+
+  // Set default payment method to cash when entering step 4
+  useEffect(() => {
+    if (currentStep === 4 && !checkoutData.paymentMethod) {
+      updateCheckoutData({ paymentMethod: "cash" });
+    }
+  }, [currentStep, checkoutData.paymentMethod]);
 
   // Redirect if no rooms selected
   useEffect(() => {
@@ -287,85 +294,53 @@ export default function CheckoutPage() {
         {/* Progress Bar */}
         <ProgressBar currentStep={currentStep} />
 
-        {currentStep === 1 || currentStep === 2 || currentStep === 3 ? (
-          // Step 1, 2 & 3: Use same layout as Booking page (no Card wrapper, use BookingSummary)
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2">
-              {renderStep()}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-6">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="flex items-center gap-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Quay lại
-                </Button>
-                {currentStep < 4 && (
-                  <Button
-                    onClick={handleNext}
-                    disabled={!canProceed()}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    Tiếp theo
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Booking Summary Sidebar */}
-            <div className="lg:col-span-1">
-              <BookingSummary
-                checkIn={checkoutData.checkIn}
-                checkOut={checkoutData.checkOut}
-                guests={checkoutData.guests}
-                nights={checkoutData.nights}
-                bookingRooms={checkoutData.rooms}
-                roomExtras={checkoutData.roomExtras}
-                showProceedButton={false}
-              />
-            </div>
-          </div>
-        ) : (
-          // Other steps: Use card layout with PriceSummary
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2">
+        {/* All steps use same layout with BookingSummary */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {currentStep === 4 ? (
               <Card className="p-6">{renderStep()}</Card>
+            ) : (
+              renderStep()
+            )}
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-6">
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="flex items-center gap-2"
+                disabled={currentStep === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Quay lại
+              </Button>
+              {currentStep < 4 && (
                 <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="flex items-center gap-2"
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Trước
+                  Tiếp theo
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
-                {currentStep < 4 && (
-                  <Button
-                    onClick={handleNext}
-                    disabled={!canProceed()}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    Tiếp theo
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Price Summary Sidebar */}
-            <div className="lg:col-span-1">
-              <PriceSummary checkoutData={checkoutData} />
+              )}
             </div>
           </div>
-        )}
+
+          {/* Booking Summary Sidebar */}
+          <div className="lg:col-span-1">
+            <BookingSummary
+              checkIn={checkoutData.checkIn}
+              checkOut={checkoutData.checkOut}
+              guests={checkoutData.guests}
+              nights={checkoutData.nights}
+              bookingRooms={checkoutData.rooms}
+              roomExtras={checkoutData.roomExtras}
+              showProceedButton={false}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
