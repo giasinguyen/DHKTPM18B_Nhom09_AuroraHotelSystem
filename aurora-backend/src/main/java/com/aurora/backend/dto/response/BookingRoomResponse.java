@@ -19,4 +19,5 @@ public class BookingRoomResponse {
     Double pricePerNight;
     Integer nights;
     Double totalPrice; // pricePerNight * nights
+    String roomNotes; // Ghi chú cho phòng này
 }

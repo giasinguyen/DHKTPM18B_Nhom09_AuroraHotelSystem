@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt phòng</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #1a1a1a; background-color: #f5f5f5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5;">
+    <tr>
+        <td align="center" style="padding: 20px 0;">
+            <table role="presentation" width="800" cellpadding="0" cellspacing="0" border="0" style="max-width: 800px; width: 100%; background-color: #ffffff;">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background-color: #d4a574; color: #ffffff; padding: 32px; text-align: center;">
+                        <h1 style="margin: 0 0 8px 0; font-size: 26px; font-weight: 600;">Xác nhận đặt phòng thành công</h1>
+                        <p style="margin: 0; font-size: 15px; opacity: 0.95;">Cảm ơn quý khách đã lựa chọn Aurora Hotel</p>
+                    </td>
+                </tr>
+
+                <!-- Content -->
+                <tr>
+                    <td style="padding: 32px;">
+
+                        <!-- Greeting -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="padding-bottom: 24px;">
+                                    <p style="margin: 0 0 12px 0; font-size: 15px; text-align: justify;">
+                                        Kính gửi <strong th:text="${customerName}">Quý khách</strong>,
+                                    </p>
+                                    <p style="margin: 0; font-size: 15px; text-align: justify;">
+                                        Đơn đặt phòng của quý khách đã được xác nhận thành công. Dưới đây là thông tin chi tiết về đặt phòng của quý khách.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Booking Code -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                            <tr>
+                                <td style="background-color: #fafafa; border-left: 4px solid #d4a574; padding: 20px 24px;">
+                                    <h2 style="margin: 0 0 8px 0; color: #d4a574; font-size: 16px; font-weight: 600;">Mã đặt phòng</h2>
+                                    <p style="margin: 0; font-size: 20px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.5px;" th:text="${bookingCode}">AURORA_20231207_BK123456</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Customer Information -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                            <tr>
+                                <td>
+                                    <h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #d4a574;">Thông tin khách hàng</h3>
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500; width: 40%;">Họ và tên</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${customerName}">Nguyễn Văn A</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500;">Email</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${customerEmail}">example@email.com</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500;">Số điện thoại</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${customerPhone}">0123456789</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; font-size: 13px; color: #666; font-weight: 500;">Ngày đặt</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${bookingDate}">07/12/2023 14:30</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Stay Information -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                            <tr>
+                                <td>
+                                    <h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #d4a574;">Thông tin lưu trú</h3>
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500; width: 40%;">Ngày nhận phòng</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${checkinDate}">15/12/2023</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500;">Ngày trả phòng</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${checkoutDate}">18/12/2023</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #666; font-weight: 500;">Trạng thái đặt phòng</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; border-bottom: 1px solid #e5e5e5; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;">
+                                                <span style="display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; background-color: #d4a574; color: #ffffff;" th:text="${bookingStatus}">Đã xác nhận</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; font-size: 13px; color: #666; font-weight: 500;">Trạng thái thanh toán</td>
+                                            <td style="padding: 12px 16px; background-color: #fafafa; font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;">
+                                                <span style="display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; background-color: #d4a574; color: #ffffff;" th:text="${paymentStatus}">Đã thanh toán</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Room Details -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                            <tr>
+                                <td>
+                                    <h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #d4a574;">Chi tiết phòng</h3>
+
+                                    <!-- Room Card Loop -->
+                                    <div th:each="room : ${rooms}">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                                            <tr>
+                                                <td style="background-color: #fafafa; padding: 20px 24px; border-left: 3px solid #d4a574;">
+                                                    <!-- Room Header -->
+                                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e5e5e5;">
+                                                        <tr>
+                                                            <td style="font-size: 16px; font-weight: 600; color: #1a1a1a;" th:text="${room.name}">Deluxe Room</td>
+                                                            <td style="text-align: right;">
+                                                                <span style="display: inline-block; background-color: #d4a574; color: #ffffff; padding: 4px 16px; border-radius: 4px; font-size: 14px; font-weight: 600;" th:text="'Phòng ' + ${room.number}">Phòng 101</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <!-- Room Details -->
+                                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                        <tr>
+                                                            <td style="padding: 8px 0; font-size: 14px; color: #666; width: 35%;">Giá phòng / đêm</td>
+                                                            <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${room.price}">1,500,000 VNĐ</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding: 8px 0; font-size: 14px; color: #666;">Số đêm</td>
+                                                            <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${room.nights}">3</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding: 8px 0; font-size: 14px; color: #666;">Thành tiền</td>
+                                                            <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${room.total}">4,500,000 VNĐ</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Price Summary -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+                            <tr>
+                                <td>
+                                    <h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #d4a574;">Tổng kết thanh toán</h3>
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa; padding: 24px;">
+                                        <tr>
+                                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">
+                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td style="font-size: 15px; color: #666;">Tổng tiền phòng</td>
+                                                        <td style="font-size: 15px; font-weight: 600; color: #1a1a1a; text-align: right;" th:text="${subtotal}">4,500,000 VNĐ</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">
+                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td style="font-size: 15px; color: #666;">Giảm giá</td>
+                                                        <td style="font-size: 15px; font-weight: 600; color: #dc3545; text-align: right;" th:text="'-' + ${discount}">-450,000 VNĐ</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-top: 16px; border-top: 2px solid #d4a574;">
+                                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                    <tr>
+                                                        <td style="font-size: 17px; font-weight: 600; color: #1a1a1a;">Tổng cộng</td>
+                                                        <td style="font-size: 20px; font-weight: 700; color: #d4a574; text-align: right;" th:text="${total}">4,050,000 VNĐ</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Special Request -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;" th:if="${specialRequest != 'Không có'}">
+                            <tr>
+                                <td>
+                                    <h3 style="margin: 0 0 16px 0; font-size: 17px; font-weight: 600; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #d4a574;">Yêu cầu đặc biệt</h3>
+                                    <div style="background-color: #fff9e6; border-left: 4px solid #ffc107; padding: 16px 20px; font-size: 14px; color: #1a1a1a; text-align: justify;" th:text="${specialRequest}">
+                                        Phòng tầng cao, view biển
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Important Notice -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="background-color: #f0f7ff; border-left: 4px solid #2196F3; padding: 20px 24px;">
+                                    <h3 style="margin: 0 0 12px 0; color: #1976D2; font-size: 15px; font-weight: 600;">Lưu ý quan trọng</h3>
+                                    <ul style="margin: 0; padding-left: 20px; color: #333; font-size: 14px; line-height: 1.8;">
+                                        <li style="margin-bottom: 4px; text-align: justify;">Vui lòng mang theo CMND/CCCD khi làm thủ tục nhận phòng</li>
+                                        <li style="margin-bottom: 4px; text-align: justify;">Giờ nhận phòng: 14:00 | Giờ trả phòng: 12:00</li>
+                                        <li style="margin-bottom: 4px; text-align: justify;">Nếu cần hủy hoặc thay đổi đặt phòng, vui lòng liên hệ trước 24 giờ</li>
+                                        <li style="margin-bottom: 4px; text-align: justify;">Vui lòng giữ email này để xuất trình khi nhận phòng</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- Banner -->
+                <tr>
+                    <td>
+                        <img th:src="'cid:aurora-banner'" alt="Aurora Hotel Banner" style="width: 100%; height: auto; display: block;" />
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color: #2c3e50; color: #ecf0f1; padding: 24px 32px; text-align: center; font-size: 14px;">
+                        <p style="margin: 4px 0;"><strong>Aurora Hotel Management System</strong></p>
+                        <p style="margin: 4px 0;">Cảm ơn quý khách đã tin tưởng và lựa chọn dịch vụ của chúng tôi</p>
+                        <p style="margin: 12px 0 4px 0; font-size: 12px; opacity: 0.8;">© 2023 Aurora Hotel. All rights reserved.</p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

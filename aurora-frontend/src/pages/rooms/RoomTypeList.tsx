@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Eye, MoreHorizontal, Trash2, Edit, Users, Maximize, BedDouble, Check, DollarSign } from 'lucide-react';
+import fallbackImage from '@/assets/images/commons/fallback.png';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,9 +25,9 @@ import {
   type Column 
 } from '@/components/custom';
 
-import { roomTypeApi } from '@/services/roomApi';
+import { roomTypeApi, roomCategoryApi } from '@/services/roomApi';
 import { branchApi } from '@/services/branchApi';
-import type { RoomType } from '@/types/room.types';
+import type { RoomType, RoomCategory } from '@/types/room.types';
 import type { Branch } from '@/types/branch.types';
 
 export default function RoomTypeList() {
@@ -35,6 +36,7 @@ export default function RoomTypeList() {
   // State
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Pagination
@@ -46,6 +48,7 @@ export default function RoomTypeList() {
   // Filters
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   
   // Sorting
   const [sortColumn, setSortColumn] = useState('name');
@@ -55,18 +58,25 @@ export default function RoomTypeList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string | null>(null);
 
-  // Fetch branches for filter
+  // Fetch branches and categories for filter
   useEffect(() => {
-    const fetchBranches = async () => {
+    const fetchFilters = async () => {
       try {
-        const response = await branchApi.getAll({ page: 0, size: 100 });
-        setBranches(response.result.content);
+        const branchRes = await branchApi.getAll({ page: 0, size: 100 });
+        setBranches(branchRes.result.content);
+        
+        // Fetch categories for selected branch (or first branch if none selected)
+        if (branchRes.result.content.length > 0) {
+          const branchToFetch = selectedBranch || branchRes.result.content[0].id;
+          const categoryRes = await roomCategoryApi.getByBranch(branchToFetch);
+          setCategories(categoryRes.result || []);
+        }
       } catch (error) {
-        console.error('Failed to fetch branches:', error);
+        console.error('Failed to fetch filters:', error);
       }
     };
-    fetchBranches();
-  }, []);
+    fetchFilters();
+  }, [selectedBranch]);
 
   // Fetch room types
   const fetchRoomTypes = useCallback(async () => {
@@ -91,7 +101,14 @@ export default function RoomTypeList() {
       }
       
       const pageData = response.result;
-      setRoomTypes(pageData.content);
+      let filteredTypes = pageData.content;
+      
+      // Filter by category if selected
+      if (selectedCategory) {
+        filteredTypes = filteredTypes.filter(rt => rt.categoryId === selectedCategory);
+      }
+      
+      setRoomTypes(filteredTypes);
       setTotalPages(pageData.totalPages);
       setTotalElements(pageData.totalElements);
     } catch (error) {
@@ -100,7 +117,7 @@ export default function RoomTypeList() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, selectedBranch, sortColumn, sortDirection]);
+  }, [currentPage, pageSize, selectedBranch, selectedCategory, sortColumn, sortDirection]);
 
   useEffect(() => {
     fetchRoomTypes();
@@ -136,11 +153,24 @@ export default function RoomTypeList() {
   const handleClearFilters = () => {
     setSearchKeyword('');
     setSelectedBranch('');
+    setSelectedCategory('');
     setCurrentPage(0);
   };
 
   // Table columns
   const columns: Column<RoomType>[] = [
+    {
+      key: 'imageUrl',
+      header: 'Ảnh',
+      cell: (roomType) => (
+        <img
+          src={roomType.imageUrl || fallbackImage}
+          alt={roomType.name}
+          className="w-32 h-32 object-cover rounded-md"
+          onError={(e) => { e.currentTarget.src = fallbackImage; }}
+        />
+      ),
+    },
     {
       key: 'name',
       header: 'Tên loại phòng',
@@ -164,7 +194,7 @@ export default function RoomTypeList() {
         <div className="flex items-center gap-1.5">
           <DollarSign className="h-4 w-4 text-green-600" />
           <span className="font-medium text-green-700">
-            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(roomType.basePrice)}
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(roomType.priceFrom)}
           </span>
         </div>
       ),
@@ -200,9 +230,7 @@ export default function RoomTypeList() {
       cell: (roomType) => (
         <div className="flex items-center gap-2">
           <BedDouble className="h-4 w-4 text-muted-foreground" />
-          <span className="text-green-600">{roomType.availableRooms}</span>
-          <span className="text-muted-foreground">/</span>
-          <span>{roomType.totalRooms}</span>
+          <span className="font-medium">{roomType.totalRooms}</span>
         </div>
       ),
     },
@@ -285,6 +313,11 @@ export default function RoomTypeList() {
     label: branch.name,
   }));
 
+  const categoryOptions = categories.map((category) => ({
+    value: category.id,
+    label: category.name,
+  }));
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -316,6 +349,16 @@ export default function RoomTypeList() {
                 options: branchOptions,
                 onChange: (value) => {
                   setSelectedBranch(value === 'all' ? '' : value);
+                  setCurrentPage(0);
+                },
+              },
+              {
+                key: 'category',
+                label: 'Hạng phòng',
+                value: selectedCategory,
+                options: categoryOptions,
+                onChange: (value) => {
+                  setSelectedCategory(value === 'all' ? '' : value);
                   setCurrentPage(0);
                 },
               },

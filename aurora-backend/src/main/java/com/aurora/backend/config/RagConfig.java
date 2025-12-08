@@ -1,11 +1,14 @@
 package com.aurora.backend.config;
 
+import com.aurora.backend.service.RagService;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +20,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class RagConfig {
-
     @Value("${langchain4j.google-ai-gemini.embedding-model.output-dimensionality:768}")
     private int outputDimension;
+
+    @Bean
+    public RagService geminiRagService(ContentRetriever contentRetriever, GoogleAiGeminiChatModel googleAiGeminiChatModel) {
+        return AiServices.builder(RagService.class)
+                .chatModel(googleAiGeminiChatModel)
+                .contentRetriever(contentRetriever)
+                .build();
+    }
 
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore(DataSourceProperties properties, DataSourceProperties dataSourceProperties) {

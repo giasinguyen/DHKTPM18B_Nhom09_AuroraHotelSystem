@@ -19,12 +19,25 @@ public class ServiceCreationRequest {
     @NotBlank(message = "SERVICE_NAME_REQUIRED")
     String name;
     
-    String type;
+    @NotBlank(message = "SERVICE_CATEGORY_REQUIRED")
+    String categoryId;
     
     String description;
     
     @Positive(message = "BASE_PRICE_POSITIVE")
     Double basePrice;
+    
+    String unit; // "per hour", "per person", "per item", "per trip"
+    
+    Integer durationMinutes; // Duration (in minutes)
+    
+    Integer maxCapacityPerSlot; // Số lượng khách tối đa mỗi slot thời gian
+    
+    Boolean requiresBooking; // Có cần đặt trước không
+    
+    Boolean active; // Dịch vụ có đang hoạt động không
+    
+    String operatingHours; // "08:00-22:00" or "24/7"
     
     List<String> images;
 }

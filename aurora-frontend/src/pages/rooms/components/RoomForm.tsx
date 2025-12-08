@@ -3,7 +3,10 @@
 // ============================================
 
 import { useEffect, useState } from 'react';
-import { Loader2, Building2, DoorOpen, Users, Maximize, Layers } from 'lucide-react';
+import { Loader2, Building2, DoorOpen, Users, Maximize, Layers, DollarSign, Eye, Percent, Image as ImageIcon, Plus, X, Upload } from 'lucide-react';
+import fallbackImage from '@/assets/images/commons/fallback.png';
+import { uploadToCloudinary, uploadMultipleToCloudinary } from '@/config/cloudinary';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,9 +37,10 @@ interface FormState {
   roomNumber: string;
   floor: number;
   status: RoomStatus;
-  capacityAdults: number;
-  capacityChildren: number;
-  sizeM2: number;
+  viewType: string;
+  basePrice: number;
+  salePercent: number;
+  images: string[];
 }
 
 interface FormErrors {
@@ -44,9 +48,9 @@ interface FormErrors {
   roomTypeId?: string;
   roomNumber?: string;
   floor?: string;
-  capacityAdults?: string;
-  capacityChildren?: string;
-  sizeM2?: string;
+  viewType?: string;
+  basePrice?: string;
+  salePercent?: string;
 }
 
 // ============================================
@@ -84,11 +88,15 @@ export default function RoomForm({
     roomTypeId: room?.roomTypeId || '',
     roomNumber: room?.roomNumber || '',
     floor: room?.floor || 1,
-    status: room?.status || 'AVAILABLE',
-    capacityAdults: room?.capacityAdults || 2,
-    capacityChildren: room?.capacityChildren || 0,
-    sizeM2: room?.sizeM2 || 25,
+    status: room?.status || 'READY',
+    viewType: room?.viewType || 'CITY',
+    basePrice: room?.basePrice || 500000,
+    salePercent: room?.salePercent || 0,
+    images: room?.images || [],
   });
+  
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // ========== Effects ==========
 
@@ -100,11 +108,13 @@ export default function RoomForm({
         roomTypeId: room.roomTypeId || '',
         roomNumber: room.roomNumber || '',
         floor: room.floor || 1,
-        status: room.status || 'AVAILABLE',
-        capacityAdults: room.capacityAdults || 2,
-        capacityChildren: room.capacityChildren || 0,
-        sizeM2: room.sizeM2 || 25,
+        status: room.status || 'READY',
+        viewType: room.viewType || 'CITY',
+        basePrice: room.basePrice || 500000,
+        salePercent: room.salePercent || 0,
+        images: room.images || [],
       });
+      setNewImageUrl('');
       setErrors({});
     }
   }, [room]);
@@ -179,18 +189,78 @@ export default function RoomForm({
     if (formState.floor < -5 || formState.floor > 200) {
       newErrors.floor = 'Tầng phải từ -5 đến 200';
     }
-    if (formState.capacityAdults < 1 || formState.capacityAdults > 20) {
-      newErrors.capacityAdults = 'Số người lớn từ 1-20';
+    if (!formState.basePrice || formState.basePrice <= 0) {
+      newErrors.basePrice = 'Giá gốc phải lớn hơn 0';
     }
-    if (formState.capacityChildren < 0 || formState.capacityChildren > 10) {
-      newErrors.capacityChildren = 'Số trẻ em từ 0-10';
-    }
-    if (formState.sizeM2 < 10 || formState.sizeM2 > 1000) {
-      newErrors.sizeM2 = 'Diện tích từ 10-1000m²';
+    if (formState.salePercent < 0 || formState.salePercent > 100) {
+      newErrors.salePercent = '% giảm giá từ 0-100';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleAddImage = () => {
+    if (newImageUrl.trim() && !formState.images.includes(newImageUrl.trim())) {
+      setFormState(prev => ({
+        ...prev,
+        images: [...prev.images, newImageUrl.trim()]
+      }));
+      setNewImageUrl('');
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Validate max images
+    if (formState.images.length + files.length > 10) {
+      toast.error('Chỉ được tải tối đa 10 ảnh');
+      return;
+    }
+
+    // Validate file types and sizes
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Vui lòng chỉ chọn các file ảnh');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`File ${file.name} vượt quá 5MB`);
+        return;
+      }
+    }
+
+    try {
+      setIsUploadingImage(true);
+      toast.info(`Đang tải lên ${files.length} ảnh...`);
+      
+      // Upload all files using backend API
+      const uploadedUrls = await uploadMultipleToCloudinary(Array.from(files), 'rooms');
+      
+      // Add to form state
+      setFormState(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+      
+      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công!`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Không thể tải ảnh lên. Vui lòng thử lại.');
+    } finally {
+      setIsUploadingImage(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormState(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -204,9 +274,10 @@ export default function RoomForm({
         roomNumber: formState.roomNumber,
         floor: formState.floor,
         status: formState.status,
-        capacityAdults: formState.capacityAdults,
-        capacityChildren: formState.capacityChildren,
-        sizeM2: formState.sizeM2,
+        viewType: formState.viewType,
+        basePrice: formState.basePrice,
+        salePercent: formState.salePercent,
+        images: formState.images.length > 0 ? formState.images : undefined,
       };
       await onSubmit(updateData);
     } else {
@@ -216,9 +287,10 @@ export default function RoomForm({
         roomNumber: formState.roomNumber,
         floor: formState.floor,
         status: formState.status,
-        capacityAdults: formState.capacityAdults,
-        capacityChildren: formState.capacityChildren,
-        sizeM2: formState.sizeM2,
+        viewType: formState.viewType,
+        basePrice: formState.basePrice,
+        salePercent: formState.salePercent,
+        images: formState.images.length > 0 ? formState.images : undefined,
       };
       await onSubmit(createData);
     }
@@ -388,72 +460,161 @@ export default function RoomForm({
         </CardContent>
       </Card>
 
-      {/* Capacity & Size Section */}
+      {/* Price & View Section */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-purple-100 text-purple-600">
-              <Users className="h-5 w-5" />
+            <div className="p-2 rounded-xl bg-green-100 text-green-600">
+              <DollarSign className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg">Sức chứa & Diện tích</CardTitle>
-              <CardDescription>Thông tin về sức chứa và kích thước phòng</CardDescription>
+              <CardTitle className="text-lg">Giá & Khuyến mãi</CardTitle>
+              <CardDescription>Quản lý giá phòng và giảm giá linh hoạt</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-3">
-          {/* Capacity Adults */}
+          {/* View Type */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              Số người lớn <span className="text-destructive">*</span>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              Hướng view <span className="text-destructive">*</span>
             </Label>
-            <Input
-              type="number"
-              value={formState.capacityAdults}
-              onChange={(e) => updateField('capacityAdults', parseInt(e.target.value) || 1)}
-              min={1}
-              max={20}
-              className={`h-11 ${errors.capacityAdults ? 'border-destructive' : ''}`}
-            />
-            <p className="text-sm text-muted-foreground">Từ 1-20 người</p>
-            {errors.capacityAdults && <p className="text-sm text-destructive">{errors.capacityAdults}</p>}
+            <Select
+              value={formState.viewType}
+              onValueChange={(value) => updateField('viewType', value)}
+            >
+              <SelectTrigger className="h-11">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CITY">Thành phố</SelectItem>
+                <SelectItem value="SEA">Biển/Sông</SelectItem>
+                <SelectItem value="MOUNTAIN">Núi</SelectItem>
+                <SelectItem value="GARDEN">Vườn</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.viewType && <p className="text-sm text-destructive">{errors.viewType}</p>}
           </div>
 
-          {/* Capacity Children */}
+          {/* Base Price */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              Số trẻ em
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              Giá gốc (VNĐ/đêm) <span className="text-destructive">*</span>
             </Label>
             <Input
               type="number"
-              value={formState.capacityChildren}
-              onChange={(e) => updateField('capacityChildren', parseInt(e.target.value) || 0)}
+              value={formState.basePrice}
+              onChange={(e) => updateField('basePrice', parseFloat(e.target.value) || 0)}
               min={0}
-              max={10}
-              className={`h-11 ${errors.capacityChildren ? 'border-destructive' : ''}`}
+              step={10000}
+              placeholder="500000"
+              className={`h-11 ${errors.basePrice ? 'border-destructive' : ''}`}
             />
-            <p className="text-sm text-muted-foreground">Từ 0-10 trẻ em</p>
-            {errors.capacityChildren && <p className="text-sm text-destructive">{errors.capacityChildren}</p>}
+            <p className="text-sm text-muted-foreground">Giá gốc của phòng (có thể thay đổi)</p>
+            {errors.basePrice && <p className="text-sm text-destructive">{errors.basePrice}</p>}
           </div>
 
-          {/* Size */}
+          {/* Sale Percent */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <Maximize className="h-4 w-4 text-muted-foreground" />
-              Diện tích (m²) <span className="text-destructive">*</span>
+              <Percent className="h-4 w-4 text-muted-foreground" />
+              % Giảm giá
             </Label>
             <Input
               type="number"
-              value={formState.sizeM2}
-              onChange={(e) => updateField('sizeM2', parseInt(e.target.value) || 10)}
-              min={10}
-              max={1000}
-              className={`h-11 ${errors.sizeM2 ? 'border-destructive' : ''}`}
+              value={formState.salePercent}
+              onChange={(e) => updateField('salePercent', parseFloat(e.target.value) || 0)}
+              min={0}
+              max={100}
+              step={1}
+              placeholder="0"
+              className={`h-11 ${errors.salePercent ? 'border-destructive' : ''}`}
             />
-            <p className="text-sm text-muted-foreground">Từ 10-1000 m²</p>
-            {errors.sizeM2 && <p className="text-sm text-destructive">{errors.sizeM2}</p>}
+            <p className="text-sm text-muted-foreground">
+              Giá hiển thị: {formState.basePrice ? (formState.basePrice * (100 - formState.salePercent) / 100).toLocaleString('vi-VN') : '0'} VNĐ
+            </p>
+            {errors.salePercent && <p className="text-sm text-destructive">{errors.salePercent}</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Images Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+              <ImageIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Hình ảnh phòng</CardTitle>
+              <CardDescription>Tải lên hình ảnh cho phòng (tối đa 10 ảnh)</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('room-images-upload')?.click()}
+                disabled={isUploadingImage || formState.images.length >= 10}
+                className="flex items-center gap-2"
+              >
+                {isUploadingImage ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
+              </Button>
+              <input
+                id="room-images-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <span className="text-sm text-muted-foreground">
+                JPG, PNG (tối đa 5MB/ảnh, {10 - formState.images.length} ảnh còn lại)
+              </span>
+            </div>
+
+            {formState.images.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {formState.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={image}
+                      alt={`Room Image ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-md border"
+                      onError={(e) => { e.currentTarget.src = fallbackImage; }}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 rounded-full shadow-md opacity-90 hover:opacity-100 transition-opacity"
+                      onClick={() => handleRemoveImage(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+                <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Chưa có hình ảnh nào được thêm</p>
+                <p className="text-sm">Nhấp nút "Chọn ảnh" để tải lên</p>
+              </div>
+            )}
+            {formState.images.length >= 10 && (
+              <p className="text-sm text-amber-600">Đã đạt tối đa 10 ảnh</p>
+            )}
           </div>
         </CardContent>
       </Card>

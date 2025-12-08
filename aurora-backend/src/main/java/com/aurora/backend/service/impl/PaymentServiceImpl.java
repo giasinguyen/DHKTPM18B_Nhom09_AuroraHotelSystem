@@ -90,14 +90,11 @@ public class PaymentServiceImpl implements PaymentService {
     private void updateBookingPaymentStatus(Booking booking) {
         BigDecimal totalPaid = paymentRepository.getTotalPaidAmount(booking.getId());
         BigDecimal totalPrice = booking.getTotalPrice();
-        BigDecimal depositAmount = booking.getDepositAmount();
         
         Booking.PaymentStatus newStatus;
         
         if (totalPaid.compareTo(totalPrice) >= 0) {
             newStatus = Booking.PaymentStatus.PAID;
-        } else if (depositAmount != null && totalPaid.compareTo(depositAmount) >= 0) {
-            newStatus = Booking.PaymentStatus.DEPOSIT_PAID;
         } else if (totalPaid.compareTo(BigDecimal.ZERO) > 0) {
             newStatus = Booking.PaymentStatus.PARTIALLY_PAID;
         } else {

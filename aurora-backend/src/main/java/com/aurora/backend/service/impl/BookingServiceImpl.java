@@ -5,18 +5,29 @@ import com.aurora.backend.dto.request.BookingConfirmRequest;
 import com.aurora.backend.dto.request.BookingCreationRequest;
 import com.aurora.backend.dto.request.BookingModificationRequest;
 import com.aurora.backend.dto.request.BookingUpdateRequest;
+import com.aurora.backend.dto.request.CheckoutRequest;
 import com.aurora.backend.dto.response.BookingCancellationResponse;
 import com.aurora.backend.dto.response.BookingResponse;
 import com.aurora.backend.entity.Booking;
 import com.aurora.backend.entity.Branch;
 import com.aurora.backend.entity.User;
+import com.aurora.backend.entity.Room;
+import com.aurora.backend.entity.Service;
+import com.aurora.backend.entity.BookingRoom;
+import com.aurora.backend.entity.ServiceBooking;
 import com.aurora.backend.exception.AppException;
 import com.aurora.backend.enums.ErrorCode;
 import com.aurora.backend.mapper.BookingMapper;
+import com.aurora.backend.mapper.BookingRoomMapper;
 import com.aurora.backend.repository.BookingRepository;
 import com.aurora.backend.repository.BranchRepository;
 import com.aurora.backend.repository.UserRepository;
+import com.aurora.backend.repository.RoomRepository;
+import com.aurora.backend.repository.ServiceRepository;
+import com.aurora.backend.repository.BookingRoomRepository;
+import com.aurora.backend.repository.ServiceBookingRepository;
 import com.aurora.backend.service.BookingService;
+import com.aurora.backend.service.EmailService;
 import com.aurora.backend.service.RefundService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +54,13 @@ public class BookingServiceImpl implements BookingService {
     BookingRepository bookingRepository;
     BranchRepository branchRepository;
     UserRepository userRepository;
+    RoomRepository roomRepository;
+    ServiceRepository serviceRepository;
+    BookingRoomRepository bookingRoomRepository;
+    ServiceBookingRepository serviceBookingRepository;
     BookingMapper bookingMapper;
     RefundService refundService;
+    EmailService emailService;
 
     @Override
     @Transactional
@@ -54,12 +70,27 @@ public class BookingServiceImpl implements BookingService {
         Branch branch = branchRepository.findById(request.getBranchId())
                 .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_EXISTED));
         
-        User customer = userRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        
         Booking booking = bookingMapper.toBooking(request);
         booking.setBranch(branch);
-        booking.setCustomer(customer);
+        
+        // Set customer if provided
+        if (request.getCustomerId() != null && !request.getCustomerId().trim().isEmpty()) {
+            User customer = userRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            booking.setCustomer(customer);
+            log.info("Creating booking for customer: {}", customer.getUsername());
+        } else {
+            booking.setCustomer(null);
+            log.info("Creating booking for walk-in guest: {}", request.getGuestFullName());
+        }
+        
+        // Always set guest information (from form)
+        // This is useful even for logged-in customers (e.g., booking for someone else, contact backup)
+        booking.setGuestFullName(request.getGuestFullName());
+        booking.setGuestEmail(request.getGuestEmail());
+        booking.setGuestPhone(request.getGuestPhone());
+        log.info("Guest info set - Name: {}, Email: {}, Phone: {}", 
+                request.getGuestFullName(), request.getGuestEmail(), request.getGuestPhone());
         
         String bookingCode = generateBookingCode();
         while (bookingRepository.existsByBookingCode(bookingCode)) {
@@ -375,5 +406,211 @@ public class BookingServiceImpl implements BookingService {
             bookingRepository.save(booking);
             log.info("Booking auto-confirmed: {}", booking.getBookingCode());
         }
+    }
+    
+    @Override
+    @Transactional
+    public BookingResponse checkoutComplete(CheckoutRequest request) {
+        log.info("Processing complete checkout for branch: {}", request.getBranchId());
+        
+        // Validate payment success - only create booking if payment is successful
+        if (request.getPaymentSuccess() == null || !request.getPaymentSuccess()) {
+            log.warn("Payment not successful - booking will not be created. Payment method: {}", request.getPaymentMethod());
+            throw new AppException(ErrorCode.PAYMENT_NOT_SUCCESSFUL); // You may need to add this error code
+        }
+        
+        log.info("Payment confirmed successful - proceeding with booking creation");
+        
+        // 1. Create Booking
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_EXISTED));
+        
+        // Set initial booking status based on payment method
+        // For VNPay: Set CONFIRMED so payment can be created, will be updated after payment result
+        // For Cash: Set PENDING initially
+        Booking.BookingStatus initialStatus = "vnpay".equals(request.getPaymentMethod()) 
+                ? Booking.BookingStatus.CONFIRMED 
+                : Booking.BookingStatus.PENDING;
+        
+        Booking booking = Booking.builder()
+                .branch(branch)
+                .checkin(request.getCheckIn())
+                .checkout(request.getCheckOut())
+                .status(initialStatus)
+                .paymentStatus(Booking.PaymentStatus.PENDING)
+                .specialRequest(request.getSpecialRequests())
+                .build();
+        
+        // Set customer if provided and exists
+        // Note: If customerId is provided but user not found, try to find by email as fallback
+        // (This handles cases where seed data was re-run and user IDs changed)
+        if (request.getCustomerId() != null && !request.getCustomerId().trim().isEmpty()) {
+            User customer = null;
+            
+            try {
+                // First try: Find by ID
+                customer = userRepository.findById(request.getCustomerId())
+                        .orElse(null);
+                
+                // Fallback: If not found by ID, try to find by email (more stable)
+                if (customer == null && request.getGuestEmail() != null && !request.getGuestEmail().trim().isEmpty()) {
+                    customer = userRepository.findByEmail(request.getGuestEmail())
+                            .orElse(null);
+                }
+                
+                if (customer != null) {
+                    booking.setCustomer(customer);
+                    log.info("Creating booking for customer: {}", customer.getUsername());
+                } else {
+                    booking.setCustomer(null);
+                    log.warn("Customer ID '{}' and email '{}' not found - treating as walk-in guest: {}", 
+                            request.getCustomerId(), request.getGuestEmail(), request.getGuestFullName());
+                }
+            } catch (Exception e) {
+                log.error("Error finding customer with ID '{}': {}", 
+                        request.getCustomerId(), e.getMessage(), e);
+                booking.setCustomer(null);
+            }
+        } else {
+            booking.setCustomer(null);
+            log.info("Creating booking for walk-in guest: {}", request.getGuestFullName());
+        }
+        
+        // Always set guest information (from form in step 3)
+        // This is useful even for logged-in customers (e.g., booking for someone else, contact backup)
+        booking.setGuestFullName(request.getGuestFullName());
+        booking.setGuestEmail(request.getGuestEmail());
+        booking.setGuestPhone(request.getGuestPhone());
+        log.info("Guest info set - Name: {}, Email: {}, Phone: {}", 
+                request.getGuestFullName(), request.getGuestEmail(), request.getGuestPhone());
+        
+        // Generate booking code
+        String bookingCode = generateBookingCode();
+        while (bookingRepository.existsByBookingCode(bookingCode)) {
+            bookingCode = generateBookingCode();
+        }
+        booking.setBookingCode(bookingCode);
+        
+        // Calculate prices
+        BigDecimal roomsSubtotal = BigDecimal.ZERO;
+        BigDecimal servicesTotal = BigDecimal.ZERO;
+        
+        for (CheckoutRequest.RoomBookingRequest roomReq : request.getRooms()) {
+            BigDecimal roomPrice = BigDecimal.valueOf(roomReq.getPricePerNight());
+            BigDecimal roomTotal = roomPrice.multiply(BigDecimal.valueOf(request.getNights()));
+            roomsSubtotal = roomsSubtotal.add(roomTotal);
+        }
+        
+        if (request.getServices() != null) {
+            for (CheckoutRequest.ServiceBookingRequest serviceReq : request.getServices()) {
+                BigDecimal servicePrice = BigDecimal.valueOf(serviceReq.getPrice());
+                BigDecimal serviceTotal = servicePrice.multiply(BigDecimal.valueOf(serviceReq.getQuantity()));
+                servicesTotal = servicesTotal.add(serviceTotal);
+            }
+        }
+        
+        booking.setSubtotalPrice(roomsSubtotal);
+        booking.setTotalPrice(roomsSubtotal.add(servicesTotal));
+        booking.setDiscountAmount(BigDecimal.ZERO);
+        
+        // Set payment status based on payment method
+        if ("cash".equals(request.getPaymentMethod())) {
+            // Cash payment - mark as PAID and CONFIRMED
+            booking.setPaymentStatus(Booking.PaymentStatus.PAID);
+            booking.setStatus(Booking.BookingStatus.CONFIRMED);
+            log.info("Cash payment confirmed - setting payment status to PAID and booking to CONFIRMED");
+        } else if ("vnpay".equals(request.getPaymentMethod())) {
+            // VNPay - keep PENDING payment status, booking already CONFIRMED for payment creation
+            // Will be updated to PAID after VNPay IPN callback confirms payment
+            booking.setPaymentStatus(Booking.PaymentStatus.PENDING);
+            log.info("VNPay payment - keeping payment status PENDING, booking is CONFIRMED for payment gateway");
+        } else {
+            // Other online payments - similar to VNPay
+            booking.setPaymentStatus(Booking.PaymentStatus.PENDING);
+            log.info("Online payment - keeping payment status PENDING");
+        }
+        
+        Booking savedBooking = bookingRepository.save(booking);
+        log.info("Booking created: {} with code: {}", savedBooking.getId(), savedBooking.getBookingCode());
+        
+        // 2. Create BookingRooms
+        for (CheckoutRequest.RoomBookingRequest roomReq : request.getRooms()) {
+            Room room = roomRepository.findById(roomReq.getRoomId())
+                    .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+            
+            BigDecimal pricePerNight = BigDecimal.valueOf(roomReq.getPricePerNight());
+            BigDecimal totalAmount = pricePerNight.multiply(BigDecimal.valueOf(request.getNights()));
+            
+            BookingRoom bookingRoom = BookingRoom.builder()
+                    .booking(savedBooking)
+                    .room(room)
+                    .pricePerNight(pricePerNight)
+                    .nights(request.getNights())
+                    .actualAdults(request.getGuests())
+                    .actualChildren(0)
+                    .totalAmount(totalAmount)
+                    .roomNotes(roomReq.getRoomNotes())
+                    .build();
+            
+            bookingRoomRepository.save(bookingRoom);
+            log.info("BookingRoom created for room: {}", room.getRoomNumber());
+        }
+        
+        // 3. Create ServiceBookings (only if customer exists)
+        if (request.getServices() != null && !request.getServices().isEmpty() && booking.getCustomer() != null) {
+            for (CheckoutRequest.ServiceBookingRequest serviceReq : request.getServices()) {
+                Service service = serviceRepository.findById(serviceReq.getServiceId())
+                        .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_FOUND));
+                
+                BigDecimal pricePerUnit = BigDecimal.valueOf(serviceReq.getPrice());
+                BigDecimal totalPrice = pricePerUnit.multiply(BigDecimal.valueOf(serviceReq.getQuantity()));
+                
+                // Use check-in date as service date time (can be adjusted later)
+                LocalDateTime serviceDateTime = request.getCheckIn().atStartOfDay();
+                
+                ServiceBooking serviceBooking = ServiceBooking.builder()
+                        .booking(savedBooking)
+                        .service(service)
+                        .customer(booking.getCustomer())
+                        .serviceDateTime(serviceDateTime)
+                        .quantity(serviceReq.getQuantity())
+                        .pricePerUnit(pricePerUnit)
+                        .totalPrice(totalPrice)
+                        .status(ServiceBooking.ServiceBookingStatus.PENDING)
+                        .build();
+                
+                serviceBookingRepository.save(serviceBooking);
+                log.info("ServiceBooking created for service: {} (quantity: {})", 
+                        service.getName(), serviceReq.getQuantity());
+            }
+        } else if (request.getServices() != null && !request.getServices().isEmpty() && booking.getCustomer() == null) {
+            log.warn("Services requested but no customer - skipping service bookings for walk-in guest");
+        }
+        
+        log.info("Checkout completed successfully. Booking ID: {}, Code: {}", 
+                savedBooking.getId(), savedBooking.getBookingCode());
+        
+        // Ensure customer is loaded before mapping (lazy loading issue)
+        bookingRepository.flush();
+        
+        // Force load customer if it exists (to avoid lazy loading issues)
+        if (savedBooking.getCustomer() != null) {
+            // Access customer to trigger lazy load
+            savedBooking.getCustomer().getUsername();
+        }
+        
+        // Send booking confirmation email for cash payments
+        if ("cash".equals(request.getPaymentMethod())) {
+            try {
+                emailService.sendBookingConfirmation(savedBooking);
+                log.info("Booking confirmation email queued for cash payment: {}", savedBooking.getBookingCode());
+            } catch (Exception e) {
+                log.error("Failed to send booking confirmation email for: {}", 
+                    savedBooking.getBookingCode(), e);
+                // Don't fail the booking if email fails
+            }
+        }
+        
+        return bookingMapper.toBookingResponse(savedBooking);
     }
 }

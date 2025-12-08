@@ -20,34 +20,27 @@ import BranchListPage from "@/pages/branches/BranchList";
 import BranchUpsertPage from "@/pages/branches/BranchUpsert";
 
 // Common
-import ContactPage from "@/pages/common/Contact";
+import ContactPage from "@/pages/landing/Contact";
 import ErrorPage from "@/pages/common/ErrorPage";
-import GalleryPage from "@/pages/common/Gallery";
-import HomePage from "@/pages/common/Home";
-import NewsPage from "@/pages/common/News";
-import ServicePage from "@/pages/common/Service";
-import UserProfilePage from "@/pages/common/UserProfile";
-import GuestBranchListPage from "@/pages/common/BranchList";
-import GuestRoomDetailPage from "@/pages/common/RoomDetail";
-import GuestRoomListPage from "@/pages/common/RoomList";
-import PaymentReturnPage from "@/pages/common/PaymentReturn";
-import AboutPage from "@/pages/common/About";
-import AccommodationPage from "@/pages/common/Accommodation";
+import GalleryPage from "@/pages/landing/Gallery";
+import HomePage from "@/pages/landing/Home";
+import NewsPage from "@/pages/landing/News";
+import ServicePage from "@/pages/landing/Service";
+import UserProfilePage from "@/pages/common/customer/UserProfile";
+import GuestBranchListPage from "@/pages/landing/BranchList";
+import AboutPage from "@/pages/landing/About";
+import AccommodationPage from "@/pages/landing/Accommodation";
+import AccommodationCategoryPage from "@/pages/landing/AccommodationCategory";
+import BookingPage from "@/pages/landing/Booking";
+import CheckoutPage from "@/pages/landing/checkout";
+import BookingSuccessPage from "@/pages/landing/checkout/BookingSuccess";
+import PaymentReturnPage from "@/pages/landing/payment/PaymentReturn";
 // Common - Customer Area
 import ProfilePage from "@/pages/common/customer/account/Profile";
 import ProfileUpsertPage from "@/pages/common/customer/account/ProfileUpsert";
-import CreateBookingPage from "@/pages/common/customer/booking/CreateBooking";
-import ConfirmBookingPage from "@/pages/common/customer/booking/ConfirmBooking";
 import CustomerBookingListPage from "@/pages/common/customer/bookings/BookingList";
-import CustomerBookingDetailPage from "@/pages/common/customer/bookings/BookingDetail";
 import FavoriteListPage from "@/pages/common/customer/favorites/FavoriteList";
 import PaymentPage from "@/pages/common/customer/payment/PaymentPage";
-import LateCheckoutRequestListPage from "@/pages/common/customer/requests/LateCheckoutRequestList";
-import LateCheckoutRequestUpsertPage from "@/pages/common/customer/requests/LateCheckoutRequestUpsert";
-import EarlyCheckinRequestListPage from "@/pages/common/customer/requests/EarlyCheckinRequestList";
-import EarlyCheckinRequestUpsertPage from "@/pages/common/customer/requests/EarlyCheckinRequestUpsert";
-import IssueReportListPage from "@/pages/common/customer/requests/IssueReportList";
-import IssueReportUpsertPage from "@/pages/common/customer/requests/IssueReportUpsert";
 import ReviewListPage from "@/pages/common/customer/reviews/ReviewList";
 import ReviewUpsertPage from "@/pages/common/customer/reviews/ReviewUpsert";
 
@@ -83,6 +76,8 @@ import RoleDetailPage from "@/pages/role/RoleDetail";
 
 // Rooms
 import RoomListPage from "@/pages/rooms/RoomList";
+import RoomCategoryListPage from "@/pages/rooms/RoomCategoryList";
+import RoomCategoryUpsertPage from "@/pages/rooms/RoomCategoryUpsert";
 import RoomTypeListPage from "@/pages/rooms/RoomTypeList";
 import RoomTypeUpsertPage from "@/pages/rooms/RoomTypeUpsert";
 import RoomUpsertPage from "@/pages/rooms/RoomUpsert";
@@ -90,6 +85,12 @@ import RoomUpsertPage from "@/pages/rooms/RoomUpsert";
 // Services
 import ServiceListPage from "@/pages/services/ServiceList";
 import ServiceUpsertPage from "@/pages/services/ServiceUpsert";
+import ServiceCategoryListPage from "@/pages/services/ServiceCategoryList";
+import ServiceCategoryUpsertPage from "@/pages/services/ServiceCategoryUpsert";
+
+// Shifts
+import ShiftManagementPage from "@/pages/shifts/ShiftManagement";
+import StaffShiftDashboard from "@/pages/shifts/StaffShiftDashboard";
 
 // User (shared)
 import UserDetailPage from "@/pages/user/UserDetail";
@@ -103,35 +104,28 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       // Guest
-      { index: true, element: <HomePage /> },
-      { path: "about", element: <AboutPage /> },
-      { path: "accommodation", element: <AccommodationPage /> },
-      { path: "service", element: <ServicePage /> },
-      { path: "branches", element: <GuestBranchListPage /> },
-      { path: "rooms", element: <GuestRoomListPage /> },
-      { path: "rooms/:id", element: <GuestRoomDetailPage /> },
-      { path: "gallery", element: <GalleryPage /> },
-      { path: "news", element: <NewsPage /> },
-      { path: "contact", element: <ContactPage /> },
-      { path: "auth", element: <AuthPage /> },
-      { path: "payment/return", element: <PaymentReturnPage /> },
+      { index: true, element: <HomePage /> }, // temp complete
+      { path: "auth", element: <AuthPage /> }, // temp complete
+      { path: "about", element: <AboutPage /> }, // temp complete
+      { path: "accommodation", element: <AccommodationPage /> }, // temp complete
+      { path: "accommodation/:categoryId", element: <AccommodationCategoryPage /> }, // temp complete
+      { path: "booking", element: <BookingPage /> }, // temp complete
+      { path: "checkout", element: <CheckoutPage /> },
+      { path: "booking/success", element: <BookingSuccessPage /> },
+      { path: "service", element: <ServicePage /> }, // temp complete
+      { path: "branches", element: <GuestBranchListPage /> }, //TODO: Giới thiệu chi nhánh => update later
+      { path: "gallery", element: <GalleryPage /> }, //TODO: Giới thiệu album => update later
+      { path: "news", element: <NewsPage /> }, //TODO: Giới thiệu news website (Trung Nguyen) => update later
+      { path: "contact", element: <ContactPage /> }, //TODO: Giới thiệu Liên hệ => update later
+      { path: "payment", element: <PaymentPage /> }, //TODO: Fix URL => thanh toán sau booking (Gia Sĩ) => update later
+      { path: "payment/return", element: <PaymentReturnPage /> }, //TODO: Fix URL => thanh toán sau booking (Gia Sĩ) => update later
       // Customer
-      { path: "profile", element: <ProfilePage /> },
-      { path: "profile/upsert", element: <ProfileUpsertPage /> },
-      { path: "booking", element: <CustomerBookingListPage /> },
-      { path: "booking/create", element: <CreateBookingPage /> },
-      { path: "booking/confirm", element: <ConfirmBookingPage /> },
-      { path: "booking/:id", element: <CustomerBookingDetailPage /> },
-      { path: "favorites", element: <FavoriteListPage /> },
-      { path: "late-checkout-requests", element: <LateCheckoutRequestListPage /> },
-      { path: "late-checkout-requests/upsert", element: <LateCheckoutRequestUpsertPage /> },
-      { path: "early-checkin-requests", element: <EarlyCheckinRequestListPage /> },
-      { path: "early-checkin-requests/upsert", element: <EarlyCheckinRequestUpsertPage /> },
-      { path: "issue-reports", element: <IssueReportListPage /> },
-      { path: "issue-reports/upsert", element: <IssueReportUpsertPage /> },
-      { path: "reviews", element: <ReviewListPage /> },
-      { path: "reviews/upsert", element: <ReviewUpsertPage /> },
-      { path: "payment", element: <PaymentPage /> },
+      { path: "profile", element: <ProfilePage /> }, //TODO: refactor layout! => fix
+      { path: "profile/upsert", element: <ProfileUpsertPage /> }, //TODO: no API call => fix
+      { path: "my-bookings", element: <CustomerBookingListPage /> }, // cleanup => update later
+      { path: "favorites", element: <FavoriteListPage /> }, //TODO: => update later
+      { path: "reviews", element: <ReviewListPage /> }, //TODO => fix URL => matching booking!
+      { path: "reviews/upsert", element: <ReviewUpsertPage /> }, //TODO => fix URL => matching booking!
     ],
   },
   {
@@ -145,6 +139,8 @@ const router = createBrowserRouter([
       { path: "booking/:id", element: <BookingDetailPage /> },
       { path: "users/upsert", element: <UserUpsertPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
+      { path: "shifts", element: <StaffShiftDashboard /> },
+      { path: "my-shift", element: <StaffShiftDashboard /> },
       { path: "profile", element: <UserProfilePage /> },
     ],
   },
@@ -158,6 +154,7 @@ const router = createBrowserRouter([
       { path: "booking/upsert", element: <BookingUpsertPage /> },
       { path: "booking/:id", element: <BookingDetailPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
+      { path: "shifts", element: <ShiftManagementPage /> },
       { path: "rooms", element: <RoomListPage /> },
       { path: "rooms/upsert", element: <RoomUpsertPage /> },
       { path: "room-types", element: <RoomTypeListPage /> },
@@ -191,6 +188,10 @@ const router = createBrowserRouter([
       { path: "rooms/upsert", element: <RoomUpsertPage /> },
       { path: "room-types", element: <RoomTypeListPage /> },
       { path: "room-types/upsert", element: <RoomTypeUpsertPage /> },
+      { path: "room-categories", element: <RoomCategoryListPage /> },
+      { path: "room-categories/upsert", element: <RoomCategoryUpsertPage /> },
+      { path: "service-categories", element: <ServiceCategoryListPage /> },
+      { path: "service-categories/upsert", element: <ServiceCategoryUpsertPage /> },
       { path: "services", element: <ServiceListPage /> },
       { path: "services/upsert", element: <ServiceUpsertPage /> },
       { path: "promotions", element: <PromotionListPage /> },
@@ -205,6 +206,7 @@ const router = createBrowserRouter([
       { path: "users/:id/assign-branch", element: <AssignBranchPage /> },
       { path: "roles", element: <RoleManagementPage /> },
       { path: "roles/:id", element: <RoleDetailPage /> },
+      { path: "shifts", element: <ShiftManagementPage /> },
       { path: "documents", element: <DocumentListPage /> },
       { path: "documents/upsert", element: <DocumentUpsertPage /> },
       { path: "reports/overview", element: <OverviewReportPage /> },

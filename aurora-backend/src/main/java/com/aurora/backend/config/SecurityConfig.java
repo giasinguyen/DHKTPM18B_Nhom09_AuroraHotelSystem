@@ -51,6 +51,12 @@ public class SecurityConfig {
 
             // Room availability - PUBLIC for availability check
             "/api/v1/room-availability/check-multiple",
+            
+            // Booking checkout - PUBLIC for customers and walk-in guests
+            "/api/v1/bookings/checkout",
+
+            // VNPay payment creation - PUBLIC for guest checkout
+            "/api/v1/payments/vnpay/create",
 
             // VNPay IPN callback - MUST be public for VNPay server-to-server callback
             "/api/v1/payments/vnpay/ipn",
@@ -68,9 +74,12 @@ public class SecurityConfig {
             "/api/v1/branches/**",
             "/api/v1/rooms/search",
             "/api/v1/rooms/{id}",
+            "/api/v1/rooms/room-type/**",
             "/api/v1/room-types/**",
+            "/api/v1/room-categories/**",
             "/api/v1/promotions/**",
             "/api/v1/services/**",
+            "/api/v1/service-categories/**",
             "/api/v1/facilities/**",
             "/api/v1/amenities/**",
             "/api/v1/rag/**",
@@ -95,6 +104,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
+                .requestMatchers("/ws/rag/stream").permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/v1/document/**").permitAll() // TODO: Delete this in production
@@ -124,8 +134,12 @@ public class SecurityConfig {
         // Allow frontend origins
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:3002",
                 "http://localhost:5173",
                 "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001",
+                "http://127.0.0.1:3002",
                 "http://127.0.0.1:5173"
         ));
 

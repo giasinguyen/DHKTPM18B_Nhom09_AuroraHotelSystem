@@ -375,7 +375,7 @@ export default function NewsList() {
       <PageHeader
         title="Quản lý tin tức"
         description="Xem và quản lý tất cả tin tức, bài viết trong hệ thống"
-        onAdd={() => navigate('/admin/news/create')}
+        onAdd={() => navigate('/admin/news/upsert')}
         addButtonText="Thêm tin tức"
         onRefresh={fetchNews}
         isLoading={isLoading}

@@ -5,54 +5,54 @@ export interface HotelService {
   branchId: string;
   branchName: string;
   name: string;
-  type: ServiceType;
+  categoryId: string;
+  categoryName: string;
   description?: string;
   basePrice: number;
+  unit?: string;
+  durationMinutes?: number;
+  maxCapacityPerSlot?: number;
+  requiresBooking?: boolean;
+  active?: boolean;
+  operatingHours?: string;
+  images?: string[];
 }
-
-export type ServiceType = 
-  | 'SPA' 
-  | 'RESTAURANT' 
-  | 'LAUNDRY' 
-  | 'TRANSPORT' 
-  | 'TOUR' 
-  | 'GYM' 
-  | 'POOL' 
-  | 'OTHER';
 
 export interface ServiceCreationRequest {
   branchId: string;
   name: string;
-  type: ServiceType;
+  categoryId: string;
   description?: string;
   basePrice: number;
+  unit?: string;
+  durationMinutes?: number;
+  maxCapacityPerSlot?: number;
+  requiresBooking?: boolean;
+  active?: boolean;
+  operatingHours?: string;
+  images?: string[];
 }
 
 export interface ServiceUpdateRequest {
   name?: string;
-  type?: ServiceType;
+  categoryId?: string;
   description?: string;
   basePrice?: number;
+  unit?: string;
+  durationMinutes?: number;
+  maxCapacityPerSlot?: number;
+  requiresBooking?: boolean;
+  active?: boolean;
+  operatingHours?: string;
+  images?: string[];
 }
 
 export interface ServiceSearchParams {
   hotelId?: string;
-  type?: ServiceType;
+  categoryId?: string;
   name?: string;
   page?: number;
   size?: number;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
 }
-
-// Service type configurations
-export const SERVICE_TYPE_CONFIG: Record<ServiceType, { label: string; icon: string }> = {
-  SPA: { label: 'Spa & Massage', icon: '🧖' },
-  RESTAURANT: { label: 'Nhà hàng', icon: '🍽️' },
-  LAUNDRY: { label: 'Giặt ủi', icon: '🧺' },
-  TRANSPORT: { label: 'Vận chuyển', icon: '🚗' },
-  TOUR: { label: 'Tour du lịch', icon: '🗺️' },
-  GYM: { label: 'Phòng gym', icon: '🏋️' },
-  POOL: { label: 'Hồ bơi', icon: '🏊' },
-  OTHER: { label: 'Khác', icon: '📦' },
-};

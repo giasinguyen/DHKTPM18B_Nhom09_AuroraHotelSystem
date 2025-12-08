@@ -15,8 +15,15 @@ public class ServiceResponse {
     String branchId;
     String branchName;
     String name;
-    String type;
+    String categoryId;
+    String categoryName;
     String description;
-    Double basePrice;
+    java.math.BigDecimal basePrice;
+    String unit;
+    Integer durationMinutes;
+    Integer maxCapacityPerSlot;
+    Boolean requiresBooking;
+    Boolean active;
+    String operatingHours;
     List<String> images;
 }

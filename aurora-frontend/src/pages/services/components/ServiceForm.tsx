@@ -10,20 +10,27 @@ import {
   FileText,
   DollarSign,
   Sparkles,
-  Utensils,
-  Car,
-  Dumbbell,
-  Waves,
-  Shirt,
-  Map,
-  Package
+  Image as ImageIcon,
+  X,
+  Plus,
+  Clock,
+  Users,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  Timer,
+  Upload
 } from 'lucide-react';
+import fallbackImage from '@/assets/images/commons/fallback.png';
+import { uploadMultipleToCloudinary } from '@/config/cloudinary';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -33,28 +40,14 @@ import {
 } from '@/components/ui/select';
 
 import { branchApi } from '@/services/branchApi';
+import { serviceCategoryApi } from '@/services/serviceCategoryApi';
 import type { Branch } from '@/types/branch.types';
+import type { ServiceCategory } from '@/types/serviceCategory.types';
 import type { 
   HotelService, 
   ServiceCreationRequest, 
-  ServiceUpdateRequest,
-  ServiceType 
+  ServiceUpdateRequest
 } from '@/types/service.types';
-
-// ============================================
-// Service Type Options
-// ============================================
-
-const SERVICE_TYPES: { value: ServiceType; label: string; icon: React.ReactNode; description: string }[] = [
-  { value: 'SPA', label: 'Spa & Massage', icon: <Sparkles className="h-5 w-5" />, description: 'Dịch vụ spa, massage thư giãn' },
-  { value: 'RESTAURANT', label: 'Nhà hàng', icon: <Utensils className="h-5 w-5" />, description: 'Dịch vụ ẩm thực, đồ uống' },
-  { value: 'LAUNDRY', label: 'Giặt ủi', icon: <Shirt className="h-5 w-5" />, description: 'Dịch vụ giặt ủi quần áo' },
-  { value: 'TRANSPORT', label: 'Vận chuyển', icon: <Car className="h-5 w-5" />, description: 'Dịch vụ đưa đón, thuê xe' },
-  { value: 'TOUR', label: 'Tour du lịch', icon: <Map className="h-5 w-5" />, description: 'Tour tham quan, du lịch' },
-  { value: 'GYM', label: 'Phòng gym', icon: <Dumbbell className="h-5 w-5" />, description: 'Phòng tập thể dục, gym' },
-  { value: 'POOL', label: 'Hồ bơi', icon: <Waves className="h-5 w-5" />, description: 'Dịch vụ hồ bơi, bể bơi' },
-  { value: 'OTHER', label: 'Khác', icon: <Package className="h-5 w-5" />, description: 'Các dịch vụ khác' },
-];
 
 // ============================================
 // Form State Types
@@ -63,15 +56,22 @@ const SERVICE_TYPES: { value: ServiceType; label: string; icon: React.ReactNode;
 interface FormState {
   branchId: string;
   name: string;
-  type: ServiceType;
+  categoryId: string;
   description: string;
   basePrice: number;
+  unit: string;
+  durationMinutes: number | null;
+  maxCapacityPerSlot: number | null;
+  requiresBooking: boolean;
+  active: boolean;
+  operatingHours: string;
+  images: string[];
 }
 
 interface FormErrors {
   branchId?: string;
   name?: string;
-  type?: string;
+  categoryId?: string;
   basePrice?: string;
 }
 
@@ -100,30 +100,60 @@ export default function ServiceForm({
 }: ServiceFormProps) {
   // ========== States ==========
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  // Track if service is being loaded to prevent category reset
+  const [isServiceLoading, setIsServiceLoading] = useState(false);
 
   const [formState, setFormState] = useState<FormState>({
     branchId: service?.branchId || '',
     name: service?.name || '',
-    type: service?.type || 'OTHER',
+    categoryId: service?.categoryId || '',
     description: service?.description || '',
     basePrice: service?.basePrice || 100000,
+    unit: service?.unit || '',
+    durationMinutes: service?.durationMinutes || null,
+    maxCapacityPerSlot: service?.maxCapacityPerSlot || null,
+    requiresBooking: service?.requiresBooking ?? true,
+    active: service?.active ?? true,
+    operatingHours: service?.operatingHours || '',
+    images: service?.images || [],
   });
+  
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  
+  // Helper to get select value (convert empty string to undefined)
+  const getSelectValue = (value: string): string | undefined => {
+    return value && value.trim() !== '' ? value : undefined;
+  };
 
   // ========== Effects ==========
 
   // Update form state when service prop changes (for edit mode)
   useEffect(() => {
     if (service) {
+      setIsServiceLoading(true);
       setFormState({
         branchId: service.branchId || '',
         name: service.name || '',
-        type: service.type || 'OTHER',
+        categoryId: service.categoryId || '',
         description: service.description || '',
         basePrice: service.basePrice || 100000,
+        unit: service.unit || '',
+        durationMinutes: service.durationMinutes || null,
+        maxCapacityPerSlot: service.maxCapacityPerSlot || null,
+        requiresBooking: service.requiresBooking ?? true,
+        active: service.active ?? true,
+        operatingHours: service.operatingHours || '',
+        images: service.images || [],
       });
       setErrors({});
+      // Mark service loading as complete after state is set
+      setTimeout(() => setIsServiceLoading(false), 100);
+    } else {
+      setIsServiceLoading(false);
     }
   }, [service]);
 
@@ -143,10 +173,40 @@ export default function ServiceForm({
     fetchBranches();
   }, []);
 
+  // Fetch categories when branch is selected
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!formState.branchId) {
+        setCategories([]);
+        return;
+      }
+      try {
+        setIsLoadingCategories(true);
+        const response = await serviceCategoryApi.getByBranch(formState.branchId);
+        setCategories(response.result || []);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    
+    fetchCategories();
+    
+    // Don't reset category when loading service - reset only happens in updateField
+  }, [formState.branchId, isServiceLoading]);
+
   // ========== Handlers ==========
 
   const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
-    setFormState(prev => ({ ...prev, [field]: value }));
+    setFormState(prev => {
+      const newState = { ...prev, [field]: value };
+      // Reset category when branch is manually changed (not when loading from service)
+      if (field === 'branchId' && prev.branchId && prev.branchId !== value && !isEditMode && !isServiceLoading) {
+        newState.categoryId = '';
+      }
+      return newState;
+    });
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -163,8 +223,8 @@ export default function ServiceForm({
     } else if (formState.name.length > 100) {
       newErrors.name = 'Tên tối đa 100 ký tự';
     }
-    if (!formState.type) {
-      newErrors.type = 'Vui lòng chọn loại dịch vụ';
+    if (!formState.categoryId) {
+      newErrors.categoryId = 'Vui lòng chọn danh mục dịch vụ';
     }
     if (!formState.basePrice || formState.basePrice <= 0) {
       newErrors.basePrice = 'Giá dịch vụ phải lớn hơn 0';
@@ -172,6 +232,58 @@ export default function ServiceForm({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const remainingSlots = 10 - formState.images.length;
+    if (remainingSlots <= 0) {
+      toast.error('Đã đạt tối đa 10 ảnh');
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    
+    // Validate file types and sizes
+    for (const file of filesToUpload) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`File ${file.name} không phải là ảnh`);
+        e.target.value = '';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`File ${file.name} quá lớn (tối đa 5MB)`);
+        e.target.value = '';
+        return;
+      }
+    }
+
+    try {
+      setIsUploadingImage(true);
+      const uploadedUrls = await uploadMultipleToCloudinary(filesToUpload, 'services');
+      
+      setFormState(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+      
+      toast.success(`Đã tải lên ${uploadedUrls.length} ảnh thành công`);
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Tải ảnh lên thất bại');
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormState(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -182,9 +294,16 @@ export default function ServiceForm({
     if (isEditMode) {
       const updateData: ServiceUpdateRequest = {
         name: formState.name,
-        type: formState.type,
+        categoryId: formState.categoryId,
         description: formState.description || undefined,
         basePrice: formState.basePrice,
+        unit: formState.unit || undefined,
+        durationMinutes: formState.durationMinutes || undefined,
+        maxCapacityPerSlot: formState.maxCapacityPerSlot || undefined,
+        requiresBooking: formState.requiresBooking,
+        active: formState.active,
+        operatingHours: formState.operatingHours || undefined,
+        images: formState.images.length > 0 ? formState.images : undefined,
       };
       console.log('Updating service with data:', updateData);
       await onSubmit(updateData);
@@ -192,16 +311,22 @@ export default function ServiceForm({
       const createData: ServiceCreationRequest = {
         branchId: formState.branchId,
         name: formState.name,
-        type: formState.type,
+        categoryId: formState.categoryId,
         description: formState.description || undefined,
         basePrice: formState.basePrice,
+        unit: formState.unit || undefined,
+        durationMinutes: formState.durationMinutes || undefined,
+        maxCapacityPerSlot: formState.maxCapacityPerSlot || undefined,
+        requiresBooking: formState.requiresBooking,
+        active: formState.active,
+        operatingHours: formState.operatingHours || undefined,
+        images: formState.images.length > 0 ? formState.images : undefined,
       };
       console.log('Creating service with data:', createData);
       await onSubmit(createData);
     }
   };
 
-  const selectedTypeConfig = SERVICE_TYPES.find(t => t.value === formState.type);
 
   // ========== Render ==========
 
@@ -228,7 +353,7 @@ export default function ServiceForm({
             </Label>
             <Select
               disabled={isEditMode || isLoadingBranches}
-              value={formState.branchId}
+              value={getSelectValue(formState.branchId)}
               onValueChange={(value) => updateField('branchId', value)}
             >
               <SelectTrigger className={`h-11 max-w-md ${errors.branchId ? 'border-destructive' : ''}`}>
@@ -253,7 +378,7 @@ export default function ServiceForm({
         </CardContent>
       </Card>
 
-      {/* Service Type Selection */}
+      {/* Service Category Selection */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
@@ -261,45 +386,49 @@ export default function ServiceForm({
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg">Loại dịch vụ</CardTitle>
-              <CardDescription>Chọn loại dịch vụ phù hợp</CardDescription>
+              <CardTitle className="text-lg">Danh mục dịch vụ</CardTitle>
+              <CardDescription>Chọn danh mục dịch vụ phù hợp</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-            {SERVICE_TYPES.map((type) => {
-              const isSelected = formState.type === type.value;
-              return (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => updateField('type', type.value)}
-                  className={`
-                    flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
-                    ${isSelected 
-                      ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-md' 
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  <div className={`
-                    p-3 rounded-full
-                    ${isSelected ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-500'}
-                  `}>
-                    {type.icon}
-                  </div>
-                  <span className="text-sm font-medium">{type.label}</span>
-                </button>
-              );
-            })}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-muted-foreground" />
+              Danh mục dịch vụ <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={getSelectValue(formState.categoryId)}
+              onValueChange={(value) => updateField('categoryId', value)}
+              disabled={!formState.branchId || isLoadingCategories}
+            >
+              <SelectTrigger className={`h-11 max-w-md ${errors.categoryId ? 'border-destructive' : ''}`}>
+                <SelectValue placeholder={
+                  !formState.branchId 
+                    ? 'Vui lòng chọn chi nhánh trước' 
+                    : isLoadingCategories 
+                    ? 'Đang tải...' 
+                    : categories.length === 0
+                    ? 'Không có danh mục nào'
+                    : 'Chọn danh mục dịch vụ'
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.length > 0 && categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-muted-foreground" />
+                      {category.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {!formState.branchId && (
+              <p className="text-sm text-amber-600">Vui lòng chọn chi nhánh trước để xem danh mục dịch vụ</p>
+            )}
+            {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId}</p>}
           </div>
-          {selectedTypeConfig && (
-            <p className="mt-3 text-sm text-muted-foreground text-center">
-              {selectedTypeConfig.description}
-            </p>
-          )}
-          {errors.type && <p className="text-sm text-destructive mt-2">{errors.type}</p>}
         </CardContent>
       </Card>
 
@@ -385,6 +514,220 @@ export default function ServiceForm({
         </CardContent>
       </Card>
 
+      {/* Service Details Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Chi tiết dịch vụ</CardTitle>
+              <CardDescription>Thông tin về đơn vị, thời gian và sức chứa</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-6 md:grid-cols-2">
+          {/* Unit */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              Đơn vị tính
+            </Label>
+            <Input
+              value={formState.unit}
+              onChange={(e) => updateField('unit', e.target.value)}
+              placeholder="VD: per hour, per person, per item, per trip"
+              className="h-11"
+            />
+            <p className="text-sm text-muted-foreground">Đơn vị tính giá (VD: per hour, per person)</p>
+          </div>
+
+          {/* Duration Minutes */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Timer className="h-4 w-4 text-muted-foreground" />
+              Thời lượng (phút)
+            </Label>
+            <Input
+              type="number"
+              value={formState.durationMinutes || ''}
+              onChange={(e) => updateField('durationMinutes', e.target.value ? parseInt(e.target.value) : null)}
+              min={0}
+              placeholder="VD: 60"
+              className="h-11"
+            />
+            <p className="text-sm text-muted-foreground">Thời lượng dịch vụ tính bằng phút</p>
+          </div>
+
+          {/* Max Capacity Per Slot */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              Sức chứa tối đa mỗi slot
+            </Label>
+            <Input
+              type="number"
+              value={formState.maxCapacityPerSlot || ''}
+              onChange={(e) => updateField('maxCapacityPerSlot', e.target.value ? parseInt(e.target.value) : null)}
+              min={1}
+              placeholder="VD: 10"
+              className="h-11"
+            />
+            <p className="text-sm text-muted-foreground">Số lượng khách tối đa mỗi slot thời gian</p>
+          </div>
+
+          {/* Operating Hours */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              Giờ hoạt động
+            </Label>
+            <Input
+              value={formState.operatingHours}
+              onChange={(e) => updateField('operatingHours', e.target.value)}
+              placeholder="VD: 08:00-22:00 hoặc 24/7"
+              className="h-11"
+            />
+            <p className="text-sm text-muted-foreground">Giờ hoạt động (VD: 08:00-22:00 hoặc 24/7)</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Service Settings Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-100 text-amber-600">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Cài đặt dịch vụ</CardTitle>
+              <CardDescription>Bật/tắt các tính năng và trạng thái dịch vụ</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Requires Booking */}
+          <div className="flex items-center justify-between rounded-lg border p-4 bg-white">
+            <div className="space-y-0.5">
+              <Label className="text-base">Yêu cầu đặt trước</Label>
+              <p className="text-sm text-muted-foreground">
+                Dịch vụ có cần đặt trước không
+              </p>
+            </div>
+            <Switch
+              checked={formState.requiresBooking}
+              onCheckedChange={(checked) => updateField('requiresBooking', checked)}
+            />
+          </div>
+
+          {/* Active */}
+          <div className="flex items-center justify-between rounded-lg border p-4 bg-white">
+            <div className="space-y-0.5">
+              <Label className="text-base">Trạng thái hoạt động</Label>
+              <p className="text-sm text-muted-foreground">
+                Dịch vụ có đang hoạt động không
+              </p>
+            </div>
+            <Switch
+              checked={formState.active}
+              onCheckedChange={(checked) => updateField('active', checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Images Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-pink-100 text-pink-600">
+              <ImageIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Hình ảnh dịch vụ</CardTitle>
+              <CardDescription>Thêm hình ảnh minh họa cho dịch vụ (tối đa 10 ảnh)</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* File Upload Button */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2 flex-1"
+                disabled={formState.images.length >= 10 || isUploadingImage}
+                onClick={() => document.getElementById('service-image-upload')?.click()}
+              >
+                {isUploadingImage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang tải lên...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" />
+                    Chọn ảnh ({formState.images.length}/10)
+                  </>
+                )}
+              </Button>
+              <input
+                id="service-image-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </div>
+
+            {/* Image Preview Grid */}
+            {formState.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {formState.images.map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <div className="aspect-video rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+                      <img
+                        src={imageUrl}
+                        alt={`Service image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = fallbackImage;
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md opacity-90 hover:opacity-100 transition-opacity"
+                      onClick={() => handleRemoveImage(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {formState.images.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Chưa có hình ảnh nào được thêm</p>
+                <p className="text-sm">Nhấp nút "Chọn ảnh" để tải lên</p>
+              </div>
+            )}
+
+            {formState.images.length >= 10 && (
+              <p className="text-sm text-amber-600">Đã đạt tối đa 10 ảnh</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-4 pt-4">
         <Button
@@ -416,3 +759,4 @@ export default function ServiceForm({
     </form>
   );
 }
+

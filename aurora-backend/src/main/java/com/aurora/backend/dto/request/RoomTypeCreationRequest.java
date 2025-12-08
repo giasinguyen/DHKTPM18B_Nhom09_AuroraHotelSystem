@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,6 +16,8 @@ public class RoomTypeCreationRequest {
     @NotBlank(message = "BRANCH_ID_REQUIRED")
     String branchId;
     
+    String categoryId; // Room category: Standard, Deluxe, Presidential Suite
+    
     @NotBlank(message = "ROOM_TYPE_NAME_REQUIRED")
     String name;
     
@@ -24,13 +25,10 @@ public class RoomTypeCreationRequest {
     @Pattern(regexp = "^[A-Z]{3,5}$", message = "CODE_PATTERN_INVALID")
     String code;
     
-    // Price information
-    @NotNull(message = "BASE_PRICE_REQUIRED")
-    @DecimalMin(value = "0.01", message = "BASE_PRICE_POSITIVE")
-    BigDecimal basePrice;
-    
-    @DecimalMin(value = "0.01", message = "WEEKEND_PRICE_POSITIVE")
-    BigDecimal weekendPrice;
+    // Price information - Only reference minimum price
+    @NotNull(message = "PRICE_FROM_REQUIRED")
+    @DecimalMin(value = "0.01", message = "PRICE_FROM_POSITIVE")
+    BigDecimal priceFrom; // Giá tham khảo từ
     
     // Capacity information
     @NotNull(message = "CAPACITY_ADULTS_REQUIRED")
@@ -49,5 +47,5 @@ public class RoomTypeCreationRequest {
     
     Boolean refundable;
     Set<String> amenityIds;
-    List<String> images;
+    String imageUrl; // Ảnh đại diện cho room type
 }

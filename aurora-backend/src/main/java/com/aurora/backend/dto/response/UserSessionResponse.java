@@ -20,6 +20,7 @@ public class UserSessionResponse {
     private String email;
     private String firstName;
     private String lastName;
+    private String phone;
     private String avatarUrl;
     private List<String> roles;
     private List<String> permissions;

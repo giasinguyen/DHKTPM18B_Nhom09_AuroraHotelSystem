@@ -14,8 +14,14 @@ import {
   RefreshCcw,
   Sparkles,
   Check,
-  DollarSign
+  DollarSign,
+  Image as ImageIcon,
+  Upload,
+  X
 } from 'lucide-react';
+import fallbackImage from '@/assets/images/commons/fallback.png';
+import { uploadToCloudinary } from '@/config/cloudinary';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,8 +39,9 @@ import {
 
 import { branchApi } from '@/services/branchApi';
 import { amenityApi } from '@/services/amenityApi';
+import { roomCategoryApi } from '@/services/roomApi';
 import type { Branch } from '@/types/branch.types';
-import type { Amenity, RoomType, RoomTypeCreationRequest, RoomTypeUpdateRequest } from '@/types/room.types';
+import type { Amenity, RoomCategory, RoomType, RoomTypeCreationRequest, RoomTypeUpdateRequest } from '@/types/room.types';
 
 // ============================================
 // Form State Types
@@ -42,24 +49,25 @@ import type { Amenity, RoomType, RoomTypeCreationRequest, RoomTypeUpdateRequest 
 
 interface FormState {
   branchId: string;
+  categoryId: string;
   name: string;
   code: string;
-  basePrice: number;
-  weekendPrice: number;
+  priceFrom: number;
   capacityAdults: number;
   capacityChildren: number;
   maxOccupancy: number;
   sizeM2: number;
   refundable: boolean;
   amenityIds: string[];
+  imageUrl: string;
 }
 
 interface FormErrors {
   branchId?: string;
+  categoryId?: string;
   name?: string;
   code?: string;
-  basePrice?: string;
-  weekendPrice?: string;
+  priceFrom?: string;
   capacityAdults?: string;
   capacityChildren?: string;
   maxOccupancy?: string;
@@ -91,23 +99,27 @@ export default function RoomTypeForm({
 }: RoomTypeFormProps) {
   // ========== States ==========
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingAmenities, setIsLoadingAmenities] = useState(true);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formState, setFormState] = useState<FormState>({
     branchId: roomType?.branchId || '',
+    categoryId: roomType?.categoryId || '',
     name: roomType?.name || '',
     code: roomType?.code || '',
-    basePrice: roomType?.basePrice || 500000,
-    weekendPrice: roomType?.weekendPrice || 0,
+    priceFrom: roomType?.priceFrom || 500000,
     capacityAdults: roomType?.capacityAdults || 2,
     capacityChildren: roomType?.capacityChildren || 0,
     maxOccupancy: roomType?.maxOccupancy || 2,
     sizeM2: roomType?.sizeM2 || 25,
     refundable: roomType?.refundable ?? true,
     amenityIds: roomType?.amenities?.map(a => a.id) || [],
+    imageUrl: roomType?.imageUrl || '',
   });
 
   // ========== Effects ==========
@@ -117,16 +129,17 @@ export default function RoomTypeForm({
     if (roomType) {
       setFormState({
         branchId: roomType.branchId || '',
+        categoryId: roomType.categoryId || '',
         name: roomType.name || '',
         code: roomType.code || '',
-        basePrice: roomType.basePrice || 500000,
-        weekendPrice: roomType.weekendPrice || 0,
+        priceFrom: roomType.priceFrom || 500000,
         capacityAdults: roomType.capacityAdults || 2,
         capacityChildren: roomType.capacityChildren || 0,
         maxOccupancy: roomType.maxOccupancy || 2,
         sizeM2: roomType.sizeM2 || 25,
         refundable: roomType.refundable ?? true,
         amenityIds: roomType.amenities?.map(a => a.id) || [],
+        imageUrl: roomType.imageUrl || '',
       });
       setErrors({});
     }
@@ -148,6 +161,28 @@ export default function RoomTypeForm({
     fetchBranches();
   }, []);
 
+  // Fetch categories when branch changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!formState.branchId) {
+        setCategories([]);
+        return;
+      }
+      
+      try {
+        setIsLoadingCategories(true);
+        const response = await roomCategoryApi.getByBranch(formState.branchId);
+        setCategories(response.result || []);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, [formState.branchId]);
+
   // Fetch amenities
   useEffect(() => {
     const fetchAmenities = async () => {
@@ -168,6 +203,36 @@ export default function RoomTypeForm({
 
   const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormState(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file ảnh');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      toast.info('Đang tải ảnh lên...');
+      const imageUrl = await uploadToCloudinary(file, 'room-types');
+      updateField('imageUrl', imageUrl);
+      toast.success('Tải ảnh lên thành công!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Không thể tải ảnh lên. Vui lòng thử lại.');
+    } finally {
+      setIsUploadingImage(false);
+    }
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -179,6 +244,9 @@ export default function RoomTypeForm({
     if (!formState.branchId) {
       newErrors.branchId = 'Vui lòng chọn chi nhánh';
     }
+    if (!formState.categoryId) {
+      newErrors.categoryId = 'Vui lòng chọn hạng phòng';
+    }
     if (!formState.name || formState.name.trim() === '') {
       newErrors.name = 'Vui lòng nhập tên loại phòng';
     } else if (formState.name.length > 100) {
@@ -189,11 +257,8 @@ export default function RoomTypeForm({
     } else if (!/^[A-Z]{3,5}$/.test(formState.code)) {
       newErrors.code = 'Mã phải gồm 3-5 chữ in hoa';
     }
-    if (!formState.basePrice || formState.basePrice <= 0) {
-      newErrors.basePrice = 'Giá cơ bản phải lớn hơn 0';
-    }
-    if (formState.weekendPrice && formState.weekendPrice < 0) {
-      newErrors.weekendPrice = 'Giá cuối tuần không được âm';
+    if (!formState.priceFrom || formState.priceFrom <= 0) {
+      newErrors.priceFrom = 'Giá tham khảo từ phải lớn hơn 0';
     }
     if (formState.capacityAdults < 1 || formState.capacityAdults > 20) {
       newErrors.capacityAdults = 'Số người lớn từ 1-20';
@@ -221,32 +286,34 @@ export default function RoomTypeForm({
 
     if (isEditMode) {
       const updateData: RoomTypeUpdateRequest = {
+        categoryId: formState.categoryId,
         name: formState.name,
         code: formState.code,
-        basePrice: formState.basePrice,
-        weekendPrice: formState.weekendPrice > 0 ? formState.weekendPrice : undefined,
+        priceFrom: formState.priceFrom,
         capacityAdults: formState.capacityAdults,
         capacityChildren: formState.capacityChildren,
         maxOccupancy: formState.maxOccupancy,
         sizeM2: formState.sizeM2,
         refundable: formState.refundable,
         amenityIds: formState.amenityIds,
+        imageUrl: formState.imageUrl || undefined,
       };
       console.log('Updating room type with data:', updateData);
       await onSubmit(updateData);
     } else {
       const createData: RoomTypeCreationRequest = {
         branchId: formState.branchId,
+        categoryId: formState.categoryId,
         name: formState.name,
         code: formState.code,
-        basePrice: formState.basePrice,
-        weekendPrice: formState.weekendPrice > 0 ? formState.weekendPrice : undefined,
+        priceFrom: formState.priceFrom,
         capacityAdults: formState.capacityAdults,
         capacityChildren: formState.capacityChildren,
         maxOccupancy: formState.maxOccupancy,
         sizeM2: formState.sizeM2,
         refundable: formState.refundable,
         amenityIds: formState.amenityIds,
+        imageUrl: formState.imageUrl || undefined,
       };
       console.log('Creating room type with data:', createData);
       await onSubmit(createData);
@@ -327,6 +394,56 @@ export default function RoomTypeForm({
         </CardContent>
       </Card>
 
+      {/* Category Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-purple-100 text-purple-600">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Hạng phòng</CardTitle>
+              <CardDescription>Chọn hạng phòng (Standard, Deluxe, Presidential...)</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-muted-foreground" />
+              Hạng phòng <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              disabled={!formState.branchId || isLoadingCategories}
+              value={formState.categoryId}
+              onValueChange={(value) => updateField('categoryId', value)}
+            >
+              <SelectTrigger className={`h-11 max-w-md ${errors.categoryId ? 'border-destructive' : ''}`}>
+                <SelectValue placeholder={
+                  !formState.branchId ? 'Chọn chi nhánh trước' :
+                  isLoadingCategories ? 'Đang tải...' : 
+                  'Chọn hạng phòng'
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-muted-foreground" />
+                      {category.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId}</p>}
+            {!formState.branchId && (
+              <p className="text-sm text-amber-600">Vui lòng chọn chi nhánh trước</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Basic Info Section */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
         <CardHeader className="pb-4">
@@ -400,42 +517,23 @@ export default function RoomTypeForm({
           </div>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-2">
-          {/* Base Price */}
+          {/* Price From */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              Giá cơ bản (VNĐ/đêm) <span className="text-destructive">*</span>
+              Giá tham khảo từ (VNĐ/đêm) <span className="text-destructive">*</span>
             </Label>
             <Input
               type="number"
-              value={formState.basePrice}
-              onChange={(e) => updateField('basePrice', parseFloat(e.target.value) || 0)}
+              value={formState.priceFrom}
+              onChange={(e) => updateField('priceFrom', parseFloat(e.target.value) || 0)}
               min={0}
               step={10000}
               placeholder="500000"
-              className={`h-11 ${errors.basePrice ? 'border-destructive' : ''}`}
+              className={`h-11 ${errors.priceFrom ? 'border-destructive' : ''}`}
             />
-            <p className="text-sm text-muted-foreground">Giá áp dụng cho ngày thường trong tuần</p>
-            {errors.basePrice && <p className="text-sm text-destructive">{errors.basePrice}</p>}
-          </div>
-
-          {/* Weekend Price */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              Giá cuối tuần (VNĐ/đêm)
-            </Label>
-            <Input
-              type="number"
-              value={formState.weekendPrice}
-              onChange={(e) => updateField('weekendPrice', parseFloat(e.target.value) || 0)}
-              min={0}
-              step={10000}
-              placeholder="600000"
-              className={`h-11 ${errors.weekendPrice ? 'border-destructive' : ''}`}
-            />
-            <p className="text-sm text-muted-foreground">Để trống hoặc 0 sẽ dùng giá cơ bản</p>
-            {errors.weekendPrice && <p className="text-sm text-destructive">{errors.weekendPrice}</p>}
+            <p className="text-sm text-muted-foreground">Giá tham khảo thấp nhất của loại phòng này</p>
+            {errors.priceFrom && <p className="text-sm text-destructive">{errors.priceFrom}</p>}
           </div>
         </CardContent>
       </Card>
@@ -521,6 +619,71 @@ export default function RoomTypeForm({
               className={`h-11 ${errors.sizeM2 ? 'border-destructive' : ''}`}
             />
             {errors.sizeM2 && <p className="text-sm text-destructive">{errors.sizeM2}</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Image Section */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+              <ImageIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Ảnh đại diện</CardTitle>
+              <CardDescription>Tải lên ảnh đại diện cho loại phòng</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('room-type-image-upload')?.click()}
+                disabled={isUploadingImage}
+                className="flex items-center gap-2"
+              >
+                {isUploadingImage ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
+              </Button>
+              <input
+                id="room-type-image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <span className="text-sm text-muted-foreground">
+                JPG, PNG, GIF (tối đa 5MB)
+              </span>
+            </div>
+            
+            {formState.imageUrl && (
+              <div className="relative inline-block">
+                <img
+                  src={formState.imageUrl}
+                  alt="Preview"
+                  className="w-full max-w-md h-48 object-cover rounded-lg border-2 border-slate-200"
+                  onError={(e) => { e.currentTarget.src = fallbackImage; }}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8"
+                  onClick={() => updateField('imageUrl', '')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

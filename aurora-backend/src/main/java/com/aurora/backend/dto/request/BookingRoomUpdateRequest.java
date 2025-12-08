@@ -15,4 +15,6 @@ public class BookingRoomUpdateRequest {
     
     @Positive(message = "NIGHTS_POSITIVE")
     Integer nights;
+    
+    String roomNotes; // Ghi chú cho phòng này
 }

@@ -33,9 +33,20 @@ public class Booking extends BaseEntity {
     @JoinColumn(name = "branch_id", nullable = false)
     Branch branch;
 
+    // Customer can be null for walk-in guests (khách vãng lai)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     User customer;
+
+    // Guest information for walk-in guests (khách vãng lai)
+    @Column(length = 200)
+    String guestFullName; // Tên khách hàng (nếu không có customer)
+    
+    @Column(length = 100)
+    String guestEmail; // Email khách hàng (nếu không có customer)
+    
+    @Column(length = 20)
+    String guestPhone; // Số điện thoại khách hàng (nếu không có customer)
 
     @Column(nullable = false)
     LocalDate checkin;
@@ -56,9 +67,6 @@ public class Booking extends BaseEntity {
 
     @Column(precision = 12, scale = 2)
     BigDecimal totalPrice;   // Tổng tiền sau promo + services
-    
-    @Column(precision = 12, scale = 2)
-    BigDecimal depositAmount; // Tiền đặt cọc
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
