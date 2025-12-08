@@ -96,5 +96,9 @@ public final class PermissionConstants {
         public static final String NEWS_CREATE = "NEWS_CREATE";
         public static final String NEWS_UPDATE = "NEWS_UPDATE";
         public static final String NEWS_DELETE = "NEWS_DELETE";
+        public static final String DOCUMENT_VIEW = "DOCUMENT_VIEW";
+        public static final String DOCUMENT_CREATE = "DOCUMENT_CREATE";
+        public static final String DOCUMENT_UPDATE = "DOCUMENT_UPDATE";
+        public static final String DOCUMENT_DELETE = "DOCUMENT_DELETE";
     }
 }

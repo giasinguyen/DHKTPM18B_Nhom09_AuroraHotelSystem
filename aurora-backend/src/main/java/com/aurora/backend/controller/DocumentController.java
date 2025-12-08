@@ -1,5 +1,7 @@
 package com.aurora.backend.controller;
 
+import com.aurora.backend.config.annotation.RequirePermission;
+import com.aurora.backend.constant.PermissionConstants;
 import com.aurora.backend.dto.response.ApiResponse;
 import com.aurora.backend.entity.Document;
 import com.aurora.backend.service.DocumentService;
@@ -23,6 +25,7 @@ public class DocumentController {
     DocumentService documentService;
 
     @PostMapping("/upload")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_CREATE)
     public ResponseEntity<ApiResponse<Document>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "shouldEmbed", required = false, defaultValue = "false") Boolean shouldEmbed,
@@ -41,6 +44,7 @@ public class DocumentController {
     }
 
     @GetMapping
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_VIEW)
     public ResponseEntity<ApiResponse<List<Document>>> listFiles() {
         log.info("Request to get all documents");
 
@@ -55,6 +59,7 @@ public class DocumentController {
     }
 
     @GetMapping("/{id}")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_VIEW)
     public ResponseEntity<ApiResponse<Document>> getDocument(@PathVariable String id) {
         log.info("Request to get document: id={}", id);
 
@@ -69,6 +74,7 @@ public class DocumentController {
     }
 
     @PutMapping("/{id}")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_UPDATE)
     public ResponseEntity<ApiResponse<Document>> updateFile(
             @PathVariable String id,
             @RequestParam("file") MultipartFile file,
@@ -88,6 +94,7 @@ public class DocumentController {
     }
 
     @PostMapping("/{id}/metadata")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_UPDATE)
     public ResponseEntity<ApiResponse<Document>> updateMetadata(
             @PathVariable String id,
             @RequestParam(value = "description", required = false) String description,
@@ -106,6 +113,7 @@ public class DocumentController {
     }
 
     @DeleteMapping("/{id}")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_DELETE)
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String id) {
         log.info("Request to delete document: id={}", id);
 
@@ -119,6 +127,7 @@ public class DocumentController {
     }
 
     @PostMapping("/{id}/remove-chunking")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_UPDATE)
     public ResponseEntity<ApiResponse<Document>> removeChunking(@PathVariable String id) {
         log.info("Request to remove chunking for document: id={}", id);
 
@@ -133,6 +142,7 @@ public class DocumentController {
     }
 
     @PostMapping("/{id}/re-chunk")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_UPDATE)
     public ResponseEntity<ApiResponse<Document>> reChunkDocument(@PathVariable String id) throws IOException {
         log.info("Request to re-chunk document: id={}", id);
 
@@ -147,6 +157,7 @@ public class DocumentController {
     }
 
     @PostMapping("/reindex-all")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_UPDATE)
     public ResponseEntity<ApiResponse<Void>> reindexAllFiles() {
         log.info("Request to reindex all documents");
 
@@ -160,6 +171,7 @@ public class DocumentController {
     }
 
     @GetMapping("/{id}/is-indexed")
+    @RequirePermission(PermissionConstants.Admin.DOCUMENT_VIEW)
     public ResponseEntity<ApiResponse<Boolean>> isFileIndexed(@PathVariable String id) {
         log.info("Request to check if document is indexed: id={}", id);
 
