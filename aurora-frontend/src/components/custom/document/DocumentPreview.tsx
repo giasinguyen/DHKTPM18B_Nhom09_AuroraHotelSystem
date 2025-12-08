@@ -1,4 +1,7 @@
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
+import { Viewer, Worker } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { CalendarDays, Download, PenSquare, User } from "lucide-react";
 import { FileIcon, defaultStyles } from "react-file-icon";
 import type { DefaultExtensionType } from "react-file-icon";
@@ -23,22 +26,6 @@ type DocumentPreviewProps = {
   onEdit?: (document: DocumentItem) => void;
 };
 
-const previewableExtensions = new Set([
-  "pdf",
-  "doc",
-  "docx",
-  "ppt",
-  "pptx",
-  "xls",
-  "xlsx",
-  "csv",
-  "txt",
-  "png",
-  "jpg",
-  "jpeg",
-  "gif",
-]);
-
 export const DocumentPreview = ({
   document,
   open,
@@ -46,10 +33,8 @@ export const DocumentPreview = ({
   onEdit,
 }: DocumentPreviewProps) => {
   const canPreview =
-    !!document && previewableExtensions.has(document.extension.toLowerCase());
-  const viewerDocuments = document
-    ? [{ uri: document.url, fileName: document.name, fileType: document.extension }]
-    : [];
+    !!document && (document.extension.toLowerCase() === "pdf" || document.mimeType === "application/pdf");
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -84,18 +69,12 @@ export const DocumentPreview = ({
                 <div className="rounded-xl border bg-white/90 p-3 shadow-inner">
                   {canPreview ? (
                     <div style={{ height: "420px" }}>
-                      <DocViewer
-                        documents={viewerDocuments}
-                        pluginRenderers={DocViewerRenderers}
-                        config={{
-                          header: {
-                            disableHeader: false,
-                            disableFileName: false,
-                            retainURLParams: false,
-                          },
-                        }}
-                        style={{ height: "100%" }}
-                      />
+                      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+                        <Viewer
+                          fileUrl={document.url}
+                          plugins={[defaultLayoutPluginInstance]}
+                        />
+                      </Worker>
                     </div>
                   ) : (
                     <PreviewFallback extension={document.extension} />
