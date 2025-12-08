@@ -1,6 +1,5 @@
-import { Bell, Search, Settings } from 'lucide-react';
+import { Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,20 +18,8 @@ interface TopbarProps {
 export default function Topbar({ className }: TopbarProps) {
   return (
     <div className={`flex h-16 items-center justify-between border-b bg-white px-6 ${className}`}>
-      {/* Search Bar */}
-      <div className="flex flex-1 items-center gap-4">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            type="search"
-            placeholder="Search bookings, customers..."
-            className="pl-10 pr-4"
-          />
-        </div>
-      </div>
-
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 ml-auto">
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

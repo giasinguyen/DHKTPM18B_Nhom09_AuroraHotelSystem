@@ -14,11 +14,13 @@ import type { Room, RoomType } from "@/types/room.types";
 interface ExtrasStepProps {
   checkoutData: CheckoutData;
   updateCheckoutData: (updates: Partial<CheckoutData>) => void;
+  rolePrefix?: string;
 }
 
 export default function ExtrasStep({
   checkoutData,
   updateCheckoutData,
+  rolePrefix = '',
 }: ExtrasStepProps) {
   const navigate = useNavigate();
   const { rooms, roomExtras } = checkoutData;

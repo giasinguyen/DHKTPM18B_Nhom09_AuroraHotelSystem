@@ -50,6 +50,14 @@ export interface CheckoutData {
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+
+  // Detect current role prefix from URL
+  const currentPath = window.location.pathname;
+  const rolePrefix = currentPath.startsWith('/admin') ? '/admin' 
+    : currentPath.startsWith('/manager') ? '/manager'
+    : currentPath.startsWith('/staff') ? '/staff'
+    : '';
+
   const [checkoutData, setCheckoutData] = useState<CheckoutData>(() => {
     // Always load from bookingRooms first (most recent data from booking page)
     const bookingRooms = localStorage.getItem("bookingRooms");
@@ -176,9 +184,9 @@ export default function CheckoutPage() {
   // Redirect if no rooms selected
   useEffect(() => {
     if (checkoutData.rooms.length === 0) {
-      navigate("/booking");
+      navigate(`${rolePrefix}/booking`);
     }
-  }, [checkoutData.rooms.length, navigate]);
+  }, [checkoutData.rooms.length, navigate, rolePrefix]);
 
   const updateCheckoutData = (updates: Partial<CheckoutData>) => {
     setCheckoutData((prev) => ({ ...prev, ...updates }));
@@ -194,7 +202,7 @@ export default function CheckoutPage() {
     if (currentStep > 1) {
       setCurrentStep((prev) => (prev - 1) as CheckoutStep);
     } else {
-      navigate("/booking");
+      navigate(`${rolePrefix}/booking`);
     }
   };
 
@@ -205,6 +213,7 @@ export default function CheckoutPage() {
           <ConfirmBookingStep
             checkoutData={checkoutData}
             updateCheckoutData={updateCheckoutData}
+            rolePrefix={rolePrefix}
           />
         );
       case 2:
@@ -212,6 +221,7 @@ export default function CheckoutPage() {
           <ExtrasStep
             checkoutData={checkoutData}
             updateCheckoutData={updateCheckoutData}
+            rolePrefix={rolePrefix}
           />
         );
       case 3:
@@ -225,6 +235,7 @@ export default function CheckoutPage() {
         return (
           <PaymentStep
             checkoutData={checkoutData}
+            rolePrefix={rolePrefix}
             updateCheckoutData={updateCheckoutData}
           />
         );
@@ -284,11 +295,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <VideoHero
-        title={getStepTitle()}
-        subtitle={getStepSubtitle()}
-      />
+      {/* Hero Section - Only show for client */}
+      {!rolePrefix && (
+        <VideoHero
+          title={getStepTitle()}
+          subtitle={getStepSubtitle()}
+        />
+      )}
 
       <div className="container mx-auto px-4 py-8">
         {/* Progress Bar */}

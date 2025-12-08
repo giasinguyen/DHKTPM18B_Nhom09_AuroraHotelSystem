@@ -48,6 +48,13 @@ export default function BookingPage() {
   const roomTypeId = searchParams.get("roomTypeId") || undefined;
   const categoryId = searchParams.get("categoryId") || undefined;
 
+  // Detect current role prefix from URL
+  const currentPath = window.location.pathname;
+  const rolePrefix = currentPath.startsWith('/admin') ? '/admin' 
+    : currentPath.startsWith('/manager') ? '/manager'
+    : currentPath.startsWith('/staff') ? '/staff'
+    : '';
+
   const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [roomType, setRoomType] = useState<RoomType | null>(null);
@@ -359,8 +366,8 @@ export default function BookingPage() {
     // Save filter to localStorage for checkout
     localStorage.setItem("bookingFilter", JSON.stringify(filter));
     
-    // Navigate to checkout page
-    navigate("/checkout");
+    // Navigate to checkout page with correct prefix
+    navigate(`${rolePrefix}/booking/checkout`);
   };
 
 
@@ -387,11 +394,13 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <VideoHero
-        title={pageTitle}
-        subtitle="Tìm và đặt phòng khách sạn phù hợp với nhu cầu của bạn"
-      />
+      {/* Hero Section - Only show for client */}
+      {!rolePrefix && (
+        <VideoHero
+          title={pageTitle}
+          subtitle="Tìm và đặt phòng khách sạn phù hợp với nhu cầu của bạn"
+        />
+      )}
 
       {/* Filter Section */}
       <div className="bg-white border-b py-6">
@@ -399,11 +408,17 @@ export default function BookingPage() {
           <div className="mb-4">
             <Button
               variant="ghost"
-              onClick={() =>
-                navigate(
-                  categoryId ? `/accommodation/${categoryId}` : "/accommodation"
-                )
-              }
+              onClick={() => {
+                // If in admin/staff/manager, go back to previous page
+                if (rolePrefix) {
+                  navigate(-1);
+                } else {
+                  // For client, navigate to accommodation
+                  navigate(
+                    categoryId ? `/accommodation/${categoryId}` : "/accommodation"
+                  );
+                }
+              }}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               Quay lại

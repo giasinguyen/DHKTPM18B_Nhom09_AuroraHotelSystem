@@ -36,6 +36,14 @@ import { BOOKING_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from '@/types/booking.ty
 const BookingDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Detect current role prefix from URL
+  const currentPath = window.location.pathname;
+  const rolePrefix = currentPath.startsWith('/admin') ? '/admin' 
+    : currentPath.startsWith('/manager') ? '/manager'
+    : currentPath.startsWith('/staff') ? '/staff'
+    : '';
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -57,7 +65,7 @@ const BookingDetailPage = () => {
       toast.error('Không thể tải thông tin đặt phòng', {
         description: error.response?.data?.message || 'Vui lòng thử lại sau',
       });
-      navigate('/admin/booking');
+      navigate(`${rolePrefix}/bookings`);
     } finally {
       setLoading(false);
     }
@@ -166,7 +174,7 @@ const BookingDetailPage = () => {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => navigate('/admin/booking')}
+              onClick={() => navigate(`${rolePrefix}/bookings`)}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>

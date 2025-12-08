@@ -34,7 +34,7 @@ import AccommodationCategoryPage from "@/pages/landing/AccommodationCategory";
 import BookingPage from "@/pages/landing/Booking";
 import CheckoutPage from "@/pages/landing/checkout";
 import BookingSuccessPage from "@/pages/landing/checkout/BookingSuccess";
-import UserBookingDetailPage from "@/pages/landing/checkout/UserBookingDetail";
+import UserBookingDetailPage from "@/pages/common/customer/UserBookingDetail";
 import PaymentReturnPage from "@/pages/landing/payment/PaymentReturn";
 // Common - Customer Area
 import ProfilePage from "@/pages/common/customer/account/Profile";
@@ -111,9 +111,9 @@ const router = createBrowserRouter([
       { path: "accommodation", element: <AccommodationPage /> }, // temp complete
       { path: "accommodation/:categoryId", element: <AccommodationCategoryPage /> }, // temp complete
       { path: "booking", element: <BookingPage /> }, // temp complete
-      { path: "checkout", element: <CheckoutPage /> },
+      { path: "booking/checkout", element: <CheckoutPage /> },
       { path: "booking/success", element: <BookingSuccessPage /> },
-      { path: "landing/checkout/user-booking-detail/:id", element: <UserBookingDetailPage /> },
+      { path: "booking/user-booking-detail/:id", element: <UserBookingDetailPage /> },
       { path: "service", element: <ServicePage /> }, // temp complete
       { path: "branches", element: <GuestBranchListPage /> }, //TODO: Giới thiệu chi nhánh => update later
       { path: "gallery", element: <GalleryPage /> }, //TODO: Giới thiệu album => update later
@@ -137,9 +137,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <StaffDashboardPage /> },
-      { path: "booking", element: <BookingListPage /> },
-      { path: "booking/upsert", element: <BookingUpsertPage /> },
-      { path: "booking/:id", element: <BookingDetailPage /> },
+      { path: "bookings", element: <BookingListPage /> },
+      { path: "bookings/upsert", element: <BookingUpsertPage /> },
+      { path: "bookings/:id", element: <BookingDetailPage /> },
+      { path: "booking", element: <BookingPage /> },
+      { path: "booking/checkout", element: <CheckoutPage /> },
       { path: "users/upsert", element: <UserUpsertPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
       { path: "shifts", element: <StaffShiftDashboard /> },
@@ -153,9 +155,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <ManagerDashboardPage /> },
-      { path: "booking", element: <BookingListPage /> },
-      { path: "booking/upsert", element: <BookingUpsertPage /> },
-      { path: "booking/:id", element: <BookingDetailPage /> },
+      { path: "bookings", element: <BookingListPage /> },
+      { path: "bookings/upsert", element: <BookingUpsertPage /> },
+      { path: "bookings/:id", element: <BookingDetailPage /> },
+      { path: "booking", element: <BookingPage /> },
+      { path: "booking/checkout", element: <CheckoutPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
       { path: "shifts", element: <ShiftManagementPage /> },
       { path: "rooms", element: <RoomListPage /> },
@@ -183,9 +187,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <AdminDashboardPage /> },
-      { path: "booking", element: <BookingListPage /> },
-      { path: "booking/upsert", element: <BookingUpsertPage /> },
-      { path: "booking/:id", element: <BookingDetailPage /> },
+      { path: "bookings", element: <BookingListPage /> },
+      { path: "bookings/upsert", element: <BookingUpsertPage /> },
+      { path: "bookings/:id", element: <BookingDetailPage /> },
+      { path: "booking", element: <BookingPage /> },
+      { path: "booking/checkout", element: <CheckoutPage /> },
       { path: "reports/shift", element: <ShiftReportPage /> },
       { path: "rooms", element: <RoomListPage /> },
       { path: "rooms/upsert", element: <RoomUpsertPage /> },

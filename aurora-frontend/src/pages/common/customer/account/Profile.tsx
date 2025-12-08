@@ -346,7 +346,7 @@ export default function CustomerProfilePage() {
                           return (
                             <div
                               key={booking.id}
-                              onClick={() => window.location.href = `/landing/checkout/user-booking-detail/${booking.id}`}
+                              onClick={() => window.location.href = `/booking/user-booking-detail/${booking.id}`}
                               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-green-300 transition-all cursor-pointer"
                             >
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

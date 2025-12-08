@@ -16,11 +16,13 @@ import type { CheckoutRequest } from "@/types/checkout.types";
 interface PaymentStepProps {
   checkoutData: CheckoutData;
   updateCheckoutData: (updates: Partial<CheckoutData>) => void;
+  rolePrefix?: string;
 }
 
 export default function PaymentStep({
   checkoutData,
   updateCheckoutData,
+  rolePrefix = '',
 }: PaymentStepProps) {
   const navigate = useNavigate();
   const { paymentMethod, rooms, checkIn, checkOut, guests, nights, roomExtras, guestInfo } = checkoutData;
@@ -139,8 +141,14 @@ export default function PaymentStep({
             toast.error("Không thể tạo thanh toán VNPay. Booking đã được tạo với mã " + bookingCode);
             setIsSubmitting(false);
             
-            // Navigate to booking details even if VNPay fails
-            navigate(`/booking/success?bookingId=${bookingId}&bookingCode=${bookingCode}`);
+            // Navigate based on role
+            if (rolePrefix) {
+              // Admin/Manager/Staff: go to bookings list
+              navigate(`${rolePrefix}/bookings`);
+            } else {
+              // Client: go to success page
+              navigate(`/booking/success?bookingId=${bookingId}&bookingCode=${bookingCode}`);
+            }
             return;
           }
         }
@@ -153,8 +161,14 @@ export default function PaymentStep({
         localStorage.removeItem("bookingFilter");
         localStorage.removeItem("checkoutData");
         
-        // Navigate to success page with booking ID
-        navigate(`/booking/success?bookingId=${bookingId}&bookingCode=${bookingCode}`);
+        // Navigate based on role
+        if (rolePrefix) {
+          // Admin/Manager/Staff: go to bookings list
+          navigate(`${rolePrefix}/bookings`);
+        } else {
+          // Client: go to success page
+          navigate(`/booking/success?bookingId=${bookingId}&bookingCode=${bookingCode}`);
+        }
       }
     } catch (error: unknown) {
       console.error("Failed to create booking:", error);

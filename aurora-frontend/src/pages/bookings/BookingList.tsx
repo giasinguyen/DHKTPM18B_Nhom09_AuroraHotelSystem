@@ -51,6 +51,13 @@ const paymentStatusConfig: Record<PaymentStatus, { label: string; variant: 'defa
 export default function BookingList() {
   const navigate = useNavigate();
   
+  // Detect current role prefix from URL
+  const currentPath = window.location.pathname;
+  const rolePrefix = currentPath.startsWith('/admin') ? '/admin' 
+    : currentPath.startsWith('/manager') ? '/manager'
+    : currentPath.startsWith('/staff') ? '/staff'
+    : '';
+  
   // State
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -339,11 +346,11 @@ export default function BookingList() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate(`/admin/booking/${booking.id}`)}>
+              <DropdownMenuItem onClick={() => navigate(`${rolePrefix}/bookings/${booking.id}`)}>
                 <Eye className="h-4 w-4 mr-2" />
                 Xem chi tiết
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate(`/admin/booking/upsert`)}>
+              <DropdownMenuItem onClick={() => navigate(`${rolePrefix}/bookings/upsert`)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Chỉnh sửa
               </DropdownMenuItem>
@@ -408,7 +415,7 @@ export default function BookingList() {
       <PageHeader
         title="Quản lý đặt phòng"
         description="Xem và quản lý tất cả đặt phòng trong hệ thống"
-        onAdd={() => navigate('/admin/booking/upsert')}
+        onAdd={() => navigate(`${rolePrefix}/bookings/upsert`)}
         addButtonText="Tạo đặt phòng"
         onRefresh={fetchBookings}
         isLoading={isLoading}

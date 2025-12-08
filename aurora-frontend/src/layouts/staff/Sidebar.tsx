@@ -30,8 +30,11 @@ const menuItems = [
   {
     title: 'Bookings',
     icon: CalendarCheck,
-    href: '/staff/booking',
-    children: [{ title: 'Booking List', href: '/staff/booking' }],
+    href: '/staff/bookings',
+    children: [
+      { title: 'Booking List', href: '/staff/bookings' },
+      { title: 'Booking', href: '/staff/booking' },
+    ],
   },
   {
     title: 'Customers',

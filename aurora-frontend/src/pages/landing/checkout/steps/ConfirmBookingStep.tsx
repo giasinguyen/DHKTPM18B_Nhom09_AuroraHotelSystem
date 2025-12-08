@@ -11,10 +11,12 @@ import type { Room, RoomType } from "@/types/room.types";
 interface ConfirmBookingStepProps {
   checkoutData: CheckoutData;
   updateCheckoutData: (updates: Partial<CheckoutData>) => void;
+  rolePrefix?: string;
 }
 
 export default function ConfirmBookingStep({
   checkoutData,
+  rolePrefix = '',
 }: ConfirmBookingStepProps) {
   const navigate = useNavigate();
   const { rooms: bookingRooms } = checkoutData;
@@ -101,7 +103,7 @@ export default function ConfirmBookingStep({
         <Button
           variant="outline"
           className="mt-4"
-          onClick={() => navigate("/booking")}
+          onClick={() => navigate(`${rolePrefix}/booking`)}
         >
           Quay lại chọn phòng
         </Button>
@@ -128,7 +130,7 @@ export default function ConfirmBookingStep({
             showActionButton={true}
             actionButtonVariant="edit"
             actionButtonText="Chỉnh sửa"
-            onActionClick={() => navigate("/booking")}
+            onActionClick={() => navigate(`${rolePrefix}/booking`)}
             onViewImages={handleViewImages}
           />
         ))}

@@ -37,8 +37,11 @@ const menuItems = [
   {
     title: 'Bookings',
     icon: CalendarCheck,
-    href: '/admin/booking',
-    children: [{ title: 'Booking List', href: '/admin/booking' }],
+    href: '/admin/bookings',
+    children: [
+      { title: 'Booking List', href: '/admin/bookings' },
+      { title: 'Booking', href: '/admin/booking' },
+    ],
   },
   // ===== Kế thừa từ Manager =====
   {
