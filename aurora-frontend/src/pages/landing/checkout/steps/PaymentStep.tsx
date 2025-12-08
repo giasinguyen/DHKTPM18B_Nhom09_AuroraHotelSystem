@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { bookingApi } from "@/services/bookingApi";
 import { vnpayService } from "@/services/vnpayService";
+import roomAvailabilityApi from "@/services/roomAvailabilityApi";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import type { CheckoutData } from "../index";
@@ -57,13 +58,60 @@ export default function PaymentStep({
 
   const handleCompleteBooking = async () => {
     if (!paymentMethod) {
-      toast.error("Vui l\u00f2ng ch\u1ecdn ph\u01b0\u01a1ng th\u1ee9c thanh to\u00e1n");
+      toast.error("Vui lòng chọn phương thức thanh toán");
       return;
     }
 
     try {
       setIsSubmitting(true);
       
+      // ===== BƯỚC 1: KIỂM TRA LẠI TÍNH KHẢ DỤNG CỦA PHÒNG =====
+      // Đây là bước quan trọng để tránh race condition
+      console.log("🔍 Checking room availability before booking...");
+      
+      const roomIds = rooms.map(room => room.roomId);
+      const availabilityResponse = await roomAvailabilityApi.checkMultipleRooms(
+        roomIds,
+        checkIn,
+        checkOut
+      );
+      
+      // Kiểm tra từng phòng
+      const unavailableRooms: string[] = [];
+      if (availabilityResponse.result) {
+        Object.entries(availabilityResponse.result).forEach(([roomId, isAvailable]) => {
+          if (!isAvailable) {
+            const room = rooms.find(r => r.roomId === roomId);
+            if (room) {
+              unavailableRooms.push(room.roomNumber || room.roomTypeName);
+            }
+          }
+        });
+      }
+      
+      // Nếu có phòng không khả dụng, chặn lại
+      if (unavailableRooms.length > 0) {
+        setIsSubmitting(false);
+        toast.error(
+          `Phòng ${unavailableRooms.join(", ")} vừa được đặt bởi khách hàng khác!`,
+          {
+            description: "Vui lòng chọn phòng khác hoặc thay đổi ngày đặt.",
+            duration: 5000,
+          }
+        );
+        
+        // Navigate back to booking page to select different rooms
+        if (rolePrefix) {
+          navigate(`${rolePrefix}/booking`);
+        } else {
+          navigate('/booking');
+        }
+        return;
+      }
+      
+      console.log("✅ All rooms are available, proceeding with booking...");
+      
+      // ===== BƯỚC 2: TẠO BOOKING =====
       // Prepare rooms data
       const roomBookings = rooms.map((room) => ({
         roomId: room.roomId,
