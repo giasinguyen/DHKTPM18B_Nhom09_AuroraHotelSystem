@@ -49,7 +49,7 @@ public class DocumentSeeder {
                             byte[] fileBytes = resource.getInputStream().readAllBytes();
                             String contentType = determineContentType(filename);
 
-                            documentService.loadFileFromBytes(filename, contentType, fileBytes);
+                            documentService.loadFileFromBytes(filename, contentType, fileBytes, true);
                             loadedCount++;
                             log.info("Successfully loaded document: {}", filename);
                         } catch (Exception e) {

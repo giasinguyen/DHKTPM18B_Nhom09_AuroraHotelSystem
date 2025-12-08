@@ -1,12 +1,12 @@
 package com.aurora.backend.controller;
 
-import com.aurora.backend.entity.DocumentMetadata;
+import com.aurora.backend.dto.response.ApiResponse;
+import com.aurora.backend.entity.Document;
 import com.aurora.backend.service.DocumentService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
@@ -22,33 +23,133 @@ public class DocumentController {
     DocumentService documentService;
 
     @PostMapping("/upload")
-    public ResponseEntity<DocumentMetadata> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(documentService.uploadFile(file));
+    public ResponseEntity<ApiResponse<Document>> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "shouldEmbed", required = false, defaultValue = "false") Boolean shouldEmbed
+    ) throws IOException {
+        log.info("Request to upload document: filename={}, shouldEmbed={}", file.getOriginalFilename(), shouldEmbed);
+
+        Document document = documentService.uploadFile(file, shouldEmbed);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Document>builder()
+                        .message("Document uploaded successfully")
+                        .result(document)
+                        .build()
+        );
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentMetadata>> listFiles() {
-        return ResponseEntity.ok(documentService.listFiles());
+    public ResponseEntity<ApiResponse<List<Document>>> listFiles() {
+        log.info("Request to get all documents");
+
+        List<Document> documents = documentService.listFiles();
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<Document>>builder()
+                        .message("Documents retrieved successfully")
+                        .result(documents)
+                        .build()
+        );
     }
 
-    @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) throws IOException {
-        byte[] data = documentService.downloadFile(id);
-        DocumentMetadata meta = documentService.listFiles().stream().filter(f -> f.getId().equals(id)).findFirst().orElseThrow();
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(meta.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + meta.getFilename() + "\"")
-                .body(data);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Document>> getDocument(@PathVariable String id) {
+        log.info("Request to get document: id={}", id);
+
+        Document document = documentService.getDocument(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Document>builder()
+                        .message("Document retrieved successfully")
+                        .result(document)
+                        .build()
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DocumentMetadata> updateFile(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(documentService.updateFile(id, file));
+    public ResponseEntity<ApiResponse<Document>> updateFile(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "shouldEmbed", required = false, defaultValue = "false") Boolean shouldEmbed
+    ) throws IOException {
+        log.info("Request to update document: id={}, filename={}, shouldEmbed={}", id, file.getOriginalFilename(), shouldEmbed);
+
+        Document document = documentService.updateFile(id, file, shouldEmbed);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Document>builder()
+                        .message("Document updated successfully")
+                        .result(document)
+                        .build()
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFile(@PathVariable Long id) throws IOException {
+    public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String id) {
+        log.info("Request to delete document: id={}", id);
+
         documentService.deleteFile(id);
-        return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("Document deleted successfully")
+                        .build()
+        );
+    }
+
+    @PostMapping("/{id}/remove-chunking")
+    public ResponseEntity<ApiResponse<Document>> removeChunking(@PathVariable String id) {
+        log.info("Request to remove chunking for document: id={}", id);
+
+        Document document = documentService.removeChunking(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Document>builder()
+                        .message("Document chunking removed successfully")
+                        .result(document)
+                        .build()
+        );
+    }
+
+    @PostMapping("/{id}/re-chunk")
+    public ResponseEntity<ApiResponse<Document>> reChunkDocument(@PathVariable String id) throws IOException {
+        log.info("Request to re-chunk document: id={}", id);
+
+        Document document = documentService.reChunkDocument(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Document>builder()
+                        .message("Document re-chunked successfully")
+                        .result(document)
+                        .build()
+        );
+    }
+
+    @PostMapping("/reindex-all")
+    public ResponseEntity<ApiResponse<Void>> reindexAllFiles() {
+        log.info("Request to reindex all documents");
+
+        documentService.reindexAllFiles();
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("All documents reindexed successfully")
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}/is-indexed")
+    public ResponseEntity<ApiResponse<Boolean>> isFileIndexed(@PathVariable String id) {
+        log.info("Request to check if document is indexed: id={}", id);
+
+        Boolean isIndexed = documentService.isFileIndexed(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Boolean>builder()
+                        .message("Document index status retrieved successfully")
+                        .result(isIndexed)
+                        .build()
+        );
     }
 }
