@@ -44,7 +44,7 @@ public class SecurityConfig {
 
             // Room availability - PUBLIC for availability check
             "/api/v1/room-availability/check-multiple",
-            
+
             // Booking checkout - PUBLIC for customers and walk-in guests
             "/api/v1/bookings/checkout",
 
@@ -57,7 +57,6 @@ public class SecurityConfig {
             // Cloudinary upload endpoints
             "/api/v1/cloudinary/upload",
             "/api/v1/cloudinary/upload-multiple",
-
             // Test endpoints - For testing purposes only (remove in production)
             "/api/v1/test/**"
     };
@@ -87,9 +86,11 @@ public class SecurityConfig {
             "/api/v1/room-availability/find-available/**",
             "/api/v1/room-availability/calendar/**",
             "/api/v1/room-availability/count-available/**",
-            
+
             // Booking public endpoints - For guest booking lookup
-            "/api/v1/bookings/public/**"
+            "/api/v1/bookings/public/**",
+            "/api/v1/health",
+            "/api/v1/ping",
     };
     private final CustomJwtDecoder customJwtDecoder;
     private final CustomJwtAuthenticationConverter customJwtAuthenticationConverter;
