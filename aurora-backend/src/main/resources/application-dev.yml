@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/aurora_hotel
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:5432/aurora_hotel}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
