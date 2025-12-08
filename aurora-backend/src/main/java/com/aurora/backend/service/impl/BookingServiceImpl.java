@@ -15,6 +15,7 @@ import com.aurora.backend.entity.Room;
 import com.aurora.backend.entity.Service;
 import com.aurora.backend.entity.BookingRoom;
 import com.aurora.backend.entity.ServiceBooking;
+import com.aurora.backend.entity.Payment;
 import com.aurora.backend.exception.AppException;
 import com.aurora.backend.enums.ErrorCode;
 import com.aurora.backend.mapper.BookingMapper;
@@ -26,6 +27,7 @@ import com.aurora.backend.repository.RoomRepository;
 import com.aurora.backend.repository.ServiceRepository;
 import com.aurora.backend.repository.BookingRoomRepository;
 import com.aurora.backend.repository.ServiceBookingRepository;
+import com.aurora.backend.repository.PaymentRepository;
 import com.aurora.backend.service.BookingService;
 import com.aurora.backend.service.EmailService;
 import com.aurora.backend.service.RefundService;
@@ -58,6 +60,7 @@ public class BookingServiceImpl implements BookingService {
     ServiceRepository serviceRepository;
     BookingRoomRepository bookingRoomRepository;
     ServiceBookingRepository serviceBookingRepository;
+    PaymentRepository paymentRepository;
     BookingMapper bookingMapper;
     RefundService refundService;
     EmailService emailService;
@@ -559,6 +562,22 @@ public class BookingServiceImpl implements BookingService {
         
         Booking savedBooking = bookingRepository.save(booking);
         log.info("Booking created: {} with code: {}", savedBooking.getId(), savedBooking.getBookingCode());
+        
+        // 1.5. Create Payment record for CASH payment
+        if ("cash".equals(request.getPaymentMethod())) {
+            Payment cashPayment = Payment.builder()
+                    .booking(savedBooking)
+                    .method(Payment.PaymentMethod.CASH)
+                    .status(Payment.PaymentStatus.SUCCESS)
+                    .amount(savedBooking.getTotalPrice())
+                    .currency("VND")
+                    .paidAt(LocalDateTime.now())
+                    .notes("Cash payment on checkout")
+                    .build();
+            paymentRepository.save(cashPayment);
+            log.info("Cash payment record created for booking: {} with amount: {}", 
+                    savedBooking.getBookingCode(), savedBooking.getTotalPrice());
+        }
         
         // 2. Create BookingRooms
         for (CheckoutRequest.RoomBookingRequest roomReq : request.getRooms()) {
