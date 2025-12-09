@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X, Loader2 } from "lucide-react";
+import englishFlag from "@/assets/images/commons/english.png";
+import vietnamFlag from "@/assets/images/commons/vietnam.png";
 
 // Language option component
 const LanguageOption = ({ value }: { value: string }) => {
   const flags = {
-    en: "/src/assets/images/commons/english.png",
-    vi: "/src/assets/images/commons/vietnam.png",
+    en: englishFlag,
+    vi: vietnamFlag,
   };
   return (
     <img

@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import defaultVideo from "@/assets/videos/aurora_hotel_2025-11-28_v1.mp4";
 
 interface VideoHeroProps {
   title?: string;
@@ -10,7 +11,7 @@ interface VideoHeroProps {
   height?: "full" | "hero"; // "full" for full screen, "hero" for h-96
 }
 
-const defaultVideoSrc = "/src/assets/videos/aurora_hotel_2025-11-28_v1.mp4";
+const defaultVideoSrc = defaultVideo;
 
 /**
  * Hero section component with video background
