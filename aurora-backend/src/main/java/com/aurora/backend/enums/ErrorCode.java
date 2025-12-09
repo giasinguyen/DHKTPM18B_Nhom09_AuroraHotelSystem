@@ -214,6 +214,28 @@ public enum ErrorCode {
     IMAGE_UPLOAD_FAILED(3201, "Failed to upload image", HttpStatus.INTERNAL_SERVER_ERROR),
     IMAGE_DELETE_FAILED(3202, "Failed to delete image", HttpStatus.INTERNAL_SERVER_ERROR),
     IMAGE_OWNER_REQUIRED(3203, "Image owner information is required", HttpStatus.BAD_REQUEST),
+    
+    // RoomEvent errors
+    EVENT_NOT_FOUND(3300, "Room event not found", HttpStatus.NOT_FOUND),
+    EVENT_ALREADY_ACTIVE(3301, "Cannot update active event", HttpStatus.BAD_REQUEST),
+    EVENT_ALREADY_COMPLETED(3302, "Cannot update completed event", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_ACTIVE_EVENT(3303, "Cannot delete active event", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_COMPLETED_EVENT(3304, "Cannot delete completed event", HttpStatus.BAD_REQUEST),
+    EVENT_NOT_SCHEDULED(3305, "Event is not in scheduled status", HttpStatus.BAD_REQUEST),
+    EVENT_NOT_ACTIVE(3306, "Event is not in active status", HttpStatus.BAD_REQUEST),
+    EVENT_INVALID_DATE_RANGE(3307, "Event start date must be before end date", HttpStatus.BAD_REQUEST),
+    ADJUSTMENT_TYPE_REQUIRED(3308, "Adjustment type is required", HttpStatus.BAD_REQUEST),
+    ADJUSTMENT_DIRECTION_REQUIRED(3309, "Adjustment direction is required", HttpStatus.BAD_REQUEST),
+    ADJUSTMENT_VALUE_REQUIRED(3310, "Adjustment value is required", HttpStatus.BAD_REQUEST),
+    ADJUSTMENT_VALUE_POSITIVE(3311, "Adjustment value must be positive", HttpStatus.BAD_REQUEST),
+    TARGET_TYPE_REQUIRED(3312, "Target type is required", HttpStatus.BAD_REQUEST),
+    TARGET_ID_REQUIRED(3313, "Target ID is required", HttpStatus.BAD_REQUEST),
+    EVENT_NAME_REQUIRED(3314, "Event name is required", HttpStatus.BAD_REQUEST),
+    EVENT_NAME_TOO_LONG(3315, "Event name is too long", HttpStatus.BAD_REQUEST),
+    EVENT_DESCRIPTION_TOO_LONG(3316, "Event description is too long", HttpStatus.BAD_REQUEST),
+    EVENT_START_DATE_REQUIRED(3317, "Event start date is required", HttpStatus.BAD_REQUEST),
+    EVENT_END_DATE_REQUIRED(3318, "Event end date is required", HttpStatus.BAD_REQUEST),
+    PRICE_ADJUSTMENTS_REQUIRED(3319, "At least one price adjustment is required", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

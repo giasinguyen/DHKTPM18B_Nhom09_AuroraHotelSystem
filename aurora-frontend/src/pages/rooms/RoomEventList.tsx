@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Eye, MoreHorizontal, Edit, Trash2, Calendar, TrendingUp } from 'lucide-react';
+import { Eye, MoreHorizontal, Edit, Trash2, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,52 +26,7 @@ import {
 
 import type { Event, EventStatus } from '@/types/event.types';
 import { EVENT_STATUS_CONFIG } from '@/types/event.types';
-
-// Mock data for development
-const mockEvents: Event[] = [
-  {
-    id: 'event-001',
-    name: 'Tết Nguyên Đán 2026',
-    description: 'Tăng giá phòng dịp Tết Nguyên Đán',
-    startDate: '2026-01-28',
-    endDate: '2026-02-05',
-    status: 'SCHEDULED',
-    branchId: 'branch-hcm-001',
-    branchName: 'Aurora Grand Hotel Hồ Chí Minh',
-    priceAdjustments: [
-      {
-        id: 'adj-001',
-        adjustmentType: 'PERCENTAGE',
-        adjustmentValue: 50,
-        targetType: 'CATEGORY',
-        targetId: 'cat-001',
-        targetName: 'Standard',
-      },
-    ],
-    createdAt: '2025-12-01T10:00:00Z',
-  },
-  {
-    id: 'event-002',
-    name: 'Lễ 30/4 - 1/5',
-    description: 'Tăng giá phòng dịp lễ Giải phóng và Quốc tế Lao động',
-    startDate: '2026-04-30',
-    endDate: '2026-05-03',
-    status: 'SCHEDULED',
-    branchId: 'branch-hcm-001',
-    branchName: 'Aurora Grand Hotel Hồ Chí Minh',
-    priceAdjustments: [
-      {
-        id: 'adj-002',
-        adjustmentType: 'FIXED_AMOUNT',
-        adjustmentValue: 500000,
-        targetType: 'ROOM_TYPE',
-        targetId: 'rt-001',
-        targetName: 'Deluxe Double Room',
-      },
-    ],
-    createdAt: '2025-12-05T14:30:00Z',
-  },
-];
+import { roomEventService } from '@/services/roomEventService';
 
 export default function RoomEventList() {
   const navigate = useNavigate();
@@ -85,13 +40,13 @@ export default function RoomEventList() {
     : '';
 
   // State
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements] = useState(mockEvents.length);
+  const [totalElements, setTotalElements] = useState(0);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,6 +55,70 @@ export default function RoomEventList() {
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+
+  // Load events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const params: any = {
+          page: currentPage - 1,
+          size: pageSize,
+          sortBy: 'startDate',
+          sortDirection: 'ASC',
+        };
+
+        // Apply status filter
+        if (statusFilter !== 'ALL') {
+          params.status = statusFilter;
+        }
+
+        const response = await roomEventService.searchEvents(params);
+        setEvents(response.content);
+        setTotalElements(response.totalElements);
+      } catch (error: unknown) {
+        console.error('Failed to fetch events:', error);
+        toast.error('Không thể tải danh sách sự kiện');
+        setEvents([]);
+        setTotalElements(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [currentPage, pageSize, statusFilter]);
+
+  // Refresh handler
+  const handleRefresh = () => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const params: any = {
+          page: currentPage - 1,
+          size: pageSize,
+          sortBy: 'startDate',
+          sortDirection: 'ASC',
+        };
+
+        if (statusFilter !== 'ALL') {
+          params.status = statusFilter;
+        }
+
+        const response = await roomEventService.searchEvents(params);
+        setEvents(response.content);
+        setTotalElements(response.totalElements);
+        toast.success('Đã làm mới danh sách');
+      } catch (error: unknown) {
+        console.error('Failed to refresh events:', error);
+        toast.error('Không thể làm mới danh sách');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -113,7 +132,17 @@ export default function RoomEventList() {
   const getAdjustmentSummary = (event: Event) => {
     const count = event.priceAdjustments.length;
     if (count === 0) return 'Chưa cấu hình';
-    return `${count} điều chỉnh`;
+    
+    const increaseCount = event.priceAdjustments.filter(adj => adj.adjustmentDirection === 'INCREASE').length;
+    const decreaseCount = event.priceAdjustments.filter(adj => adj.adjustmentDirection === 'DECREASE').length;
+    
+    if (increaseCount > 0 && decreaseCount > 0) {
+      return `${increaseCount} tăng, ${decreaseCount} giảm`;
+    } else if (increaseCount > 0) {
+      return `${increaseCount} tăng giá`;
+    } else {
+      return `${decreaseCount} giảm giá`;
+    }
   };
 
   // Table columns
@@ -150,12 +179,26 @@ export default function RoomEventList() {
     {
       key: 'adjustments',
       header: 'Điều chỉnh giá',
-      cell: (event) => (
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-green-600" />
-          <span className="text-sm">{getAdjustmentSummary(event)}</span>
-        </div>
-      ),
+      cell: (event) => {
+        const hasIncrease = event.priceAdjustments.some(adj => adj.adjustmentDirection === 'INCREASE');
+        const hasDecrease = event.priceAdjustments.some(adj => adj.adjustmentDirection === 'DECREASE');
+        
+        return (
+          <div className="flex items-center gap-2">
+            {hasIncrease && hasDecrease ? (
+              <div className="flex gap-1">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingDown className="h-4 w-4 text-red-600" />
+              </div>
+            ) : hasIncrease ? (
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            )}
+            <span className="text-sm">{getAdjustmentSummary(event)}</span>
+          </div>
+        );
+      },
     },
     {
       key: 'status',
@@ -217,13 +260,31 @@ export default function RoomEventList() {
     if (!eventToDelete) return;
 
     try {
-      // TODO: Call API to delete event
+      await roomEventService.deleteEvent(eventToDelete.id);
       toast.success('Đã xóa sự kiện thành công');
-      setEvents(events.filter((e) => e.id !== eventToDelete.id));
+      
+      // Refresh list
+      const params: any = {
+        page: currentPage - 1,
+        size: pageSize,
+        sortBy: 'startDate',
+        sortDirection: 'ASC',
+      };
+      if (statusFilter !== 'ALL') {
+        params.status = statusFilter;
+      }
+      const response = await roomEventService.searchEvents(params);
+      setEvents(response.content);
+      setTotalElements(response.totalElements);
+      
       setDeleteDialogOpen(false);
       setEventToDelete(null);
-    } catch {
-      toast.error('Không thể xóa sự kiện');
+    } catch (error: unknown) {
+      console.error('Failed to delete event:', error);
+      const errorMessage = 
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 
+        'Không thể xóa sự kiện';
+      toast.error(errorMessage);
     }
   };
 
@@ -234,7 +295,7 @@ export default function RoomEventList() {
         description="Quản lý điều chỉnh giá phòng theo lễ tết và sự kiện đặc biệt"
         onAdd={() => navigate(`${rolePrefix}/room-events/upsert`)}
         addButtonText="Tạo sự kiện mới"
-        onRefresh={() => setIsLoading(true)}
+        onRefresh={handleRefresh}
         isLoading={isLoading}
       />
 

@@ -104,6 +104,9 @@ VALUES (gen_random_uuid(), 'BOOKING_APPROVE', 'Phê duyệt đặt phòng đặc
        (gen_random_uuid(), 'STAFF_VIEW', 'Xem danh sách nhân viên', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
        (gen_random_uuid(), 'DASHBOARD_VIEW_MANAGER', 'Truy cập dashboard quản lý branch', CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP, 0, false),
+       -- Event permissions for managers (view only)
+       (gen_random_uuid(), 'EVENT_VIEW', 'Xem sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
+        CURRENT_TIMESTAMP, 0, false),
        (gen_random_uuid(), 'STAFF_CREATE', 'Tạo tài khoản nhân viên mới', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0,
         false),
        (gen_random_uuid(), 'STAFF_UPDATE', 'Cập nhật thông tin nhân viên', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0,
@@ -144,7 +147,14 @@ VALUES (gen_random_uuid(), 'USER_VIEW', 'Xem danh sách tất cả người dùn
        (gen_random_uuid(), 'DOCUMENT_UPDATE', 'Cập nhật tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
        (gen_random_uuid(), 'DOCUMENT_DELETE', 'Xóa tài liệu', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
        (gen_random_uuid(), 'DASHBOARD_VIEW_ADMIN', 'Truy cập dashboard tổng quan hệ thống', CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP, 0, false)
+        CURRENT_TIMESTAMP, 0, false),
+       -- Event permissions for admins (full control)
+       (gen_random_uuid(), 'EVENT_CREATE', 'Tạo sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+       (gen_random_uuid(), 'EVENT_UPDATE', 'Cập nhật sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+       (gen_random_uuid(), 'EVENT_DELETE', 'Xóa sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+       (gen_random_uuid(), 'EVENT_ACTIVATE', 'Kích hoạt sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+       (gen_random_uuid(), 'EVENT_COMPLETE', 'Hoàn thành sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false),
+       (gen_random_uuid(), 'EVENT_CANCEL', 'Hủy sự kiện điều chỉnh giá phòng', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, false)
 ON CONFLICT (name) DO NOTHING;
 
 
@@ -309,6 +319,9 @@ WHERE r.name = 'MANAGER'
                  'REPORT_VIEW',
                  'REPORT_EXPORT',
                  'STAFF_VIEW',
+                 'DASHBOARD_VIEW_MANAGER',
+                 -- Event permissions for managers (view only)
+                 'EVENT_VIEW'
                  'DASHBOARD_VIEW_MANAGER',
                  'STAFF_CREATE',
                  'STAFF_UPDATE',

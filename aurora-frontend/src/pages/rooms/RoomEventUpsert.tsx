@@ -20,32 +20,10 @@ import type {
   Event,
   PriceAdjustment,
   PriceAdjustmentType,
+  PriceAdjustmentDirection,
   PriceAdjustmentTarget,
 } from '@/types/event.types';
-
-// Mock data for dropdowns
-const mockBranches = [
-  { id: 'branch-hcm-001', name: 'Aurora Grand Hotel Hồ Chí Minh' },
-  { id: 'branch-hn-001', name: 'Aurora Grand Hotel Hà Nội' },
-];
-
-const mockCategories = [
-  { id: 'cat-001', name: 'Standard' },
-  { id: 'cat-002', name: 'Deluxe' },
-  { id: 'cat-003', name: 'Suite' },
-];
-
-const mockRoomTypes = [
-  { id: 'rt-001', name: 'Standard Single Room' },
-  { id: 'rt-002', name: 'Deluxe Double Room' },
-  { id: 'rt-003', name: 'Executive Suite' },
-];
-
-const mockRooms = [
-  { id: 'room-101', name: 'Phòng 101 - Standard Single' },
-  { id: 'room-201', name: 'Phòng 201 - Deluxe Double' },
-  { id: 'room-301', name: 'Phòng 301 - Executive Suite' },
-];
+import { roomEventService, roomEventHelperService } from '@/services/roomEventService';
 
 export default function RoomEventUpsert() {
   const navigate = useNavigate();
@@ -75,38 +53,105 @@ export default function RoomEventUpsert() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Dropdown options (loaded from API)
+  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [roomTypes, setRoomTypes] = useState<Array<{ id: string; name: string }>>([]);
+  const [rooms, setRooms] = useState<Array<{ id: string; name: string }>>([]);
+
+  // Load dropdown options
+  useEffect(() => {
+    const loadDropdownOptions = async () => {
+      try {
+        const [branchesData, categoriesData, roomTypesData, roomsData] = await Promise.all([
+          roomEventHelperService.getBranches(),
+          roomEventHelperService.getCategories(),
+          roomEventHelperService.getRoomTypes(),
+          roomEventHelperService.getRooms(),
+        ]);
+
+        setBranches(branchesData);
+        setCategories(categoriesData);
+        setRoomTypes(roomTypesData);
+        setRooms(roomsData);
+      } catch (error: unknown) {
+        console.error('Failed to load dropdown options:', error);
+        toast.error('Không thể tải dữ liệu dropdown');
+      }
+    };
+
+    loadDropdownOptions();
+  }, []);
+
+  // Load categories, room types, rooms when branch changes
+  useEffect(() => {
+    if (!formData.branchId) return;
+
+    const loadBranchData = async () => {
+      try {
+        const [categoriesData, roomTypesData, roomsData] = await Promise.all([
+          roomEventHelperService.getCategories(formData.branchId),
+          roomEventHelperService.getRoomTypes(formData.branchId),
+          roomEventHelperService.getRooms(formData.branchId),
+        ]);
+
+        setCategories(categoriesData);
+        setRoomTypes(roomTypesData);
+        setRooms(roomsData);
+      } catch (error: unknown) {
+        console.error('Failed to load branch data:', error);
+        toast.error('Không thể tải dữ liệu chi nhánh');
+      }
+    };
+
+    loadBranchData();
+  }, [formData.branchId]);
+
   // Load event data in edit mode
   useEffect(() => {
-    if (isEditMode) {
-      // TODO: Fetch event data from API
-      setIsLoading(true);
-      setTimeout(() => {
-        // Mock data
-        setFormData({
-          id: eventId,
-          name: 'Tết Nguyên Đán 2026',
-          description: 'Tăng giá phòng dịp Tết Nguyên Đán',
-          startDate: '2026-01-28',
-          endDate: '2026-02-05',
-          status: 'SCHEDULED',
-          branchId: 'branch-hcm-001',
-          priceAdjustments: [
-            {
-              id: 'adj-001',
-              adjustmentType: 'PERCENTAGE',
-              adjustmentValue: 50,
-              targetType: 'CATEGORY',
-              targetId: 'cat-001',
-              targetName: 'Standard',
-            },
-          ],
-        });
-        setIsLoading(false);
-      }, 500);
-    }
-  }, [eventId, isEditMode]);
+    if (isEditMode && eventId) {
+      const loadEventData = async () => {
+        try {
+          setIsLoading(true);
+          const event = await roomEventService.getEventById(eventId);
+          
+          setFormData({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            status: event.status,
+            branchId: event.branchId,
+            priceAdjustments: event.priceAdjustments || [],
+          });
 
-  const handleInputChange = (field: keyof Event, value: any) => {
+          // Load branch-specific data
+          if (event.branchId) {
+            const [categoriesData, roomTypesData, roomsData] = await Promise.all([
+              roomEventHelperService.getCategories(event.branchId),
+              roomEventHelperService.getRoomTypes(event.branchId),
+              roomEventHelperService.getRooms(event.branchId),
+            ]);
+
+            setCategories(categoriesData);
+            setRoomTypes(roomTypesData);
+            setRooms(roomsData);
+          }
+        } catch (error: unknown) {
+          console.error('Failed to load event:', error);
+          toast.error('Không thể tải thông tin sự kiện');
+          navigate(-1);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadEventData();
+    }
+  }, [eventId, isEditMode, navigate]);
+
+  const handleInputChange = (field: keyof Event, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -114,6 +159,7 @@ export default function RoomEventUpsert() {
     const newAdjustment: Partial<PriceAdjustment> = {
       id: `adj-${Date.now()}`,
       adjustmentType: 'PERCENTAGE',
+      adjustmentDirection: 'INCREASE',
       adjustmentValue: 0,
       targetType: 'CATEGORY',
       targetId: '',
@@ -136,7 +182,7 @@ export default function RoomEventUpsert() {
   const handleAdjustmentChange = (
     index: number,
     field: keyof PriceAdjustment,
-    value: any
+    value: unknown
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -149,11 +195,11 @@ export default function RoomEventUpsert() {
   const getTargetOptions = (targetType: PriceAdjustmentTarget) => {
     switch (targetType) {
       case 'CATEGORY':
-        return mockCategories;
+        return categories;
       case 'ROOM_TYPE':
-        return mockRoomTypes;
+        return roomTypes;
       case 'SPECIFIC_ROOM':
-        return mockRooms;
+        return rooms;
       default:
         return [];
     }
@@ -203,13 +249,47 @@ export default function RoomEventUpsert() {
     setIsSaving(true);
 
     try {
-      // TODO: Call API to create/update event
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Prepare price adjustments (remove id for new adjustments)
+      const priceAdjustments = formData.priceAdjustments!.map((adj) => ({
+        adjustmentType: adj.adjustmentType,
+        adjustmentDirection: adj.adjustmentDirection,
+        adjustmentValue: adj.adjustmentValue,
+        targetType: adj.targetType,
+        targetId: adj.targetId,
+        targetName: adj.targetName,
+      }));
 
-      toast.success(isEditMode ? 'Đã cập nhật sự kiện' : 'Đã tạo sự kiện mới');
+      if (isEditMode && eventId) {
+        // Update existing event
+        await roomEventService.updateEvent(eventId, {
+          name: formData.name,
+          description: formData.description,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          branchId: formData.branchId,
+          priceAdjustments,
+        });
+        toast.success('Đã cập nhật sự kiện');
+      } else {
+        // Create new event
+        await roomEventService.createEvent({
+          name: formData.name!,
+          description: formData.description,
+          startDate: formData.startDate!,
+          endDate: formData.endDate!,
+          branchId: formData.branchId!,
+          priceAdjustments,
+        });
+        toast.success('Đã tạo sự kiện mới');
+      }
+
       navigate(`${rolePrefix}/room-events`);
-    } catch (error) {
-      toast.error('Có lỗi xảy ra, vui lòng thử lại');
+    } catch (error: unknown) {
+      console.error('Failed to save event:', error);
+      const errorMessage = 
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 
+        'Có lỗi xảy ra, vui lòng thử lại';
+      toast.error(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -312,7 +392,7 @@ export default function RoomEventUpsert() {
                   <SelectValue placeholder="Chọn chi nhánh" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockBranches.map((branch) => (
+                  {branches.map((branch) => (
                     <SelectItem key={branch.id} value={branch.id}>
                       {branch.name}
                     </SelectItem>
@@ -350,7 +430,37 @@ export default function RoomEventUpsert() {
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Hướng điều chỉnh</Label>
+                      <Select
+                        value={adjustment.adjustmentDirection}
+                        onValueChange={(value) =>
+                          handleAdjustmentChange(
+                            index,
+                            'adjustmentDirection',
+                            value as PriceAdjustmentDirection
+                          )
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="INCREASE">
+                            <span className="flex items-center gap-2">
+                              <span className="text-green-600">↑</span> Tăng giá
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="DECREASE">
+                            <span className="flex items-center gap-2">
+                              <span className="text-red-600">↓</span> Giảm giá
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div>
                       <Label>Loại điều chỉnh</Label>
                       <Select
@@ -394,12 +504,18 @@ export default function RoomEventUpsert() {
                         }
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        {adjustment.adjustmentType === 'PERCENTAGE'
-                          ? 'Tăng giá theo phần trăm'
-                          : 'Tăng giá cố định theo VNĐ'}
+                        {adjustment.adjustmentDirection === 'INCREASE' 
+                          ? (adjustment.adjustmentType === 'PERCENTAGE'
+                              ? 'Tăng giá theo phần trăm'
+                              : 'Tăng giá cố định theo VNĐ')
+                          : (adjustment.adjustmentType === 'PERCENTAGE'
+                              ? 'Giảm giá theo phần trăm'
+                              : 'Giảm giá cố định theo VNĐ')}
                       </p>
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Áp dụng cho</Label>
                       <Select

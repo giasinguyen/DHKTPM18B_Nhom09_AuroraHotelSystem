@@ -76,6 +76,9 @@ public final class PermissionConstants {
         public static final String SHIFT_ASSIGN = "SHIFT_ASSIGN";
         public static final String SHIFT_UNASSIGN = "SHIFT_UNASSIGN";
         public static final String SHIFT_VIEW_ALL = "SHIFT_VIEW_ALL";
+        
+        // Event permissions for managers (view only)
+        public static final String EVENT_VIEW = "EVENT_VIEW";
     }
 
     public static final class Admin {
@@ -106,5 +109,13 @@ public final class PermissionConstants {
         public static final String DOCUMENT_CREATE = "DOCUMENT_CREATE";
         public static final String DOCUMENT_UPDATE = "DOCUMENT_UPDATE";
         public static final String DOCUMENT_DELETE = "DOCUMENT_DELETE";
+        
+        // Event permissions for admins (full control)
+        public static final String EVENT_CREATE = "EVENT_CREATE";
+        public static final String EVENT_UPDATE = "EVENT_UPDATE";
+        public static final String EVENT_DELETE = "EVENT_DELETE";
+        public static final String EVENT_ACTIVATE = "EVENT_ACTIVATE";
+        public static final String EVENT_COMPLETE = "EVENT_COMPLETE";
+        public static final String EVENT_CANCEL = "EVENT_CANCEL";
     }
 }

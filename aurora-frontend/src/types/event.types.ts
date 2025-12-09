@@ -3,12 +3,15 @@ export type EventStatus = 'SCHEDULED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
 export type PriceAdjustmentType = 'PERCENTAGE' | 'FIXED_AMOUNT';
 
+export type PriceAdjustmentDirection = 'INCREASE' | 'DECREASE';
+
 export type PriceAdjustmentTarget = 'CATEGORY' | 'ROOM_TYPE' | 'SPECIFIC_ROOM';
 
 export interface PriceAdjustment {
   id?: string;
   adjustmentType: PriceAdjustmentType; // Tăng theo % hoặc số tiền cố định
-  adjustmentValue: number; // Giá trị tăng/giảm
+  adjustmentDirection: PriceAdjustmentDirection; // Tăng giá hoặc giảm giá
+  adjustmentValue: number; // Giá trị tăng/giảm (luôn dương)
   targetType: PriceAdjustmentTarget; // Áp dụng cho hạng phòng, loại phòng, hoặc phòng cụ thể
   targetId: string; // ID của category/roomType/room
   targetName?: string; // Tên để hiển thị
@@ -59,6 +62,12 @@ export const EVENT_STATUS_CONFIG: Record<EventStatus, { label: string; variant: 
 export const PRICE_ADJUSTMENT_TYPE_LABELS: Record<PriceAdjustmentType, string> = {
   PERCENTAGE: 'Phần trăm (%)',
   FIXED_AMOUNT: 'Số tiền cố định (₫)',
+};
+
+// Price adjustment direction labels
+export const PRICE_ADJUSTMENT_DIRECTION_LABELS: Record<PriceAdjustmentDirection, string> = {
+  INCREASE: 'Tăng giá',
+  DECREASE: 'Giảm giá',
 };
 
 // Price adjustment target labels
