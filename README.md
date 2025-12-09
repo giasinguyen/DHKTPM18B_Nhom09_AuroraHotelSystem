@@ -5,6 +5,33 @@
 
 ---
 
+## 🏷️ Tech Stack Badges
+
+### Frontend
+![React](https://img.shields.io/badge/React-19.1.1-61dafb?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178c6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.1.2-646cff?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1.14-06b6d4?logo=tailwindcss&logoColor=white)
+![Redux](https://img.shields.io/badge/Redux%20Toolkit-2.9.0-764abc?logo=redux&logoColor=white)
+
+### Backend
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-6db33f?logo=springboot&logoColor=white)
+![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain4j-latest-00b4a9?logo=chainlink&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7.2-dc382d?logo=redis&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-3.9-c71a36?logo=apachemaven&logoColor=white)
+
+
+### Tools & DevOps
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ed?logo=docker&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-9.40-000000?logo=jsonwebtokens&logoColor=white)
+![Hibernate](https://img.shields.io/badge/Hibernate-6.x-59666c?logo=hibernate&logoColor=white)
+![Lombok](https://img.shields.io/badge/Lombok-1.18.36-bc2e24?logoColor=white)
+![License](https://img.shields.io/badge/license-Educational-blue.svg)
+
+---
+
 ## 👥 Team Members
 
 | Name | Role | GitHub |
@@ -39,6 +66,7 @@
 - 🛠️ **Lombok 1.18.36** - Reduce boilerplate code
 - 🔄 **MapStruct 1.6.3** - High-performance object mapping
 - 🔍 **AOP (Aspect-Oriented Programming)** - Cross-cutting concerns
+- 🔗 **Langchain4j** - AI framwork simplify integrating LLMs into Java applications
 - 📊 **Slf4j + Logback** - Logging framework
 
 ### 🗄️ Database
@@ -54,6 +82,7 @@
 - � **Docker** - Containerization
 - 📮 **Postman** - API testing & documentation
 - 🔐 **dotenv-java** - Environment variable management
+- 🚅 **railway** - Fullstack deploy platform
 
 ---
 
@@ -150,7 +179,19 @@
 - 🚧 Booking analytics & trends (Planned)
 - 🚧 Revenue reports (Planned)
 - 🚧 Occupancy rate tracking (Planned)
-- 🚧 Export to PDF/Excel (Planned)  
+- 🚧 Export to PDF/Excel (Planned)
+
+### 🤖 AI-Powered Features (RAG Chatbot)
+- ✅ Retrieval-Augmented Generation (RAG) chatbot
+- ✅ Integration with Google Gemini AI (gemini-2.5-flash)
+- ✅ Vector similarity search with pgvector
+- ✅ Document-based question answering
+- ✅ Context-aware intelligent responses
+- ✅ Real-time streaming chat support
+- ✅ Document parsing and text extraction (Apache Tika)
+- ✅ Semantic search over hotel documentation
+- ✅ Natural language hotel information retrieval
+- ✅ Multi-language support (Vietnamese & English)
 
 ---
 
@@ -162,35 +203,49 @@
 - **Optimized indexes** for query performance
 - **UUID primary keys** for security
 - **RBAC** with 5 roles and 70+ granular permissions
+- **AI-Powered RAG Chatbot** with Langchain4j & Google Gemini AI
+- **Vector Search** with pgvector for semantic document retrieval
 
 ---
 
-## �🛠️ Setup & Installation
+## 📖 Project Documentation
+
+For detailed setup and development guides, please refer to:
+
+- **[📱 Frontend Documentation](./aurora-frontend/README.md)** - React, TypeScript, Vite setup and development
+- **[⚙️ Backend Documentation](./aurora-backend/README.md)** - Spring Boot, Java, PostgreSQL setup and API reference
+- **[📐 System Diagrams](./docs/README.md)** - Class diagrams, database schemas, and ERD
+
+---
+
+## �🛠️ Quick Start Guide
 
 ### Prerequisites
-- ☕ **Java 21** (OpenJDK or Oracle JDK)
-- 📦 **Maven 3.8+** (or use included wrapper)
-- 🐘 **PostgreSQL 16** (or use Docker)
-- 📱 **Node.js 18+** and **npm 9+**
-- 🐳 **Docker** (optional, for database)
-- 🔧 **Git**
+- ☕ **Java 21** - [Download](https://www.oracle.com/java/technologies/downloads/)
+- 📦 **Maven 3.9+** - Included in project (Maven Wrapper)
+- 🐘 **PostgreSQL 16+** - [Download](https://www.postgresql.org/download/) or use Docker
+- 📱 **Node.js 20+** - [Download](https://nodejs.org/)
+- 🐳 **Docker & Docker Compose** - [Download](https://www.docker.com/) (Recommended)
+- 🔧 **Git** - [Download](https://git-scm.com/)
 
----
+> 💡 **Tip:** For detailed installation instructions, see [Backend Setup Guide](./aurora-backend/README.md#-installation) and [Frontend Setup Guide](./aurora-frontend/README.md#-installation)
 
-### 🐘 Database Setup (Option 1: Docker - Recommended)
+### 🐘 Database Setup (Docker Compose - Recommended)
 
 ```bash
-# Navigate to backend directory
-cd aurora-backend
+# Clone the repository
+git clone https://github.com/giasinguyen/aurora-hotel-system.git
+cd aurora-hotel-system/aurora-backend
 
-# Start PostgreSQL + pgAdmin containers
+# Start PostgreSQL + Redis + pgAdmin containers
 docker-compose up -d
 
 # Check container status
-docker ps
+docker-compose ps
 
 # Containers will be available:
 # - PostgreSQL: localhost:5432
+# - Redis: localhost:6379
 # - pgAdmin: http://localhost:5050
 #   - Email: admin@gmail.com
 #   - Password: admin
@@ -203,29 +258,9 @@ docker ps
 - Username: `admin`
 - Password: `admin`
 
----
-
-### 🐘 Database Setup (Option 2: Manual PostgreSQL)
-
-```bash
-# Install PostgreSQL 16
-# For Ubuntu/Debian:
-sudo apt update
-sudo apt install postgresql-16 postgresql-contrib-16
-
-# For macOS (using Homebrew):
-brew install postgresql@16
-
-# For Windows: Download installer from postgresql.org
-
-# Start PostgreSQL service
-sudo systemctl start postgresql
-
-# Create database
-sudo -u postgres psql
-postgres=# CREATE DATABASE aurora_hotel;
-postgres=# CREATE USER aurora_user WITH PASSWORD 'your_secure_password';
-postgres=# GRANT ALL PRIVILEGES ON DATABASE aurora_hotel TO aurora_user;
+> 📚 **Detailed Instructions:** See [Backend Database Setup](./aurora-backend/README.md#-database-setup)_hotel`
+- Username: `admin`
+---tgres=# GRANT ALL PRIVILEGES ON DATABASE aurora_hotel TO aurora_user;
 postgres=# \q
 ```
 
@@ -255,48 +290,75 @@ JWT_REFRESHABLE_DURATION=86400
 openssl rand -hex 32
 ```
 
-**Install dependencies and run:**
+### ⚙️ Backend Setup (Spring Boot)
+
 ```bash
-# Clean install (skip tests for faster build)
-./mvnw clean install -DskipTests
+# Navigate to backend directory
+cd aurora-backend
 
-# Run the application
-./mvnw spring-boot:run
+# Copy environment template
+cp .env.example .env
 
-# Or with specific profile
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-**Backend will be available at:** `http://localhost:8080`
-
-**Swagger UI (if configured):** `http://localhost:8080/swagger-ui.html`
-
----
-
+# Edit .env with your configuration
+# Minimum required variables:
+# - DB_URL=jdbc:postgresql://localhost:5432/aurora_hotel
+# - DB_USERNAME=admin
+# - DB_PASSWORD=admin
+# - JWT_SIGNER_KEY=<generate-secure-key>
+# - REDIS_HOST=localhost
+# - REDIS_PORT=6379
+# - REDIS_PASSWORD=admin
 ### 🎨 Frontend Setup (React + Vite)
 
 ```bash
 # Navigate to frontend directory
 cd aurora-frontend
 
-# Install dependencies
-npm install
+# Copy environment template
+cp .env.example .env.local
 
-# Start development server
-npm run dev
-
-# The frontend will start with hot-reload
-```
-
-**Frontend will be available at:** `http://localhost:5173`
-
----
-
-## 🚀 Development Commands
-
+# Edit .env.local with your configuration
+# - VITE_API_BASE_URL=http://localhost:8080
+# - VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+# - VITE_CLOUDINARY_UPLOAD_PRESET=your_preset
 ### 🔙 Backend Commands
 
 ```bash
+# Development mode with auto-reload
+./mvnw spring-boot:run
+
+# Build for production
+./mvnw clean package -DskipTests
+
+# Run tests
+./mvnw test
+```
+
+> 📚 **More Commands:** See [Backend README](./aurora-backend/README.md#-running-the-application)
+
+### 🎨 Frontend Commands
+
+```bash
+# Start development server (hot-reload)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
+```
+
+> 📚 **More Commands:** See [Frontend README](./aurora-frontend/README.md#-running-the-application) **Complete Frontend Guide:** See [Frontend README](./aurora-frontend/README.md) for:
+> - Detailed setup instructions
+> - Component architecture
+> - State management with Redux
+> - Styling with TailwindCSS
+> - Building for production
+> - Docker deployment
 # Development mode with auto-reload
 ./mvnw spring-boot:run
 
@@ -335,81 +397,36 @@ npm run preview
 npm run lint
 
 # Type check
-npm run type-check
-
-# Clean node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### 🐳 Docker Commands
-
-```bash
-# Start all containers
-docker-compose up -d
-
-# Stop all containers
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# Restart containers
-docker-compose restart
-
-# Remove containers and volumes
-docker-compose down -v
-
-# Access PostgreSQL container
-docker exec -it rag_postgres psql -U admin -d aurora_hotel
-
-# Backup database
-docker exec rag_postgres pg_dump -U admin aurora_hotel > backup.sql
-
-# Restore database
-docker exec -i rag_postgres psql -U admin aurora_hotel < backup.sql
-```
-
 ---
 
-## 🔧 Configuration Details
+## ⚙️ Configuration
 
-### Backend Configuration Files
+### Environment Variables
 
-**`application.yml`** (Common config)
-```yaml
-server:
-  port: 8080
+Both frontend and backend require environment configuration:
 
-spring:
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/aurora_hotel}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc.batch_size: 20
-
-jwt:
-  signerKey: ${JWT_SIGNER_KEY}
-  valid-duration: ${JWT_VALID_DURATION:3600}
-  refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
+**Backend (.env):**
+```env
+DB_URL=jdbc:postgresql://localhost:5432/aurora_hotel
+DB_USERNAME=admin
+DB_PASSWORD=admin
+JWT_SIGNER_KEY=your-secure-key
+REDIS_HOST=localhost
+REDIS_PORT=6379
 ```
 
-**`application-dev.yml`** (Development)
-```yaml
-spring:
+**Frontend (.env.local):**
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_preset
+```
+
+> 📚 **Complete Configuration Guide:**
+> - [Backend Configuration](./aurora-backend/README.md#-configuration)
+> - [Frontend Configuration](./aurora-frontend/README.md#-configuration)
+
+---ing:
   jpa:
     show-sql: true
     properties:
@@ -470,89 +487,34 @@ logging:
 | DELETE | `/api/v1/users/{id}` | Delete user | `USER_DELETE` |
 
 ### Branch Management
+## 📚 API Documentation
 
-| Method | Endpoint | Description | Permission Required |
-|--------|----------|-------------|---------------------|
-| GET | `/api/v1/branches` | Get all branches | `BRANCH_VIEW` |
-| GET | `/api/v1/branches/{id}` | Get branch by ID | `BRANCH_VIEW` |
-| POST | `/api/v1/branches` | Create branch | `BRANCH_CREATE` |
-| PUT | `/api/v1/branches/{id}` | Update branch | `BRANCH_UPDATE` |
-| DELETE | `/api/v1/branches/{id}` | Delete branch | `BRANCH_DELETE` |
+### Quick API Reference
 
-### Booking System
+**Key Endpoints:**
+- 🔐 **Authentication:** `/auth/login`, `/auth/refresh`, `/auth/logout`
+- 👥 **Users:** `/users`, `/users/{id}`, `/users/my-profile`
+- 🏢 **Branches:** `/branches`, `/branches/{id}`
+- 🏨 **Rooms:** `/rooms`, `/room-types`, `/room-categories`
+- 📅 **Bookings:** `/bookings`, `/bookings/{id}`
+- 💳 **Payments:** `/payments`, `/payments/vnpay`
+- 🛎️ **Services:** `/services`, `/service-categories`
+- 📰 **Content:** `/news`, `/promotions`, `/documents`
+- 🤖 **AI Chatbot:** `/rag/chat`, `/rag/chat-stream` (RAG-powered Q&A)
 
-| Method | Endpoint | Description | Permission Required |
-|--------|----------|-------------|---------------------|
-| GET | `/api/v1/bookings` | Get all bookings | `BOOKING_VIEW_ALL` |
-| GET | `/api/v1/bookings/{id}` | Get booking by ID | `BOOKING_VIEW_OWN` |
-| POST | `/api/v1/bookings` | Create booking | `BOOKING_CREATE` |
-| PUT | `/api/v1/bookings/{id}` | Update booking | `BOOKING_UPDATE_OWN` |
-| DELETE | `/api/v1/bookings/{id}` | Cancel booking | `BOOKING_CANCEL_OWN` |
+**Postman Collections:**`, `/promotions`, `/documents`
 
-**📮 Full API Collection:** Import `Aurora_Hotel_Complete_APIs.postman_collection.json` into Postman
+**Postman Collections:**
+- `postman/Aurora Hotel Management System.postman_collection.json`
+- `postman/Aurora_Hotel_Authentication_Tests.postman_collection.json`
 
----
+> 📚 **Complete API Documentation:** See [Backend API Reference](./aurora-backend/README.md#-api-documentation) for:
+> - All endpoints with request/response examples
+> - Authentication flow
+> - Permission requirements
+> - Error codes
+> - Rate limiting
 
-## 🔐 RBAC System
-
-### 5 User Roles
-
-| Role | Description | Permissions |
-|------|-------------|-------------|
-| 👑 **ADMIN** | System Administrator | Full system access (17 permissions) |
-| 👨‍💼 **MANAGER** | Branch Manager | Branch operations, reports (13 permissions) |
-| 👔 **STAFF** | Front Desk Staff | Daily operations (10 permissions) |
-| 👤 **CUSTOMER** | Registered User | Booking & profile (9 permissions) |
-| 🌐 **GUEST** | Anonymous User | View public info (5 permissions) |
-
-### Permission Structure
-
-**70+ Granular Permissions** organized by domain:
-
-```
-Guest Permissions (5):
-├─ BRANCH_VIEW
-├─ ROOM_VIEW
-├─ ROOM_SEARCH
-├─ PROMOTION_VIEW
-└─ SERVICE_VIEW
-
-Customer Permissions (9):
-├─ BOOKING_CREATE/VIEW/UPDATE/CANCEL_OWN
-├─ PAYMENT_CREATE/VIEW_OWN
-├─ PROFILE_VIEW/UPDATE
-└─ SERVICE_REGISTER
-
-Staff Permissions (10):
-├─ BOOKING_VIEW_ALL
-├─ BOOKING_CREATE_MANUAL
-├─ BOOKING_UPDATE_ALL
-├─ BOOKING_CANCEL_ALL
-├─ ROOM_STATUS_UPDATE
-├─ CHECKIN_PROCESS
-├─ CHECKOUT_PROCESS
-├─ CUSTOMER_VIEW
-├─ PAYMENT_VIEW_ALL
-└─ SERVICE_MANAGE
-
-Manager Permissions (13):
-├─ All Staff Permissions
-├─ ROOM_CRUD
-├─ PROMOTION_CRUD
-├─ PRICE_UPDATE
-├─ REPORT_VIEW/EXPORT
-├─ STAFF_VIEW
-└─ BRANCH_VIEW_STATS
-
-Admin Permissions (17):
-├─ USER_CRUD
-├─ ROLE_CRUD
-├─ BRANCH_CRUD
-├─ PERMISSION_MANAGE
-├─ SYSTEM_CONFIG
-├─ BACKUP_MANAGE
-└─ LOG_VIEW
-```
 
 ---
 
@@ -666,55 +628,37 @@ cat .env
 - Check firewall rules for port 5432
 
 **Frontend build errors:**
-```bash
-# Clear node_modules
-rm -rf node_modules package-lock.json
-
-# Reinstall dependencies
-npm install
-
-# Check Node.js version
-node -v  # Should be 18+
-```
-
-**CORS errors:**
-- Check `SecurityConfig.java` for allowed origins
-- Ensure frontend URL is in allowed origins list
-- Clear browser cache
-
 ---
 
-## 🤝 Contributing
+## 🚀 Deployment
 
-We welcome contributions! Please follow these guidelines:
+### Docker Deployment (Recommended)
 
-### Development Workflow
+```bash
+# Build backend Docker image
+cd aurora-backend
+docker build -t aurora-backend:latest .
 
-1. **Fork the repository**
-   ```bash
-   git clone https://github.com/giasinguyen/aurora-hotel-system.git
-   cd aurora-hotel-system
-   ```
+# Build frontend Docker image
+cd aurora-frontend
+docker build -t aurora-frontend:latest .
 
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
+# Run with Docker Compose (full stack)
+docker-compose up -d
+```
 
-3. **Make your changes**
-   - Follow existing code style
-   - Write meaningful commit messages
-   - Add tests for new features
-   - Update documentation
+### Deployment Options
 
-4. **Commit your changes**
-   ```bash
-   git commit -m 'feat: Add some AmazingFeature'
-   ```
+| Component | Recommended Platform | Alternative |
+|-----------|---------------------|-------------|
+| **Backend** | Railway, AWS Elastic Beanstalk | Heroku, Azure App Service, Google Cloud Run |
+| **Frontend** | Vercel, Netlify | AWS S3 + CloudFront, Railway |
+| **Database** | AWS RDS PostgreSQL, Supabase | Railway, Azure Database, Self-hosted |
 
-5. **Push to your fork**
-   ```bash
-   git push origin feature/AmazingFeature
+> 📚 **Deployment Guides:**
+> - [Backend Deployment](./aurora-backend/README.md#-docker-deployment)
+> - [Frontend Deployment](./aurora-frontend/README.md#-docker-deployment)
+> - Production checklists included in each guidere/AmazingFeature
    ```
 
 6. **Open a Pull Request**
@@ -753,7 +697,6 @@ chore: Update dependencies
 ---
 
 ## 📊 Project Status
-
 ### ✅ Completed Features
 - [x] User authentication & authorization (JWT + RBAC)
 - [x] Multi-branch management system
@@ -763,11 +706,15 @@ chore: Update dependencies
 - [x] Promotion system
 - [x] Additional services management
 - [x] Facilities & amenities
+- [x] RAG chatbot with Langchain4j & Google Gemini AI
+- [x] Vector similarity search with pgvector
+- [x] Document management & semantic search
 - [x] Database schema with 15 entities
 - [x] RESTful API with 60+ endpoints
 - [x] Comprehensive error handling
 - [x] Audit trails & soft delete
 
+### 🚧 In Progress
 ### 🚧 In Progress
 - [ ] Frontend UI implementation
 - [ ] Payment gateway integration (VNPay, MoMo)

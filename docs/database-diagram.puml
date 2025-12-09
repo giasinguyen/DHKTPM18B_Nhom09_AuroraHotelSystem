@@ -1,0 +1,690 @@
+@startuml Aurora Hotel System - Database Diagram
+
+!define TABLE_COLOR #E3F2FD
+!define PK_COLOR #BBDEFB
+
+skinparam class {
+    BackgroundColor TABLE_COLOR
+    BorderColor #1976D2
+    ArrowColor #FF6F00
+}
+
+skinparam linetype ortho
+skinparam dpi 300
+skinparam defaultTextAlignment center
+
+' Set diagram size and orientation
+skinparam PageMargin 10
+left to right direction
+
+' Hide methods, show only fields
+hide methods
+hide stereotypes
+
+' amenities table
+entity amenities <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(100) <<UK>>
+    type : VARCHAR(30)
+    description : VARCHAR(500)
+    icon : VARCHAR(200)
+    active : BIT
+    display_order : INT
+}
+
+' bookings table
+entity bookings <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    booking_code : VARCHAR(50) <<UK>>
+    guest_full_name : VARCHAR(200)
+    guest_email : VARCHAR(100)
+    guest_phone : VARCHAR(20)
+    checkin : DATE
+    checkout : DATE
+    discount_amount : DECIMAL(10,2)
+    subtotal_price : DECIMAL(12,2)
+    total_price : DECIMAL(12,2)
+    status : VARCHAR(20)
+    payment_status : VARCHAR(20)
+    special_request : VARCHAR(1000)
+    cancelled_at : DATETIME2
+    cancellation_reason : VARCHAR(500)
+    email_sent : BIT
+    sms_sent : BIT
+    actual_checkin_time : DATETIME2
+    actual_checkout_time : DATETIME2
+    checked_in_by : VARCHAR(100)
+    checked_out_by : VARCHAR(100)
+    --
+    branch_id : VARCHAR(36) <<FK>>
+    customer_id : VARCHAR(36) <<FK>>
+    applied_promotion_id : VARCHAR(36) <<FK>>
+}
+
+' booking_rooms table
+entity booking_rooms <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    price_per_night : DECIMAL(10,2)
+    nights : INT
+    actual_adults : INT
+    actual_children : INT
+    early_checkin_charge : DECIMAL(8,2)
+    late_checkout_charge : DECIMAL(8,2)
+    total_amount : DECIMAL(10,2)
+    room_notes : VARCHAR(500)
+    --
+    booking_id : VARCHAR(36) <<FK>>
+    room_id : VARCHAR(36) <<FK>>
+}
+
+' branches table
+entity branches <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(200)
+    code : VARCHAR(20) <<UK>>
+    address : VARCHAR(300)
+    ward : VARCHAR(100)
+    district : VARCHAR(100)
+    city : VARCHAR(100)
+    latitude : FLOAT
+    longitude : FLOAT
+    phone : VARCHAR(15)
+    email : VARCHAR(100)
+    website : VARCHAR(200)
+    status : VARCHAR(20)
+    opening_date : DATE
+    check_in_time : TIME
+    check_out_time : TIME
+    operating_hours : VARCHAR(50)
+    total_rooms : INT
+    available_rooms : INT
+    description : VARCHAR(2000)
+    short_description : VARCHAR(500)
+    images : TEXT
+    --
+    manager_id : VARCHAR(36) <<FK>>
+}
+
+' documents table
+entity documents <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    filename : VARCHAR(255)
+    file_type : VARCHAR(100)
+    size : BIGINT
+    doc_url : VARCHAR(500)
+    public_id : VARCHAR(255)
+    is_embed : BIT
+    total_chunks : INT
+    metadata : TEXT
+    description : TEXT
+    --
+    uploaded_by_id : VARCHAR(36) <<FK>>
+}
+
+' facilities table
+entity facilities <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(200)
+    type : VARCHAR(50)
+    description : VARCHAR(2000)
+    location : VARCHAR(100)
+    opening_hours : VARCHAR(100)
+    policies : VARCHAR(1000)
+    requires_reservation : BIT
+    active : BIT
+    capacity : INT
+    free_for_guests : BIT
+    images : TEXT
+    --
+    branch_id : VARCHAR(36) <<FK>>
+}
+
+' image_assets table
+entity image_assets <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    public_id : VARCHAR(255)
+    url : VARCHAR(500)
+    width : INT
+    height : INT
+    size_bytes : BIGINT
+    mime_type : VARCHAR(100)
+    alt_text : VARCHAR(500)
+    owner_type : VARCHAR(100)
+    usage_path : VARCHAR(500)
+    status : VARCHAR(20)
+    --
+    news_id : VARCHAR(36) <<FK>>
+}
+
+' news table
+entity news <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    slug : VARCHAR(255) <<UK>>
+    title : VARCHAR(500)
+    description : TEXT
+    thumbnail_url : VARCHAR(500)
+    is_public : BIT
+    content_json : NVARCHAR(MAX)
+    content_html : TEXT
+    status : VARCHAR(20)
+    published_at : DATETIME2
+    --
+    created_by_user_id : VARCHAR(36) <<FK>>
+}
+
+' payments table
+entity payments <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    method : VARCHAR(20)
+    status : VARCHAR(20)
+    amount : DECIMAL(12,2)
+    currency : VARCHAR(3)
+    provider_txn_id : VARCHAR(200)
+    provider_response : VARCHAR(1000)
+    paid_at : DATETIME2
+    refund_amount : DECIMAL(12,2)
+    refunded_at : DATETIME2
+    refund_reason : VARCHAR(500)
+    refund_txn_id : VARCHAR(200)
+    notes : VARCHAR(1000)
+    processed_by : VARCHAR(100)
+    vnpay_txn_ref : VARCHAR(100) <<UK>>
+    vnpay_response_code : VARCHAR(50)
+    vnpay_bank_code : VARCHAR(50)
+    vnpay_secure_hash : TEXT
+    vnpay_card_type : VARCHAR(20)
+    --
+    booking_id : VARCHAR(36) <<FK>>
+}
+
+' permissions table
+entity permissions <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(255) <<UK>>
+    description : TEXT
+}
+
+' promotions table
+entity promotions <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    code : VARCHAR(50) <<UK>>
+    name : VARCHAR(200)
+    start_at : DATE
+    end_at : DATE
+    active : BIT
+    discount_type : VARCHAR(20)
+    percent_off : DECIMAL(5,2)
+    amount_off : DECIMAL(10,2)
+    min_booking_amount : DECIMAL(10,2)
+    min_nights : INT
+    usage_limit : INT
+    used_count : INT
+    max_discount_amount : DECIMAL(10,2)
+    stackable : BIT
+    exclusive_with_others : BIT
+    description : VARCHAR(1000)
+    terms_and_conditions : VARCHAR(2000)
+    priority : INT
+    --
+    branch_id : VARCHAR(36) <<FK>>
+}
+
+' roles table
+entity roles <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(255) <<UK>>
+    description : TEXT
+}
+
+' rooms table
+entity rooms <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    room_number : VARCHAR(20)
+    floor : INT
+    status : VARCHAR(20)
+    view_type : VARCHAR(50)
+    base_price : DECIMAL(10,2)
+    sale_percent : DECIMAL(5,2)
+    price_final : DECIMAL(10,2)
+    maintenance_notes : VARCHAR(1000)
+    last_cleaned : DATETIME2
+    images : TEXT
+    --
+    branch_id : VARCHAR(36) <<FK>>
+    room_type_id : VARCHAR(36) <<FK>>
+}
+
+' room_categories table
+entity room_categories <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(100)
+    code : VARCHAR(20)
+    description : VARCHAR(1000)
+    display_order : INT
+    active : BIT
+    image_url : VARCHAR(500)
+    --
+    branch_id : VARCHAR(36) <<FK>>
+}
+
+' room_types table
+entity room_types <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(100)
+    code : VARCHAR(20)
+    price_from : DECIMAL(10,2)
+    capacity_adults : INT
+    capacity_children : INT
+    max_occupancy : INT
+    size_m2 : FLOAT
+    bed_type : VARCHAR(50)
+    number_of_beds : INT
+    refundable : BIT
+    smoking_allowed : BIT
+    description : VARCHAR(2000)
+    short_description : VARCHAR(500)
+    image_url : VARCHAR(500)
+    --
+    branch_id : VARCHAR(36) <<FK>>
+    category_id : VARCHAR(36) <<FK>>
+}
+
+' services table
+entity services <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(200)
+    description : VARCHAR(2000)
+    base_price : DECIMAL(10,2)
+    unit : VARCHAR(50)
+    duration_minutes : INT
+    max_capacity_per_slot : INT
+    requires_booking : BIT
+    active : BIT
+    images : TEXT
+    operating_hours : VARCHAR(100)
+    --
+    branch_id : VARCHAR(36) <<FK>>
+    category_id : VARCHAR(36) <<FK>>
+}
+
+' service_bookings table
+entity service_bookings <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    service_date_time : DATETIME2
+    quantity : INT
+    price_per_unit : DECIMAL(10,2)
+    total_price : DECIMAL(10,2)
+    status : VARCHAR(20)
+    special_instructions : VARCHAR(1000)
+    completed_at : DATETIME2
+    completed_by : VARCHAR(100)
+    completion_notes : VARCHAR(500)
+    cancelled_at : DATETIME2
+    cancellation_reason : VARCHAR(500)
+    --
+    booking_id : VARCHAR(36) <<FK>>
+    service_id : VARCHAR(36) <<FK>>
+    customer_id : VARCHAR(36) <<FK>>
+    room_id : VARCHAR(36) <<FK>>
+}
+
+' service_categories table
+entity service_categories <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(100)
+    code : VARCHAR(50)
+    description : VARCHAR(1000)
+    display_order : INT
+    active : BIT
+    image_url : VARCHAR(500)
+    --
+    branch_id : VARCHAR(36) <<FK>>
+}
+
+' shift_check_ins table
+entity shift_check_ins <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    check_in_time : DATETIME2
+    check_out_time : DATETIME2
+    status : VARCHAR(20)
+    ip_address : VARCHAR(50)
+    device_info : VARCHAR(255)
+    location : VARCHAR(255)
+    notes : VARCHAR(500)
+    is_late : BIT
+    is_early_departure : BIT
+    late_minutes : INT
+    early_departure_minutes : INT
+    --
+    assignment_id : VARCHAR(36) <<FK>>
+    staff_id : VARCHAR(36) <<FK>>
+}
+
+' staff_shift_assignments table
+entity staff_shift_assignments <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    shift_date : DATE
+    status : VARCHAR(20)
+    notes : VARCHAR(500)
+    cancelled_reason : VARCHAR(500)
+    --
+    user_id : VARCHAR(36) <<FK>>
+    work_shift_id : VARCHAR(36) <<FK>>
+    branch_id : VARCHAR(36) <<FK>>
+    assigned_by_id : VARCHAR(36) <<FK>>
+}
+
+' users table
+entity users <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    username : VARCHAR(50) <<UK>>
+    password : VARCHAR(255)
+    first_name : VARCHAR(100)
+    last_name : VARCHAR(100)
+    dob : DATE
+    phone : VARCHAR(15)
+    email : VARCHAR(100) <<UK>>
+    address : VARCHAR(500)
+    avatar_url : VARCHAR(500)
+    active : BIT
+    email_verified : BIT
+    last_login_at : DATETIME2
+    failed_login_attempts : INT
+    locked_until : DATETIME2
+    lock_reason : VARCHAR(500)
+    --
+    assigned_branch_id : VARCHAR(36) <<FK>>
+}
+
+' work_shifts table
+entity work_shifts <<table>> {
+    **id : VARCHAR(36) <<PK>>**
+    --
+    created_at : DATETIME2
+    updated_at : DATETIME2
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+    version : BIGINT
+    deleted : BIT
+    --
+    name : VARCHAR(100) <<UK>>
+    description : VARCHAR(500)
+    start_time : TIME
+    end_time : TIME
+    color_code : VARCHAR(7)
+    active : BIT
+    --
+    branch_id : VARCHAR(36) <<FK>>
+}
+
+' Junction Tables
+entity user_roles <<table>> {
+    **user_id : VARCHAR(36) <<PK,FK>>**
+    **role_id : VARCHAR(36) <<PK,FK>>**
+}
+
+entity role_permissions <<table>> {
+    **role_id : VARCHAR(36) <<PK,FK>>**
+    **permission_id : VARCHAR(36) <<PK,FK>>**
+}
+
+entity user_disabled_permissions <<table>> {
+    **user_id : VARCHAR(36) <<PK,FK>>**
+    **permission_id : VARCHAR(36) <<PK,FK>>**
+}
+
+entity room_type_amenities <<table>> {
+    **room_type_id : VARCHAR(36) <<PK,FK>>**
+    **amenity_id : VARCHAR(36) <<PK,FK>>**
+}
+
+entity promotion_room_types <<table>> {
+    **promotion_id : VARCHAR(36) <<PK,FK>>**
+    **room_type_id : VARCHAR(36) <<PK,FK>>**
+}
+
+' Relationships
+documents }o--|| users : uploaded_by_id
+
+bookings ||--o{ booking_rooms : booking_id
+bookings }o--|| branches : branch_id
+bookings }o--o| users : customer_id
+bookings }o--o| promotions : applied_promotion_id
+
+booking_rooms }o--|| rooms : room_id
+
+branches ||--o{ rooms : branch_id
+branches ||--o{ facilities : branch_id
+branches ||--o{ room_categories : branch_id
+branches ||--o{ room_types : branch_id
+branches ||--o{ services : branch_id
+branches ||--o{ service_categories : branch_id
+branches ||--o{ work_shifts : branch_id
+branches }o--o| users : manager_id
+
+facilities }o--|| branches : branch_id
+
+news ||--o{ image_assets : news_id
+news }o--|| users : created_by_user_id
+
+payments }o--|| bookings : booking_id
+
+promotions }o--o| branches : branch_id
+
+rooms }o--|| branches : branch_id
+rooms }o--o| room_types : room_type_id
+
+room_categories ||--o{ room_types : category_id
+room_categories }o--|| branches : branch_id
+
+room_types }o--|| branches : branch_id
+room_types }o--o| room_categories : category_id
+
+services }o--|| branches : branch_id
+services }o--|| service_categories : category_id
+
+service_bookings }o--|| services : service_id
+service_bookings }o--o| bookings : booking_id
+service_bookings }o--o| users : customer_id
+service_bookings }o--|| rooms : room_id
+
+service_categories }o--|| branches : branch_id
+service_categories ||--o{ services : category_id
+
+shift_check_ins }o--|| staff_shift_assignments : assignment_id
+shift_check_ins }o--|| users : staff_id
+
+staff_shift_assignments }o--|| users : user_id
+staff_shift_assignments }o--|| work_shifts : work_shift_id
+staff_shift_assignments }o--o| branches : branch_id
+staff_shift_assignments }o--o| users : assigned_by_id
+
+users }o--o| branches : assigned_branch_id
+
+work_shifts }o--o| branches : branch_id
+
+' Many-to-Many Relationships
+users ||--o{ user_roles : user_id
+roles ||--o{ user_roles : role_id
+
+roles ||--o{ role_permissions : role_id
+permissions ||--o{ role_permissions : permission_id
+
+users ||--o{ user_disabled_permissions : user_id
+permissions ||--o{ user_disabled_permissions : permission_id
+
+room_types ||--o{ room_type_amenities : room_type_id
+amenities ||--o{ room_type_amenities : amenity_id
+
+promotions ||--o{ promotion_room_types : promotion_id
+room_types ||--o{ promotion_room_types : room_type_id
+
+@enduml

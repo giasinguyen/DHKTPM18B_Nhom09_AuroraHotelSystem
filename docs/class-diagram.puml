@@ -1,0 +1,565 @@
+@startuml Aurora Hotel System - Class Diagram
+
+!define ENTITY_COLOR #fcfcfcff
+
+skinparam class {
+    BackgroundColor ENTITY_COLOR
+    BorderColor #4CAF50
+    ArrowColor #2196F3
+}
+
+skinparam linetype ortho
+skinparam dpi 300
+skinparam defaultTextAlignment center
+
+' Set diagram size and orientation
+skinparam PageMargin 10
+left to right direction
+
+' Amenity Entity
+class Amenity {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - type: String
+    - description: String
+    - icon: String
+    - active: Boolean
+    - displayOrder: Integer
+}
+
+' Booking Entity
+class Booking {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - bookingCode: String
+    - guestFullName: String
+    - guestEmail: String
+    - guestPhone: String
+    - checkin: LocalDate
+    - checkout: LocalDate
+    - discountAmount: BigDecimal
+    - subtotalPrice: BigDecimal
+    - totalPrice: BigDecimal
+    - status: String
+    - paymentStatus: String
+    - specialRequest: String
+    - cancelledAt: LocalDateTime
+    - cancellationReason: String
+    - emailSent: Boolean
+    - smsSent: Boolean
+    - actualCheckinTime: LocalDateTime
+    - actualCheckoutTime: LocalDateTime
+    - checkedInBy: String
+    - checkedOutBy: String
+}
+
+' BookingRoom Entity
+class BookingRoom {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - pricePerNight: BigDecimal
+    - nights: Integer
+    - actualAdults: Integer
+    - actualChildren: Integer
+    - earlyCheckinCharge: BigDecimal
+    - lateCheckoutCharge: BigDecimal
+    - totalAmount: BigDecimal
+    - roomNotes: String
+}
+
+' Branch Entity
+class Branch {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - code: String
+    - address: String
+    - ward: String
+    - district: String
+    - city: String
+    - latitude: Double
+    - longitude: Double
+    - phone: String
+    - email: String
+    - website: String
+    - status: String
+    - openingDate: LocalDate
+    - checkInTime: LocalTime
+    - checkOutTime: LocalTime
+    - operatingHours: String
+    - totalRooms: Integer
+    - availableRooms: Integer
+    - description: String
+    - shortDescription: String
+    - images: List<String>
+}
+
+' Document Entity
+class Document {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - filename: String
+    - fileType: String
+    - size: Long
+    - docUrl: String
+    - publicId: String
+    - isEmbed: Boolean
+    - totalChunks: Integer
+    - metadata: String
+    - description: String
+}
+
+' Facility Entity
+class Facility {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - type: String
+    - description: String
+    - location: String
+    - openingHours: String
+    - policies: String
+    - requiresReservation: Boolean
+    - active: Boolean
+    - capacity: Integer
+    - freeForGuests: Boolean
+    - images: List<String>
+}
+
+' ImageAsset Entity
+class ImageAsset {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - publicId: String
+    - url: String
+    - width: Integer
+    - height: Integer
+    - sizeBytes: Long
+    - mimeType: String
+    - altText: String
+    - ownerType: String
+    - usagePath: String
+    - status: String
+}
+
+' News Entity
+class News {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - slug: String
+    - title: String
+    - description: String
+    - thumbnailUrl: String
+    - isPublic: Boolean
+    - contentJson: Map<String,Object>
+    - contentHtml: String
+    - status: String
+    - publishedAt: LocalDateTime
+    + addImage(image: ImageAsset): void
+    + removeImage(image: ImageAsset): void
+}
+
+' Payment Entity
+class Payment {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - method: String
+    - status: String
+    - amount: BigDecimal
+    - currency: String
+    - providerTxnId: String
+    - providerResponse: String
+    - paidAt: LocalDateTime
+    - refundAmount: BigDecimal
+    - refundedAt: LocalDateTime
+    - refundReason: String
+    - refundTxnId: String
+    - notes: String
+    - processedBy: String
+    - vnpayTxnRef: String
+    - vnpayResponseCode: String
+    - vnpayBankCode: String
+    - vnpaySecureHash: String
+    - vnpayCardType: String
+}
+
+' Permission Entity
+class Permission {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - description: String
+}
+
+' Promotion Entity
+class Promotion {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - code: String
+    - name: String
+    - startAt: LocalDate
+    - endAt: LocalDate
+    - active: Boolean
+    - discountType: String
+    - percentOff: BigDecimal
+    - amountOff: BigDecimal
+    - minBookingAmount: BigDecimal
+    - minNights: Integer
+    - usageLimit: Integer
+    - usedCount: Integer
+    - maxDiscountAmount: BigDecimal
+    - stackable: Boolean
+    - exclusiveWithOthers: Boolean
+    - description: String
+    - termsAndConditions: String
+    - priority: Integer
+    - createdBy: String
+}
+
+' Role Entity
+class Role {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - description: String
+}
+
+' Room Entity
+class Room {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - roomNumber: String
+    - floor: Integer
+    - status: String
+    - viewType: String
+    - basePrice: BigDecimal
+    - salePercent: BigDecimal
+    - priceFinal: BigDecimal
+    - maintenanceNotes: String
+    - lastCleaned: LocalDateTime
+    - images: List<String>
+    + calculatePriceFinal(): void
+}
+
+' RoomCategory Entity
+class RoomCategory {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - code: String
+    - description: String
+    - displayOrder: Integer
+    - active: Boolean
+    - imageUrl: String
+}
+
+' RoomType Entity
+class RoomType {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - code: String
+    - priceFrom: BigDecimal
+    - capacityAdults: Integer
+    - capacityChildren: Integer
+    - maxOccupancy: Integer
+    - sizeM2: Double
+    - bedType: String
+    - numberOfBeds: Integer
+    - refundable: Boolean
+    - smokingAllowed: Boolean
+    - description: String
+    - shortDescription: String
+    - imageUrl: String
+}
+
+' Service Entity
+class Service {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - description: String
+    - basePrice: BigDecimal
+    - unit: String
+    - durationMinutes: Integer
+    - maxCapacityPerSlot: Integer
+    - requiresBooking: Boolean
+    - active: Boolean
+    - images: List<String>
+    - operatingHours: String
+}
+
+' ServiceBooking Entity
+class ServiceBooking {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - serviceDateTime: LocalDateTime
+    - quantity: Integer
+    - pricePerUnit: BigDecimal
+    - totalPrice: BigDecimal
+    - status: String
+    - specialInstructions: String
+    - completedAt: LocalDateTime
+    - completedBy: String
+    - completionNotes: String
+    - cancelledAt: LocalDateTime
+    - cancellationReason: String
+}
+
+' ServiceCategory Entity
+class ServiceCategory {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - code: String
+    - description: String
+    - displayOrder: Integer
+    - active: Boolean
+    - imageUrl: String
+}
+
+' ShiftCheckIn Entity
+class ShiftCheckIn {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - checkInTime: LocalDateTime
+    - checkOutTime: LocalDateTime
+    - status: String
+    - ipAddress: String
+    - deviceInfo: String
+    - location: String
+    - notes: String
+    - isLate: Boolean
+    - isEarlyDeparture: Boolean
+    - lateMinutes: Integer
+    - earlyDepartureMinutes: Integer
+    + getWorkingHours(): double
+    + isCurrentlyCheckedIn(): boolean
+}
+
+' StaffShiftAssignment Entity
+class StaffShiftAssignment {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - shiftDate: LocalDate
+    - status: String
+    - notes: String
+    - cancelledReason: String
+    + isActiveNow(): boolean
+}
+
+' User Entity
+class User {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - username: String
+    - password: String
+    - firstName: String
+    - lastName: String
+    - dob: LocalDate
+    - phone: String
+    - email: String
+    - address: String
+    - avatarUrl: String
+    - disabledPermissions: List<String>
+    - active: Boolean
+    - emailVerified: Boolean
+    - lastLoginAt: LocalDateTime
+    - failedLoginAttempts: Integer
+    - lockedUntil: LocalDateTime
+    - lockReason: String
+}
+
+' WorkShift Entity
+class WorkShift {
+    - id: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    - createdBy: String
+    - updatedBy: String
+    - version: Long
+    - deleted: Boolean
+    - name: String
+    - description: String
+    - startTime: LocalTime
+    - endTime: LocalTime
+    - colorCode: String
+    - active: Boolean
+    + isWithinShiftTime(currentTime: LocalTime): boolean
+    + getDurationInHours(): double
+}
+
+' Relationships
+Document "*" -- "0..1" User : uploadedBy
+
+Booking "1" -- "0..*" BookingRoom : contains
+Booking "*" -- "1" Branch : at
+Booking "*" -- "0..1" User : customer
+Booking "*" -- "0..1" Promotion : appliedPromotion
+
+BookingRoom "*" -- "1" Room : for
+
+Branch "1" -- "0..*" Room : has
+Branch "1" -- "0..*" Facility : has
+Branch "1" -- "0..*" RoomCategory : has
+Branch "1" -- "0..*" RoomType : has
+Branch "1" -- "0..*" Service : offers
+Branch "1" -- "0..*" ServiceCategory : has
+Branch "1" -- "0..*" WorkShift : has
+Branch "*" -- "0..1" User : manager
+
+Facility "*" -- "1" Branch : at
+
+News "1" -- "0..*" ImageAsset : contains
+News "*" -- "1" User : createdBy
+
+Payment "*" -- "1" Booking : for
+
+Permission "*" -- "*" Role : grantedTo
+
+Promotion "*" -- "0..1" Branch : for
+Promotion "*" -- "*" RoomType : applicableTo
+
+Role "*" -- "*" Permission : has
+
+Room "*" -- "1" Branch : at
+Room "*" -- "0..1" RoomType : of
+
+RoomCategory "1" -- "0..*" RoomType : groups
+RoomCategory "*" -- "1" Branch : at
+
+RoomType "*" -- "1" Branch : at
+RoomType "*" -- "0..1" RoomCategory : belongsTo
+RoomType "*" -- "*" Amenity : includes
+
+Service "*" -- "1" Branch : at
+Service "*" -- "1" ServiceCategory : belongsTo
+
+ServiceBooking "*" -- "1" Service : for
+ServiceBooking "*" -- "0..1" Booking : linkedTo
+ServiceBooking "*" -- "0..1" User : customer
+ServiceBooking "*" -- "1" Room : for
+
+ServiceCategory "*" -- "1" Branch : at
+ServiceCategory "1" -- "0..*" Service : categorizes
+
+ShiftCheckIn "*" -- "1" StaffShiftAssignment : records
+ShiftCheckIn "*" -- "1" User : staff
+
+StaffShiftAssignment "*" -- "1" User : staff
+StaffShiftAssignment "*" -- "1" WorkShift : template
+StaffShiftAssignment "*" -- "0..1" Branch : at
+StaffShiftAssignment "*" -- "0..1" User : assignedBy
+
+User "*" -- "0..1" Branch : assignedTo
+User "*" -- "*" Role : has
+
+WorkShift "*" -- "0..1" Branch : for
+
+@enduml
