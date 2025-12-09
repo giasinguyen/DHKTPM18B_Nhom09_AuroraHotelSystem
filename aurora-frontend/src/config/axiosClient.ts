@@ -14,9 +14,17 @@ export const setupAxiosInterceptors = (dispatch: AppDispatch) => {
   dispatchRef = dispatch;
 };
 
+// Get API base URL from runtime config or fallback to build-time env or default
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined' && window._env_?.VITE_API_BASE_URL) {
+    return window._env_.VITE_API_BASE_URL;
+  }
+  return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+};
+
 // Default configuration for requests
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
 });
 

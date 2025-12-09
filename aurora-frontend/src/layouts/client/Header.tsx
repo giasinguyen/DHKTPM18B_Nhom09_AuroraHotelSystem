@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 // import { setLanguage } from "@/features/slices/languageSlice";
 import { setBranchDetails } from "@/features/slices/branchSlice";
+import auroraLogo from "@/assets/images/commons/aurora-logo.png";
+// import englishFlag from "@/assets/images/commons/english.png";
+// import vietnamFlag from "@/assets/images/commons/vietnam.png";
 import { branchApi } from "@/services/branchApi";
 import type { Branch } from "@/types/branch.types";
 import UserMenu from "@/pages/common/components/UserMenu";
@@ -135,7 +138,7 @@ export default function Header() {
           <Link to="/" onClick={handleNavClick} className="hidden lg:flex items-center space-x-3">
             <div className="w-28 h-28 flex items-center justify-center">
               <img
-                src="/src/assets/images/commons/aurora-logo.png"
+                src={auroraLogo}
                 alt="Aurora Hotel"
                 className="h-full w-auto object-contain"
               />
@@ -240,7 +243,7 @@ export default function Header() {
                 <SelectItem value="en">
                   <div className="flex items-center gap-2">
                     <img
-                      src="/src/assets/images/commons/english.png"
+                      src={englishFlag}
                       alt="English"
                       className="w-5 h-5 object-cover rounded-sm"
                     />
@@ -250,7 +253,7 @@ export default function Header() {
                 <SelectItem value="vi">
                   <div className="flex items-center gap-2">
                     <img
-                      src="/src/assets/images/commons/vietnam.png"
+                      src={vietnamFlag}
                       alt="Tiếng Việt"
                       className="w-5 h-5 object-cover rounded-sm"
                     />
@@ -363,7 +366,7 @@ export default function Header() {
                       <SelectItem value="en">
                         <div className="flex items-center gap-2">
                           <img
-                            src="/src/assets/images/commons/english.png"
+                            src={englishFlag}
                             alt="English"
                             className="w-5 h-5 object-cover rounded-sm"
                           />
@@ -373,7 +376,7 @@ export default function Header() {
                       <SelectItem value="vi">
                         <div className="flex items-center gap-2">
                           <img
-                            src="/src/assets/images/commons/vietnam.png"
+                            src={vietnamFlag}
                             alt="Tiếng Việt"
                             className="w-5 h-5 object-cover rounded-sm"
                           />
@@ -411,7 +414,7 @@ export default function Header() {
             >
               <div className="w-28 h-28 flex items-center justify-center">
                 <img
-                  src="/src/assets/images/commons/aurora-logo.png"
+                  src={auroraLogo}
                   alt="Aurora Hotel"
                   className="h-full w-auto object-contain"
                 />

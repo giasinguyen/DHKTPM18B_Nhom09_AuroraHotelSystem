@@ -1,0 +1,12 @@
+# Backend .dockerignore
+target/
+.mvn/
+.idea/
+.git/
+.gitignore
+*.md
+.env
+.env.local
+*.log
+.DS_Store
+postman/

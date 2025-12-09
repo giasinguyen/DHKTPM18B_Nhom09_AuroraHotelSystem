@@ -6,6 +6,13 @@ import type { ServiceCategory } from "@/types/serviceCategory.types";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import heroVideo from "@/assets/videos/aurora_hotel_2025-11-28_v1.mp4";
+import banner02 from "@/assets/images/banners/aurora-banner-02.jpg";
+import banner03 from "@/assets/images/banners/aurora-banner-03.jpg";
+import banner04 from "@/assets/images/banners/aurora-banner-04.jpg";
+import banner05 from "@/assets/images/banners/aurora-banner-05.jpg";
+import fallbackImage from "@/assets/images/commons/fallback.png";
+import presidentRoom from "@/assets/images/rooms/aurora-persident-room.jpg";
 
 export default function HomePage() {
   const { t } = useTranslation("home");
@@ -39,7 +46,7 @@ export default function HomePage() {
       <section className="relative h-screen w-full">
         <div className="relative h-full w-full">
           <video
-            src="/src/assets/videos/aurora_hotel_2025-11-28_v1.mp4"
+            src={heroVideo}
             autoPlay
             loop
             muted
@@ -91,28 +98,28 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <img
-                  src="/src/assets/images/banners/aurora-banner-02.jpg"
+                  src={banner02}
                   alt="Hotel Room"
                   className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />
               </div>
               <div className="mt-8">
                 <img
-                  src="/src/assets/images/banners/aurora-banner-03.jpg"
+                  src={banner03}
                   alt="Hotel View"
                   className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />
               </div>
               <div className="-mt-8">
                 <img
-                  src="/src/assets/images/banners/aurora-banner-04.jpg"
+                  src={banner04}
                   alt="Hotel Amenity"
                   className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />
               </div>
               <div>
                 <img
-                  src="/src/assets/images/banners/aurora-banner-05.jpg"
+                  src={banner05}
                   alt="Hotel Service"
                   className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />
@@ -154,7 +161,7 @@ export default function HomePage() {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = "/src/assets/images/commons/fallback.png";
+                          target.src = fallbackImage;
                         }}
                       />
                     ) : (
@@ -202,7 +209,7 @@ export default function HomePage() {
           }
         >
           <img
-            src="/src/assets/images/rooms/aurora-persident-room.jpg"
+            src={presidentRoom}
             alt="Aurora Beach Hotel Luxury Experience"
             height={720}
             width={1400}

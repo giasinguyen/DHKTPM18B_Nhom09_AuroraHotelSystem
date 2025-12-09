@@ -4,10 +4,20 @@
 
 import axiosClient from './axiosClient';
 
-export const CLOUDINARY_CONFIG = {
-  cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqmlxcbxt',
-  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'aurora_hotel',
+// Get Cloudinary config from runtime config or fallback to build-time env or defaults
+const getCloudinaryConfig = () => {
+  const cloudName = (typeof window !== 'undefined' && window._env_?.VITE_CLOUDINARY_CLOUD_NAME) 
+    || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME 
+    || 'dqmlxcbxt';
+  
+  const uploadPreset = (typeof window !== 'undefined' && window._env_?.VITE_CLOUDINARY_UPLOAD_PRESET) 
+    || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET 
+    || 'aurora_hotel';
+  
+  return { cloudName, uploadPreset };
 };
+
+export const CLOUDINARY_CONFIG = getCloudinaryConfig();
 
 /**
  * Upload image to Cloudinary via Backend API
