@@ -1,10 +1,19 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+/**
+ * Get API base URL from runtime config or fallback to build-time env or default
+ */
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window._env_?.VITE_API_BASE_URL) {
+    return window._env_.VITE_API_BASE_URL;
+  }
+  return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+};
 
 /**
  * Build WebSocket URL for RAG streaming
  * @returns WebSocket URL
  */
 export const buildRagWebSocketUrl = (): string => {
+  const API_BASE_URL = getApiBaseUrl();
   const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
   const url = API_BASE_URL.replace(/^https?/, wsProtocol);
   return `${url}/ws/rag/stream`;

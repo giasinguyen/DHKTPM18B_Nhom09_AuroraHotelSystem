@@ -12,8 +12,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   XCircle,
-  Wrench,
-  Ban
+  Wrench
 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

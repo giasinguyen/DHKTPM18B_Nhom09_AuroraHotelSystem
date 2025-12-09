@@ -90,7 +90,7 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading = fal
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors },
     setValue,
   } = useForm<FormData>({
     defaultValues: {
