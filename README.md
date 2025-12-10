@@ -685,7 +685,7 @@ Dự án này được phát triển cho mục đích **học tập** trong môn
 
 <br/>
 
-Made with ❤️ by **Aurora Development Team**
+Made with ❤️ by **The Challengers Team**
 
 <br/>
 
